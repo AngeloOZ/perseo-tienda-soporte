@@ -1,0 +1,21 @@
+.button-contenedor{
+    position: relative;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+.indicador_cantidad{
+    font-weight: bold;
+    user-select: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    border-radius: 100%;
+    color: #fff;
+}

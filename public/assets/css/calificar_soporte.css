@@ -1,0 +1,114 @@
+:root {
+    --primary-color: #b5b5b5;
+}
+
+.no-resize{
+    resize: none;
+}
+
+.contenedor-pregunta{
+    margin-top: 25px;
+}
+
+.title-pregunta{
+    color: #000;
+    margin-bottom: 15px;
+}
+
+.radio-tile-group > * {
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+.radio-tile-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.input-container {
+    position: relative;
+    height: 100px;
+    width: 100px;
+    margin: 5px 15px;
+}
+
+.input-container input {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0;
+}
+
+.input-container .radio-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    transition: all 300ms ease;
+}
+
+.input-container i {
+    color: var(--primary-color);
+    font-size: 32px;
+}
+
+.input-container label {
+    color: var(--primary-color);
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    user-select: none;
+}
+
+input:checked + .radio-tile {
+    background-color: var(--primary-color);
+    box-shadow: 0 0 12px var(--primary-color);
+    transform: scale(1.05);
+}
+
+.input-container:nth-child(1) input:checked + .radio-tile {
+    background-color: #FA5563;
+    border: 2px solid #FA5563;
+    box-shadow: 0 0 12px #FA5563;
+}
+
+.input-container:nth-child(2) input:checked + .radio-tile {
+    background-color: #FB834F;
+    border: 2px solid #FB834F;
+    box-shadow: 0 0 12px #FB834F;
+}
+
+.input-container:nth-child(3) input:checked + .radio-tile {
+    background-color: #FCCF3E;
+    border: 2px solid #FCCF3E;
+    box-shadow: 0 0 12px #FCCF3E;
+}
+
+.input-container:nth-child(4) input:checked + .radio-tile {
+    background-color: #A0D77A;
+    border: 2px solid #A0D77A;
+    box-shadow: 0 0 12px #A0D77A;
+}
+
+.input-container:nth-child(5) input:checked + .radio-tile {
+    background-color: #6BCA6C;
+    border: 2px solid #6BCA6C;
+    box-shadow: 0 0 12px #6BCA6C;
+}
+
+input:checked + .radio-tile i,
+input:checked + .radio-tile label {
+    color: white;
+}

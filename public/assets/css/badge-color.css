@@ -1,0 +1,65 @@
+/* ASIGNADO: Amarillo Bootstrap */
+.bg-asignado {
+    background-color: #ffc107;
+    color: #000000; /* Color de texto de contraste */
+}
+
+/* AGENDADO: Azul Bootstrap */
+.bg-agendado {
+    background-color: #007bff;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* PARAMETRIZADO: Turquesa Bootstrap */
+.bg-parametrizado {
+    background-color: #17a2b8;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* IMPLEMENTACIÓN: Rojo Bootstrap */
+.bg-implementacion {
+    background-color: #dc3545;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* REVISADO 1: Gris Bootstrap */
+.bg-revisado1 {
+    background-color: #6c757d;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* FINALIZADO: Verde Bootstrap */
+.bg-finalizado {
+    background-color: #28a745;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* REAGENDADO: Naranja Bootstrap */
+.bg-reagendado {
+    background-color: #fd7e14;
+    color: #000000; /* Color de texto de contraste */
+}
+
+/* REVISADO 2: Violeta Bootstrap */
+.bg-revisado2 {
+    background-color: #6610f2;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* APROBADO: Verde menta Bootstrap */
+.bg-aprobado {
+    background-color: #20c997;
+    color: #000000; /* Color de texto de contraste */
+}
+
+/* RECHAZADO: Rojo oscuro Bootstrap */
+.bg-rechazado {
+    background-color: #ff4444;
+    color: #ffffff; /* Color de texto de contraste */
+}
+
+/* SIN RESPUESTA: Gris Bootstrap */
+.bg-sinrespuesta {
+    background-color: #6c757d;
+    color: #ffffff; /* Color de texto de contraste */
+}
