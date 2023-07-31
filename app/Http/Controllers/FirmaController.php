@@ -618,54 +618,32 @@ class FirmaController extends Controller
     /* -------------------------------------------------------------------------- */
     public function listado_revisor(Request $request)
     {
-
-        if ($request->ajax()) {
-
-            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')->where('distribuidoresid', '=', Auth::user()->distribuidoresid)->where('estado', 3)->orWhere('estado', 4)->get();
-
-            return DataTables::of($data)
-                ->editColumn('fecha_creacion', function ($fecha) {
-                    $date = new DateTime($fecha->fecha_creacion);
-                    return $date->format('d-m-Y');
-                })
-                ->editColumn('tipo_persona', function ($tipo) {
-                    if ($tipo->tipo_persona == 1) {
-                        return "Natural";
-                    } else {
-                        return "Juridica";
-                    }
-                })
-                ->editColumn('estado', function ($estado) {
-
-                    if ($estado->estado == 1) {
-                        return '<a class="bg-danger text-white rounded p-1">Recibido</a>';
-                    } elseif ($estado->estado == 2) {
-                        return '<a class="bg-warning text-white rounded p-1">Revisado</a>';
-                    } elseif ($estado->estado == 3) {
-                        return '<a class="bg-primary text-white rounded p-1">En proceso</a>';
-                    } elseif ($estado->estado == 4) {
-                        return '<a class="bg-info text-white rounded p-1">Finalizado</a>';
-                    } elseif ($estado->estado == 5) {
-                        return '<a class="bg-success text-white rounded p-1">Entregado al correo</a>';
-                    } elseif ($estado->estado == 6) {
-                        return '<a class="bg-secondary text-dark rounded p-1">Anulado</a>';
-                    }
-                })
-                ->editColumn('action', function ($firma) {
-                    return '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('firma.revisor_editar', $firma->firmasid) . '"  title="Editar"> <i class="la la-edit"></i> </a>' . '<a class="btn btn-icon btn-light btn-hover-info btn-sm ml-2" href="' . route('firma.estadosolicitud', base64_encode($firma->firmasid)) . '" target="_blank"  title="Enlace tracking"> <i class="la la-external-link-alt"></i> </a>';
-                })
-
-                ->rawColumns(['action', 'codigo', 'estado', 'fecha_creacion'])
-                ->make(true);
-        }
         return view('auth2.revisor_firmas.index');
     }
-    public function listado_revisor_enviadas_correo(Request $request)
+
+    public function filtrado_listado_revisor(Request $request)
     {
-
         if ($request->ajax()) {
+            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
+                ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
+                ->where('estado', 3)->orWhere('estado', 4)
+                ->when($request->fecha, function ($query, $fecha) {
+                    $dates = explode(" / ", $fecha);
 
-            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')->where('distribuidoresid', '=', Auth::user()->distribuidoresid)->where('estado', 5)->get();
+                    $date1 = strtotime($dates[0]);
+                    $desde = date('Y-m-d H:i:s', $date1);
+
+                    $date2 = strtotime($dates[1] . ' +1 day -1 second');
+                    $hasta = date('Y-m-d H:i:s', $date2);
+                    return $query->whereBetween("fecha_creacion", [$desde, $hasta]);
+                })
+                ->when($request->estado, function ($query, $estado) {
+                    return $query->where("estado", $estado);
+                })
+                ->when($request->vendedores, function ($query, $vendedores) {
+                    return $query->where("usuariosid", $vendedores);
+                })
+                ->get();
 
             return DataTables::of($data)
                 ->editColumn('fecha_creacion', function ($fecha) {
@@ -702,7 +680,69 @@ class FirmaController extends Controller
                 ->rawColumns(['action', 'codigo', 'estado', 'fecha_creacion'])
                 ->make(true);
         }
+    }
+
+    public function listado_revisor_enviadas_correo(Request $request)
+    {
         return view('auth2.revisor_firmas.enviadas_corre');
+    }
+
+    public function filtrado_listado_revisor_enviadas_correo(Request $request)
+    {
+        if ($request->ajax()) {
+            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
+                ->when($request->fecha, function ($query, $fecha) {
+                    $dates = explode(" / ", $fecha);
+
+                    $date1 = strtotime($dates[0]);
+                    $desde = date('Y-m-d H:i:s', $date1);
+
+                    $date2 = strtotime($dates[1] . ' +1 day -1 second');
+                    $hasta = date('Y-m-d H:i:s', $date2);
+                    return $query->whereBetween("fecha_creacion", [$desde, $hasta]);
+                })
+                ->when($request->vendedores, function ($query, $vendedores) {
+                    return $query->where("usuariosid", $vendedores);
+                })
+                ->where('distribuidoresid', Auth::user()->distribuidoresid)
+                ->where('estado', 5)
+                ->get();
+
+            return DataTables::of($data)
+                ->editColumn('fecha_creacion', function ($fecha) {
+                    $date = new DateTime($fecha->fecha_creacion);
+                    return $date->format('d-m-Y');
+                })
+                ->editColumn('tipo_persona', function ($tipo) {
+                    if ($tipo->tipo_persona == 1) {
+                        return "Natural";
+                    } else {
+                        return "Juridica";
+                    }
+                })
+                ->editColumn('estado', function ($estado) {
+
+                    if ($estado->estado == 1) {
+                        return '<a class="bg-danger text-white rounded p-1">Recibido</a>';
+                    } elseif ($estado->estado == 2) {
+                        return '<a class="bg-warning text-white rounded p-1">Revisado</a>';
+                    } elseif ($estado->estado == 3) {
+                        return '<a class="bg-primary text-white rounded p-1">En proceso</a>';
+                    } elseif ($estado->estado == 4) {
+                        return '<a class="bg-info text-white rounded p-1">Finalizado</a>';
+                    } elseif ($estado->estado == 5) {
+                        return '<a class="bg-success text-white rounded p-1">Entregado al correo</a>';
+                    } elseif ($estado->estado == 6) {
+                        return '<a class="bg-secondary text-dark rounded p-1">Anulado</a>';
+                    }
+                })
+                ->editColumn('action', function ($firma) {
+                    return '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('firma.revisor_editar', $firma->firmasid) . '"  title="Editar"> <i class="la la-edit"></i> </a>' . '<a class="btn btn-icon btn-light btn-hover-info btn-sm ml-2" href="' . route('firma.estadosolicitud', base64_encode($firma->firmasid)) . '" target="_blank"  title="Enlace tracking"> <i class="la la-external-link-alt"></i> </a>';
+                })
+
+                ->rawColumns(['action', 'codigo', 'estado', 'fecha_creacion'])
+                ->make(true);
+        }
     }
 
     public function editar_revisor(Firma $firma)
