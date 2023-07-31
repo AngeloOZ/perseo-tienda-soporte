@@ -1,5 +1,11 @@
+@php
+    $vendedores = App\Models\User::select('usuariosid', 'identificacion', 'nombres')
+        ->where('rol', 1)
+        ->where('estado', 1)
+        ->where('distribuidoresid', Auth::user()->distribuidoresid)
+        ->get();
+@endphp
 @extends('auth2.layouts.app')
-
 @section('contenido')
     <style>
         #kt_datatable td {
@@ -19,6 +25,58 @@
                                 </div>
                             </div>
                             <div class="card-body">
+                                <div class="row mb-8">
+                                    <div class="col-12 col-md-3">
+                                        <label>Vendedores:</label>
+                                        <select class="form-control select select2" id="filtroVendedores">
+                                            <option value="" selected>Todos</option>
+                                            @foreach ($vendedores as $vendedor)
+                                                <option value="{{ $vendedor->usuariosid }}">{{ $vendedor->nombres }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <label>Estado:</label>
+                                        <select class="form-control select" id="filtroEstado">
+                                            <option value="" selected>Todos</option>
+                                            <option value="3">En progreso</option>
+                                            <option value="4">Finalizado</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <label>Fecha:</label>
+                                        <div class="input-group" id='kt_fecha'>
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text">
+                                                    <i class="la la-calendar-check-o"></i>
+                                                </span>
+                                            </div>
+                                            <input type="text" class="form-control" autocomplete="off"
+                                                placeholder="Rango de Fechas" id="filtroFecha">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
+                                        <div class="pt-8">
+                                            <button class="btn btn-primary btn-primary--icon" id="kt_search">
+                                                <span>
+                                                    <i class="la la-search"></i>
+                                                    <span>Buscar</span>
+                                                </span>
+                                            </button>&#160;&#160;
+                                            <button class="btn btn-secondary btn-secondary--icon" id="kt_reset">
+                                                <span>
+                                                    <i class="la la-close"></i>
+                                                    <span>Reiniciar</span>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <table class="table table-sm table-bordered table-head-custom table-hover text-center"
                                     id="kt_datatable">
                                     <thead>
@@ -50,6 +108,15 @@
 @section('script')
     <script>
         $(document).ready(function() {
+
+            initDateMonth();
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             var table = $('#kt_datatable').DataTable({
                 dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -73,9 +140,13 @@
                 serverSide: true,
                 //Peticion ajax que devuelve los registros
                 ajax: {
-                    url: "{{ route('firma.revisor') }}",
-                    type: 'GET'
-
+                    url: "{{ route('firma.filtrado_revisor') }}",
+                    type: 'POST',
+                    data: function(d) {
+                        d.estado = $("#filtroEstado").val();
+                        d.vendedores = $("#filtroVendedores").val();
+                        d.fecha = $("#filtroFecha").val();
+                    },
                 },
                 columns: [{
                         data: 'firmasid',
@@ -156,26 +227,80 @@
 
             });
 
-
-            $('#export_print').on('click', function(e) {
-                e.preventDefault();
-                table.button(0).trigger();
+            $('#kt_fecha').daterangepicker({
+                autoUpdateInput: false,
+                format: "DD-MM-YYYY",
+                locale: {
+                    "separator": " - ",
+                    "applyLabel": "Aplicar",
+                    "cancelLabel": "Cancelar",
+                    "fromLabel": "DE",
+                    "toLabel": "HASTA",
+                    "customRangeLabel": "Personalizado",
+                    "daysOfWeek": [
+                        "Dom",
+                        "Lun",
+                        "Mar",
+                        "Mie",
+                        "Jue",
+                        "Vie",
+                        "Sáb"
+                    ],
+                    "monthNames": [
+                        "Enero",
+                        "Febrero",
+                        "Marzo",
+                        "Abril",
+                        "Mayo",
+                        "Junio",
+                        "Julio",
+                        "Agosto",
+                        "Septiembre",
+                        "Octubre",
+                        "Noviembre",
+                        "Diciembre"
+                    ],
+                    "firstDay": 1
+                },
+                ranges: {
+                    'Hoy': [moment(), moment()],
+                    'Ultimos 7 días': [moment().subtract(6, 'days'), moment()],
+                    'Ultimos 30 días ': [moment().subtract(29, 'days'), moment()],
+                    'Mes Actual': [moment().startOf('month'), moment().endOf('month')],
+                    'Mes Anterior': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1,
+                        'month').endOf('month')],
+                    'Año Actual': [moment().startOf('year'), moment().endOf('year')],
+                    'Año Anterior': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1,
+                        'year').endOf('year')],
+                },
+                buttonClasses: ' btn',
+                applyClass: 'btn-primary',
+                cancelClass: 'btn-secondary',
+                alwaysShowCalendars: true,
+                showDropdowns: true,
+            }, function(start, end, label) {
+                $('#kt_fecha .form-control').val(start.format('DD-MM-YYYY') + ' / ' + end.format(
+                    'DD-MM-YYYY'));
             });
 
-            $('#export_copy').on('click', function(e) {
+            $('#kt_search').on('click', function(e) {
                 e.preventDefault();
-                table.button(1).trigger();
+                // guardarEstadoFiltro();
+                table.draw();
             });
 
-            $('#export_excel').on('click', function(e) {
-                e.preventDefault();
-                table.button(2).trigger();
+            $('#kt_reset').on('click', function() {
+                $("#filtroEstado").val("");
+                $("#filtroVendedores").val("");
+                initDateMonth();
+                table.draw();
             });
 
-            $('#export_pdf').on('click', function(e) {
-                e.preventDefault();
-                table.button(3).trigger();
-            });
+            function initDateMonth() {
+                $("#filtroFecha").val(
+                    `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
+                );
+            }
 
         });
     </script>

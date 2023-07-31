@@ -25,8 +25,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/',function(){
-   return redirect()->route('auth.login'); 
+Route::get('/', function () {
+    return redirect()->route('auth.login');
 });
 
 Route::get('/login', function () {
@@ -69,7 +69,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/generar-factura/{factura}', [FacturasController::class, 'generar_factura'])->name('factura.generar');
     Route::get('/autorizar-factura/{factura}', [FacturasController::class, 'autorizar_factura'])->name('factura.autorizar');
     Route::get('/ver-factura/{factura}', [FacturasController::class, 'visualizar_factura'])->name('factura.visualizar');
-    
+
     Route::get('/facturas', [FacturasController::class, 'listado'])->name('facturas.listado');
     Route::post('/facturas/filtrado-listado', [FacturasController::class, 'filtrado_listado'])->name('facturas.filtrado_listado');
 
@@ -86,9 +86,15 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     /* Rutas para admin firmas (Steban)*/
-    Route::get('/revisor-firmas', [FirmaController::class, 'listado_revisor'])->name('firma.revisor');
-    Route::get('/revisor-firmas-enviadas-correo', [FirmaController::class, 'listado_revisor_enviadas_correo'])->name('firma.revisor_correo');
-    Route::get('/revisor-editar-firma/{firma}', [FirmaController::class, 'editar_revisor'])->name('firma.revisor_editar');
+    Route::group(['prefix' => 'revisor-firmas'], function () {
+        Route::get('/', [FirmaController::class, 'listado_revisor'])->name('firma.revisor');
+        Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado_revisor'])->name('firma.filtrado_revisor');
+
+        Route::get('/enviadas-correo', [FirmaController::class, 'listado_revisor_enviadas_correo'])->name('firma.revisor_correo');
+        Route::post('/filtrado-listado-enviadas-correo', [FirmaController::class, 'filtrado_listado_revisor_enviadas_correo'])->name('firma.filtrado_revisor_correo');
+        
+        Route::get('/editar-firma/{firma}', [FirmaController::class, 'editar_revisor'])->name('firma.revisor_editar');
+    });
 
     /* Rutas para admin facturas (Joyce) */
     Route::get('/listado-facturados', [FacturasController::class, 'listado_revisor'])->name("facturas.revisor");
@@ -152,7 +158,6 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::put('/marcar-comision-pagado-vendedor', [ComisionesController::class, 'marcar_pagado_vendedores'])->name('comisiones.marcar_pagado.vendedor');
         Route::put('/marcar-comision-pagado-soportes', [ComisionesController::class, 'marcar_pagado_soportes'])->name('comisiones.marcar_pagado.soportes');
-
     });
 
     /* Rutas para cotizaciones */
