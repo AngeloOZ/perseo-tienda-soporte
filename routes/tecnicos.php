@@ -11,7 +11,7 @@ Route::prefix('dev')->group(function () {
 
         $user = Tecnicos::firstWhere('identificacion', '2300368665');
 
-        Auth::guard('admin')->login($user);
+        Auth::guard('tecnico')->login($user);
         $request->session()->regenerate();
 
         return redirect()->route('tecnicos.index');
@@ -20,10 +20,10 @@ Route::prefix('dev')->group(function () {
     })->name('tecnicos.login');
 
 
-    Route::group(['prefix' => 'tecnicos', 'middleware' => 'admin'], function () {
+    Route::group(['prefix' => 'tecnicos', 'middleware' => 'tecnico'], function () {
 
         Route::get('/', function () {
-            $user = Auth::guard('admin')->user();
+            $user = Auth::guard('tecnico')->user();
 
             return "hola tecnico {$user->nombres}";
         })->name('tecnicos.index');
