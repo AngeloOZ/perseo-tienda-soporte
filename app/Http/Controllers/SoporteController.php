@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class SoporteController extends Controller
 {
-    public function render_login(){
+    public function render_login()
+    {
         return view('soporte.auth.login');
     }
-    
+
     public function login_soporte(Request $request)
     {
         $request->validate(
@@ -32,7 +33,7 @@ class SoporteController extends Controller
             flash('Usuario Incorrecto o Usuario Inactivo')->error();
             return back();
         }
- 
+
         if ($usuario->clave !== $request->clave) {
             flash('Usuario o Contraseña Incorrectos')->error();
             return back();
@@ -46,15 +47,22 @@ class SoporteController extends Controller
             flash("El servicio de WhatsAapp está desconectado")->important();
         }
 
+        if (Auth::user()->rol == 5) {
+            $hora = strtotime(date('G:i'));
+            $inicio = strtotime('08:00');
+            $fin = strtotime('16:55');
+            if ($hora >= $inicio && $hora <= $fin) {
+                UserSoporte::where('usuariosid', Auth::user()->usuariosid)->update(['estado' => 1, 'fecha_de_ingreso' => now()]);
+            }
+        }
+
+        return $this->redirect_by_rol();
+    }
+
+    public function redirect_by_rol()
+    {
         switch (Auth::user()->rol) {
             case 5:
-                $hora = strtotime(date('G:i'));
-                $inicio = strtotime('08:00');
-                $fin = strtotime('16:55');
-                if ($hora >= $inicio && $hora <= $fin) {
-                    UserSoporte::where('usuariosid', Auth::user()->usuariosid)->update(['estado' => 1, 'fecha_de_ingreso' => now()]);
-                }
-
                 return redirect()->route('soporte.listado.activos');
                 break;
             case 6:
