@@ -10,19 +10,15 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('soporte')->group(function () {
 
     /* Tickets clientes */
+
     Route::get('/crear-ticket/{producto?}/{distribuidorid?}', [TicketSoporteController::class, 'index'])->name("soporte.crear.ticket");
     Route::get('/consultar-estado/{ruc}', [TicketSoporteController::class, 'validar_ticket_activo'])->name("soporte.consultar_estado");
     Route::get('/resultado-registro-ticket/{numero?}', [TicketSoporteController::class, 'resultado_registro'])->name("soporte.resultado_registro");
     Route::post('/crear-ticket', [TicketSoporteController::class, 'crear_ticket'])->name("soporte.crear_ticket");
-
     Route::get('/calificar-soporte/{ticket}', [TicketSoporteController::class, 'calificar_soporte_vista'])->name('soporte.calificar_ticket');
-
     Route::post('/calificar-soporte', [TicketSoporteController::class, 'registrar_calificacion_soporte'])->name('soporte.registrar_califcacion');
 
-    /* Login */
-    Route::get('/login', function () {
-        return view('soporte.auth.login');
-    })->name('soporte.auth.login');
+    Route::get('/login', [SoporteController::class, 'render_login'])->name('soporte.auth.login');
     Route::post('/login', [SoporteController::class, 'login_soporte'])->name('soporte.login');
 
 

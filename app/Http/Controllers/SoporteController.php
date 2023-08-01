@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\Auth;
 
 class SoporteController extends Controller
 {
-
+    public function render_login(){
+        return view('soporte.auth.login');
+    }
+    
     public function login_soporte(Request $request)
     {
         $request->validate(
