@@ -1322,7 +1322,7 @@ class TicketSoporteController extends Controller
         });
 
         $encuestas->ftp_fget(1, "prueba.txt", "prueba.txt", FTP_ASCII);
-        
+
         // $encuests->
 
         $encuestas->flatten();
@@ -1435,40 +1435,51 @@ class TicketSoporteController extends Controller
 
     private function asignacion_tickets()
     {
-        $horaEntrada = env('HORA_ENTRADA') || "08:10";
-        $horaSalida = env('HORA_SALIDA') || "16:55";
+        try {
+            $horaEntrada = env('HORA_ENTRADA') || "08:10";
+            $horaSalida = env('HORA_SALIDA') || "16:55";
 
-        $current = date('G:i');
-        $current = strtotime($current);
-        $entrada = strtotime($horaEntrada);
-        $salida = strtotime($horaSalida);
+            $current = date('G:i');
+            $current = strtotime($current);
+            $entrada = strtotime($horaEntrada);
+            $salida = strtotime($horaSalida);
 
-        if (!($current >= $entrada && $current <= $salida)) return;
+            if (!($current >= $entrada && $current <= $salida)) return;
 
-        $tickets = Ticket::all()->where('tecnicosid', null);
+            $tickets = Ticket::all()->where('tecnicosid', null);
 
-        foreach ($tickets as $key => $ticket) {
+            foreach ($tickets as $ticket) {
 
-            $tecnicoLibre = $this->buscar_tecnico_libre($ticket->producto, $ticket->distribuidor);
-            if ($tecnicoLibre == null) continue;
+                if ($ticket->producto == 'pc' && $ticket->distribuidor == 5) {
+                    $fechaActual = new DateTime();
+                    $fechaTicket = new DateTime($ticket->fecha_creado);
 
-            try {
+                    $intervalo = $fechaActual->diff($fechaTicket);
+                    $minutosTranscurridos = $intervalo->i;
+
+                    if ($minutosTranscurridos > 30) {
+                        $ticket->distribuidor = 2;
+                        $ticket->save();
+                    }
+                }
+
+                $tecnicoLibre = $this->buscar_tecnico_libre($ticket->producto, $ticket->distribuidor);
+
+                if ($tecnicoLibre == null) continue;
+
+
                 $ticket->tecnicosid = $tecnicoLibre->usuariosid;
                 $ticket->fecha_asignacion = now();
 
                 if ($ticket->save()) {
                     $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->usuariosid);
                     $tecnicoLibre->tickets_activos = $ticketsActivos;
-
-                    if ($tecnicoLibre->save()) {
-                        $this->notificar_asignacion_ticket($tecnicoLibre->usuariosid, $ticket);
-                    }
+                    $tecnicoLibre->save();
+                    $this->notificar_asignacion_ticket($tecnicoLibre->usuariosid, $ticket);
                 }
-            } catch (\Throwable $th) {
             }
+        } catch (\Throwable $th) {
         }
-
-        return $tickets;
     }
 
     private function buscar_tecnico_libre($producto = "web", $distribuidor = 1)
@@ -1477,10 +1488,10 @@ class TicketSoporteController extends Controller
         $tecnicoLibre = null;
         $tecnicos = [];
 
-        if ($producto == "web") {
-            $tecnicos = UserSoporte::where('estado', 1)->where('productos', 'LIKE', '%' . $producto . '%')->get();
-        } else {
+        if ($producto == "pc") {
             $tecnicos = UserSoporte::where('estado', 1)->where('distribuidor', $distribuidor)->where('productos', 'LIKE', '%' . $producto . '%')->get();
+        } else {
+            $tecnicos = UserSoporte::where('estado', 1)->where('distribuidor', 2)->where('productos', 'LIKE', '%' . $producto . '%')->get();
         }
 
         foreach ($tecnicos as $key => $tecnico) {

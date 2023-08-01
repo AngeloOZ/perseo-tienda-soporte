@@ -66,6 +66,7 @@
                                                     <span>Reiniciar</span>
                                                 </span>
                                             </button>
+                                            @include('auth.comisiones.inc.buttons')
                                         </div>
                                     </div>
                                 </div>
@@ -140,6 +141,37 @@
                         d.fecha = $("#filtroFecha").val();
                     },
                 },
+                buttons: [{
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                ],
                 columns: [{
                         data: 'firmasid',
                         name: 'firmasid',
@@ -263,6 +295,27 @@
                     `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
                 );
             }
+
+            /* Botones para exportar datos */
+            $('#export_print').on('click', function(e) {
+                e.preventDefault();
+                table.button(0).trigger();
+            });
+
+            $('#export_copy').on('click', function(e) {
+                e.preventDefault();
+                table.button(1).trigger();
+            });
+
+            $('#export_excel').on('click', function(e) {
+                e.preventDefault();
+                table.button(2).trigger();
+            });
+
+            $('#export_csv').on('click', function(e) {
+                e.preventDefault();
+                table.button(3).trigger();
+            });
         });
     </script>
 @endsection
