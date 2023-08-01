@@ -177,12 +177,6 @@
                             columns: ':not(.no-export)'
                         }
                     },
-                    // {
-                    //     extend: 'pdfHtml5',
-                    //     exportOptions: {
-                    //         columns: ':not(.no-export)'
-                    //     }
-                    // },
                 ],
                 //Combo cantidad de registros a mostrar por pantalla
                 lengthMenu: [
