@@ -19,7 +19,7 @@ class Tecnico
         if (Auth::guard('tecnico')->check()) {
             return $next($request);
         } else {
-            return redirect()->route('tecnicos.login');
+            return redirect()->route('soporte.auth.login');
         }
     }
 }
