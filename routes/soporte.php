@@ -60,7 +60,7 @@ Route::prefix('soporte')->group(function () {
             Route::get('/estado-de-tecnicos', [TicketSoporteController::class, 'listado_estado_tecnicos'])->name('soporte.listado.estado_tecnicos');
             Route::delete('/eliminar-soporte-revisor/{ticket}', [TicketSoporteController::class, 'eliminar_soporte_revisor'])->name('soporte.eliminar_ticket');
 
-            Route::prefix('revisor')->group(function () {
+            Route::prefix('reportes')->group(function () {
                 Route::get('/tickets-tecnicos', [TicketSoporteController::class, 'ver_resporte_soportes'])->name('soporte.reporte_soporte');
                 Route::post('/tickets-tecnicos', [TicketSoporteController::class, 'filtrado_reporte_soporte'])->name('soporte.filtrado_reporte_soporte');
     
