@@ -16,7 +16,7 @@ class WhatsappController extends Controller
 
     private function init_config()
     {
-        $das = isset(Auth::user()->distribuidoresid) ? Auth::user()->distribuidoresid : 2;
+        $das = isset(Auth::guard('tecnico')->user()->distribuidoresid) ? Auth::guard('tecnico')->user()->distribuidoresid : 2;
         switch ($das) {
             case 1:
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporte";
@@ -41,7 +41,7 @@ class WhatsappController extends Controller
     public function index()
     {
         $this->init_config();
-        $numeros = NumeroWhatsapp::when(Auth::user()->distribuidoresid, function ($query, $das) {
+        $numeros = NumeroWhatsapp::when(Auth::guard('tecnico')->user()->distribuidoresid, function ($query, $das) {
             if ($das <= 2) {
                 $query->where('das', 2);
             } else {

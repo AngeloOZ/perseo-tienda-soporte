@@ -835,11 +835,11 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket_revisor(Ticket $ticket)
     {
+        
         $desarrolladores = Tecnicos::where('rol', 6)->get();
         $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
         $actividades = ActividadTicket::where('ticketid', $ticket->ticketid)->get();
-
         
         $bind = [
             "ticket" => $ticket,

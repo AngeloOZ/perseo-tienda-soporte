@@ -119,13 +119,13 @@
                                     <div class="tab-pane fade" id="archivos-1" role="tabpanel"
                                         aria-labelledby="archivos-tab-1">
                                         <div class="card-body">
-                                            {{-- @include('soporte.admin.inc.list_ticket') --}}
+                                            @include('soporte.admin.inc.list_ticket')
                                         </div>
                                     </div>
                                     <div class="tab-pane fade" id="historial-1" role="tabpanel"
                                         aria-labelledby="historial-tab-1">
                                         <div class="card-body">
-                                            {{-- @include('soporte.admin.inc.historial') --}}
+                                            @include('soporte.admin.inc.historial')
                                         </div>
                                     </div>
                                 </div>
