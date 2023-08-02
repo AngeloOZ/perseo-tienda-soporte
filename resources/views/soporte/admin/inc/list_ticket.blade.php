@@ -1,5 +1,8 @@
 @php
-    $actividades = App\Models\ActividadTicket::where('ticketid', $ticket->ticketid)->get();
+    if(count($actividades) == 0){
+        $actividades = App\Models\ActividadTicket::where('ticketid', $ticket->ticketid)->get();
+    }
+
     function get_date_time($fecha, $getHora = false)
     {
         if ($getHora) {

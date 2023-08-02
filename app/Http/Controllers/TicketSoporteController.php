@@ -838,7 +838,9 @@ class TicketSoporteController extends Controller
         $desarrolladores = Tecnicos::where('rol', 6)->get();
         $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
+        $actividades = ActividadTicket::where('ticketid', $ticket->ticketid)->get();
 
+        
         $bind = [
             "ticket" => $ticket,
             "tecnicos" => $tecnicos,
@@ -846,8 +848,9 @@ class TicketSoporteController extends Controller
             "tecnicoAsignado" => $tecnicoAsignado,
             "historialTickets" => $this->obtener_historial_tickets($ticket->ruc, $ticket->numero_ticket),
             "historialCapacitaciones" => $this->obtener_historial_implementaciones($ticket->ruc),
+            "actividades" => $actividades,
         ];
-
+        
         return view("soporte.admin.revisor.editar", $bind);
     }
 
