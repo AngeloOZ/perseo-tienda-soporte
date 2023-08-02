@@ -1,5 +1,5 @@
 @php
-    $horaSalida = env('HORA_SALIDA') || "16:55";
+    $horaSalida = env('HORA_SALIDA') ?? "16:50";
 
     $currentUser = Auth::guard('tecnico')->user();
 
