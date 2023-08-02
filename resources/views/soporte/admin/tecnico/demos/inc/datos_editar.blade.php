@@ -17,7 +17,7 @@
         <select class="form-control select2 @error('tecnico') is-invalid @enderror" name="tecnico" {{ $disabled }}>
             <option value="" disabled selected>Seleccionar técnico</option>
             @foreach ($tecnicos as $item)
-                <option value="{{ $item->usuariosid }}" {{ $soporte->tecnicoid == $item->usuariosid ? 'selected' : '' }}>
+                <option value="{{ $item->tecnicosid }}" {{ $soporte->tecnicoid == $item->tecnicosid ? 'selected' : '' }}>
                     {{ $item->nombres }}</option>
             @endforeach
         </select>
