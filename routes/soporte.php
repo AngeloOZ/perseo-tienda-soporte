@@ -25,7 +25,11 @@ Route::prefix('soporte')->group(function () {
     Route::post('/login', [SoporteController::class, 'login_soporte'])->name('soporte.login');
 
 
-    Route::middleware(['auth'])->group(function () {
+    Route::middleware(['tecnico'])->group(function () {
+        Route::get('/logout', [SoporteController::class, 'logout_tecnico'])->name('soporte.logout');
+        Route::get('/cambiar-clave', [SoporteController::class, 'clave'])->name('soporte.clave');
+        Route::put('/actualizar-clave', [SoporteController::class, 'actualizar_clave'])->name('soporte.actualizar_clave');
+
         Route::get('redirect-index-by-rol', [SoporteController::class, 'redirect_by_rol'])->name("redirect.rol");
         Route::post('enviar-correo-cliente', [TicketSoporteController::class, 'enviar_correo_cliente'])->name('soporte.enviar_correo_cliente');
         Route::get('/editar-ticket/{ticket}', [TicketSoporteController::class, 'editar_ticket'])->name('soporte.editar');

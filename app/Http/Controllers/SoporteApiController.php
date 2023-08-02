@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\EncuestaSoporte;
+use App\Models\Tecnicos;
 use App\Models\Ticket;
-use App\Models\User;
 use DateTime;
 
 class SoporteApiController extends Controller
@@ -15,7 +15,7 @@ class SoporteApiController extends Controller
         $fechaFin = new DateTime($ticket->fecha_cierre);
         $intervalo = $fechaInicio->diff($fechaFin);
 
-        $tecnico = User::find($ticket->tecnicosid, ["nombres"]);
+        $tecnico = Tecnicos::find($ticket->tecnicosid, ["nombres"]);
         if (!$tecnico) return null;
 
         $temp = [
@@ -29,7 +29,8 @@ class SoporteApiController extends Controller
             "producto" => strtoupper($ticket->producto),
         ];
 
-        $calificaionQuery = EncuestaSoporte::firstWhere("ticketid", $ticket->ticketid)->where("justificado", 0);
+        $calificaionQuery = EncuestaSoporte::where("ticketid", $ticket->ticketid)->where("justificado", 0)->first();
+
         if ($calificaionQuery) {
             if ($calificaionQuery->pregunta_1) {
                 $temp['pregunta_1'] = $calificaionQuery->pregunta_1;
@@ -44,10 +45,10 @@ class SoporteApiController extends Controller
     public function obtener_soporte_powerbi()
     {
         try {
-            $soportes = Ticket::where("estado", '>=', 3)->get();
+            $TicketsSoportes = Ticket::where("estado", '>=', 3)->get();
 
-            $listadoSoportes = $soportes->map(function ($soporte) {
-                return $this->devolverDatos($soporte);
+            $listadoSoportes = $TicketsSoportes->map(function ($ticket) {
+                return $this->devolverDatos($ticket);
             });
 
             $listadoSoportes = [...$listadoSoportes];

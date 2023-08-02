@@ -1,5 +1,8 @@
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Tickets en desarrollo')
+@php
+    $currentUser = Auth::guard('tecnico')->user();
+@endphp
 @section('contenido')
     <style>
         #kt_datatable td {
@@ -24,8 +27,8 @@
                                 <select class="form-control select2 datatable-input" id="filtroTecnicos">
                                     <option value="" selected>Todos</option>
                                     @foreach ($tecnicos as $tecnico)
-                                        <option value="{{ $tecnico->usuariosid }}"
-                                            {{ Auth::user()->usuariosid == $tecnico->usuariosid ? 'selected' : '' }}>
+                                        <option value="{{ $tecnico->tecnicosid }}"
+                                            {{ $currentUser->tecnicosid == $tecnico->tecnicosid ? 'selected' : '' }}>
                                             {{ $tecnico->nombres }}
                                         </option>
                                     @endforeach
@@ -175,7 +178,7 @@
             });
 
             $('#kt_reset').on('click', function(e) {
-                $("#filtroTecnicos").val("{{ Auth::user()->usuariosid }}");
+                $("#filtroTecnicos").val("{{ $currentUser->usuariosid }}");
                 initDateMonth();
                 table.draw();
             });

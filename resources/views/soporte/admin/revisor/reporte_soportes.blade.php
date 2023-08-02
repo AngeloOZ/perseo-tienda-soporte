@@ -1,9 +1,10 @@
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Listado de técnicos')
 @php
-    $disabled = "disabled";
-    if(Auth::user()->distribuidoresid == 2){
-        $disabled = "";
+    $currentUser = Auth::guard('tecnico')->user();
+    $disabled = 'disabled';
+    if ($currentUser->distribuidoresid == 2) {
+        $disabled = '';
     }
 @endphp
 @section('contenido')
@@ -32,10 +33,18 @@
                                             </label>
                                             <select class="form-control" id="filtroDistribuidor" {{ $disabled }}>
                                                 <option value="">Todos</option>
-                                                <option value="1" {{ Auth::user()->distribuidoresid == 1 ? 'selected' : '' }} >Perseo Alfa</option>
-                                                <option value="2" {{ Auth::user()->distribuidoresid == 2 ? 'selected' : '' }} >Perseo Matriz</option>
-                                                <option value="3" {{ Auth::user()->distribuidoresid == 3 ? 'selected' : '' }} >Perseo Delta</option>
-                                                <option value="4" {{ Auth::user()->distribuidoresid == 4 ? 'selected' : '' }} >Perseo Omega</option>
+                                                <option value="1"
+                                                    {{ $currentUser->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
+                                                </option>
+                                                <option value="2"
+                                                    {{ $currentUser->distribuidoresid == 2 ? 'selected' : '' }}>Perseo
+                                                    Matriz</option>
+                                                <option value="3"
+                                                    {{ $currentUser->distribuidoresid == 3 ? 'selected' : '' }}>Perseo Delta
+                                                </option>
+                                                <option value="4"
+                                                    {{ $currentUser->distribuidoresid == 4 ? 'selected' : '' }}>Perseo Omega
+                                                </option>
                                             </select>
                                         </div>
 
@@ -45,7 +54,7 @@
                                             <select class="form-control select2" id="filtroTecnico">
                                                 <option value="" selected>Todos</option>
                                                 @foreach ($tecnicos as $tecnico)
-                                                    <option value="{{ $tecnico->usuariosid }}">
+                                                    <option value="{{ $tecnico->tecnicosid }}">
                                                         {{ $tecnico->nombres }}</option>
                                                 @endforeach
                                             </select>
@@ -307,7 +316,7 @@
                     'DD-MM-YYYY'));
             });
             dateNow();
-            
+
             initRequest();
 
             manejoSubmitFiltro();
@@ -338,7 +347,7 @@
             })
         }
 
-        function initRequest(){
+        function initRequest() {
             const body = {
                 _token: '{{ csrf_token() }}',
                 tecnicoid: $("#filtroTecnico").val(),
@@ -352,7 +361,7 @@
             try {
                 const request = await axios.post("{{ route('soporte.filtrado_reporte_soporte') }}", requestBody);
                 const result = request.data;
-                
+
                 dataChart = result;
 
                 const opt = {

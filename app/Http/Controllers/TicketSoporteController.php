@@ -8,8 +8,8 @@ use App\Models\ActividadTicket;
 use App\Models\EncuestaSoporte;
 use App\Models\Log;
 use App\Models\SoporteEspecial;
+use App\Models\Tecnicos;
 use App\Models\Ticket;
-use App\Models\User;
 use App\Models\UserSoporte;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
@@ -121,12 +121,12 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket(Ticket $ticket)
     {
-        $desarrolladores = User::where('rol', 6)->get();
-        $supervisores = User::where('rol', 7)
-            ->where('distribuidoresid', Auth::user()->distribuidoresid)
+        $desarrolladores = Tecnicos::where('rol', 6)->get();
+        $supervisores = Tecnicos::where('rol', 7)
+            ->where('distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
             ->get();
 
-        $tecnicoAsignado = User::findOrFail($ticket->tecnicosid);
+        $tecnicoAsignado = Tecnicos::findOrFail($ticket->tecnicosid);
 
         if (!$ticket->actividad_empresa) {
             $actividad = Ticket::select('actividad_empresa')
@@ -217,7 +217,7 @@ class TicketSoporteController extends Controller
 
             $ticketLog =  Ticket::find($ticket->ticketid);
             $log = new Log();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Modificar";
             $log->fecha = now();
@@ -263,7 +263,7 @@ class TicketSoporteController extends Controller
             $contentEmail = [
                 "from" => env('MAIL_FROM_ADDRESS'),
                 "subject" => "Soporte técnico - Ticket: $ticket->numero_ticket",
-                "tecnico" => trim(Auth::user()->nombres),
+                "tecnico" => trim(Auth::guard('tecnico')->user()->nombres),
                 "ticketid" => $ticket->ticketid,
                 "numero_ticket" => trim($ticket->numero_ticket),
                 "contenido" => $request->contenido,
@@ -273,13 +273,13 @@ class TicketSoporteController extends Controller
                 $contentEmail = [
                     "from" => env('MAIL_FROM_ADDRESS'),
                     "subject" => "Soporte técnico - Ticket: $ticket->numero_ticket",
-                    "tecnico" => trim(Auth::user()->nombres),
+                    "tecnico" => trim(Auth::guard('tecnico')->user()->nombres),
                     "ticketid" => $ticket->ticketid,
                     "numero_ticket" => trim($ticket->numero_ticket),
                     "contenido" => $request->contenido,
                 ];
 
-                Mail::to($destinatarios)->cc(Auth::user()->correo)->queue(new EnviarTicketSoporte($contentEmail));
+                Mail::to($destinatarios)->cc(Auth::guard('tecnico')->user()->correo)->queue(new EnviarTicketSoporte($contentEmail));
 
                 $sms = new WhatsappController();
                 $sendMessage = $sms->enviar_mensaje([
@@ -290,7 +290,7 @@ class TicketSoporteController extends Controller
             }
 
             $log = new Log();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Enviar correo";
             $log->fecha = now();
@@ -357,23 +357,23 @@ class TicketSoporteController extends Controller
         }
 
         $encuestas = EncuestaSoporte::orderBy('comentario')
-            ->join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->whereBetween("fecha_creacion", [$desde, $hasta])
-            ->where('tecnicoid', Auth::user()->usuariosid)
+            ->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid)
             ->where('justificado', '=', 0)
             ->get();
 
         $resultsPregunta1 = EncuestaSoporte::selectRaw("pregunta_1 as 'puntaje' , COUNT(pregunta_1) as 'total'")
-            ->join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->whereBetween("fecha_creacion", [$desde, $hasta])
-            ->where('tecnicoid', Auth::user()->usuariosid)
+            ->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid)
             ->where('justificado', '=', 0)
             ->groupBy('pregunta_1')->get();
 
         $resultsPregunta2 = EncuestaSoporte::selectRaw("pregunta_2 as 'puntaje' , COUNT(pregunta_2) as 'total'")
-            ->join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->whereBetween("fecha_creacion", [$desde, $hasta])
-            ->where('tecnicoid', Auth::user()->usuariosid)
+            ->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid)
             ->where('justificado', '=', 0)
             ->groupBy('pregunta_2')->get();
 
@@ -487,7 +487,9 @@ class TicketSoporteController extends Controller
     {
         $this->asignacion_tickets();
         if ($request->ajax()) {
-            $data = Ticket::select()->where([['tecnicosid', Auth::user()->usuariosid], ['estado', '<=', '2',]])->get();
+            $data = Ticket::where([['tecnicosid', Auth::guard('tecnico')->user()->tecnicosid]])
+                ->where('estado', '<=', '2')
+                ->get();
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
@@ -527,7 +529,7 @@ class TicketSoporteController extends Controller
         if ($request->ajax()) {
             $data = Ticket::where('estado', '3')
                 ->when($request->tecnico, function ($query, $tecnico) {
-                    return $query->where('tecnicosid', $tecnico);
+                    return $query->where('ticket_tienda.tecnicosid', $tecnico);
                 })
                 ->when($request->fecha, function ($query, $fecha) {
                     $dates = explode(" / ", $fecha);
@@ -565,7 +567,7 @@ class TicketSoporteController extends Controller
     {
         $this->asignacion_tickets();
         if ($request->ajax()) {
-            $data = Ticket::select()->where([['tecnicosid', Auth::user()->usuariosid], ['estado', '>=', '4',]])->get();
+            $data = Ticket::select()->where([['tecnicosid', Auth::guard('tecnico')->user()->tecnicosid], ['estado', '>=', '4',]])->get();
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
@@ -599,25 +601,25 @@ class TicketSoporteController extends Controller
     public function cambiar_disponibilidad($id_user = null)
     {
         try {
-            $user = UserSoporte::firstWhere('usuariosid', Auth::user()->usuariosid);
-            if ($id_user) {
-                $user = UserSoporte::find($id_user);
+            $user = Tecnicos::firstWhere('tecnicosid', Auth::guard('tecnico')->user()->tecnicosid);
+            if ($id_user) $user = Tecnicos::find($id_user);
+
+            if (!$user) {
+                flash("Usuario no encontrado")->warning();
+                return back();
             }
 
             $estado = "";
-            if ($user) {
-                if ($user->estado == 1) {
-                    $user->estado = 0;
-                    $estado = "Desconectado";
-                } else {
-                    $user->estado = 1;
-                    $estado = "Disponible";
-                }
-                $user->save();
-                flash("Estado actualizado a: " . $estado)->success();
-                return back();
+            if ($user->activo == 1) {
+                $user->activo = 0;
+                $estado = "Desconectado";
+            } else {
+                $user->activo = 1;
+                $estado = "Disponible";
             }
-            flash("Usuario no encontrado")->warning();
+
+            $user->save();
+            flash("Estado actualizado a: " . $estado)->success();
             return back();
         } catch (\Throwable $th) {
             flash("No se pudo actualizar el estado del perfil")->error();
@@ -628,7 +630,7 @@ class TicketSoporteController extends Controller
     public function ver_calificaciones_tecnicos(Request $request)
     {
         if ($request->ajax()) {
-            $encuestas = EncuestaSoporte::all()->where('comentario', '<>', null)->where('tecnicoid', Auth::user()->usuariosid);
+            $encuestas = EncuestaSoporte::all()->where('comentario', '<>', null)->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid);
 
             foreach ($encuestas as $key => $encuesta) {
                 $ticket = Ticket::firstWhere('ticketid', $encuesta->ticketid);
@@ -709,8 +711,8 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket_desarrollo(Ticket $ticket)
     {
-        $tecnicoAsignado = User::findOrFail($ticket->tecnicosid);
-        $supervisores = User::where('rol', 7)->where('distribuidoresid', $tecnicoAsignado->distribuidoresid)->get();
+        $tecnicoAsignado = Tecnicos::findOrFail($ticket->tecnicosid);
+        $supervisores = Tecnicos::where('rol', 7)->where('distribuidoresid', $tecnicoAsignado->distribuidoresid)->get();
 
         return view("soporte.admin.desarrollo.editar", ["ticket" => $ticket, "supervisores" => $supervisores, "tecnicoAsignado" => $tecnicoAsignado]);
     }
@@ -737,7 +739,7 @@ class TicketSoporteController extends Controller
                 }
             })
                 ->when($request->tecnico, function ($query, $tecnico) {
-                    return $query->where('tecnicosid', $tecnico);
+                    return $query->where('ticket_tienda.tecnicosid', $tecnico);
                 })
                 ->when($request->estado, function ($query, $estado) {
                     return $query->where('estado', $estado);
@@ -814,7 +816,7 @@ class TicketSoporteController extends Controller
         try {
 
             $log = new Log();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Modificar";
             $log->fecha = now();
@@ -833,8 +835,8 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket_revisor(Ticket $ticket)
     {
-        $desarrolladores = User::where('rol', 6)->get();
-        $tecnicoAsignado = User::find($ticket->tecnicosid);
+        $desarrolladores = Tecnicos::where('rol', 6)->get();
+        $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
 
         $bind = [
@@ -851,27 +853,26 @@ class TicketSoporteController extends Controller
 
     public function listado_estado_tecnicos(Request $request)
     {
-        $usuarios = UserSoporte::orderBy('estado', 'DESC')
-            ->select('usuarios_soporte.*', 'usuarios.identificacion', 'usuarios.nombres', 'usuarios.distribuidoresid')
-            ->join('usuarios', 'usuarios.usuariosid', '=', 'usuarios_soporte.usuariosid')
-            ->when(Auth::user()->distribuidoresid, function ($query, $distribuidor) {
+        $tecnicos = Tecnicos::orderBy('activo', 'DESC')
+            ->select('tecnicosid', 'identificacion', 'nombres', 'activo', 'fecha_de_ingreso', 'fecha_de_salida')
+            ->where('rol', 5)
+            ->when(Auth::guard('tecnico')->user()->distribuidoresid, function ($query, $distribuidor) {
                 if ($distribuidor == 1) {
-                    return $query->where('usuarios.distribuidoresid', 1);
+                    return $query->where('distribuidoresid', 1);
                 } else if ($distribuidor == 2) {
-                    return $query->where('usuarios.distribuidoresid', '<=', 2);
+                    return $query->where('distribuidoresid', '<=', 2);
                 } else {
-                    return $query->where('usuarios.distribuidoresid', $distribuidor);
+                    return $query->where('distribuidoresid', $distribuidor);
                 }
             })
             ->get();
 
-        foreach ($usuarios as $usuario) {
-            $usuario->identificacion = str_replace("-SOP", "", $usuario->identificacion);
+        foreach ($tecnicos as $usuario) {
             $usuario->fecha_de_ingreso = date("H:i:s - d/m/Y", strtotime($usuario->fecha_de_ingreso));
             $usuario->fecha_de_salida = date("H:i:s - d/m/Y", strtotime($usuario->fecha_de_salida));
         }
 
-        return view("soporte.admin.revisor.estado_tecnicos", compact('usuarios'));
+        return view("soporte.admin.revisor.estado_tecnicos", compact('tecnicos'));
     }
 
     public function ver_resporte_soportes()
@@ -896,48 +897,48 @@ class TicketSoporteController extends Controller
         }
 
         $results = Ticket::selectRaw("COUNT(producto) as 'cantidad', producto")
-            ->join('usuarios', 'ticket_tienda.tecnicosid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'ticket_tienda.tecnicosid', '=', 'tecnicos.tecnicosid')
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->tecnicoid, function ($query, $tecnicoid) {
-                return $query->where('tecnicosid', $tecnicoid);
+                return $query->where('ticket_tienda.tecnicosid', $tecnicoid);
             })
             ->whereBetween("fecha_asignacion", [$desde, $hasta])
             ->groupBy('producto')
             ->get();
 
-        $ticketsPorTecnicos = Ticket::selectRaw("tecnicosid, COUNT(tecnicosid) as 'cantidad'")
-            ->join('usuarios', 'ticket_tienda.tecnicosid', '=', 'usuarios.usuariosid')
+        $ticketsPorTecnicos = Ticket::selectRaw("ticket_tienda.tecnicosid, COUNT(ticket_tienda.tecnicosid) as 'cantidad'")
+            ->join('tecnicos', 'ticket_tienda.tecnicosid', '=', 'tecnicos.tecnicosid')
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->tecnicoid, function ($query, $tecnicoid) {
-                return $query->where('tecnicosid', $tecnicoid);
+                return $query->where('ticket_tienda.tecnicosid', $tecnicoid);
             })
             ->whereBetween("fecha_asignacion", [$desde, $hasta])
             ->orderBy('cantidad', 'DESC')
-            ->groupBy('tecnicosid')->get();
+            ->groupBy('ticket_tienda.tecnicosid')->get();
 
         $ticketsPorEstado = Ticket::selectRaw("ticket_tienda.estado, COUNT(ticket_tienda.estado) as 'cantidad'")
-            ->join('usuarios', 'ticket_tienda.tecnicosid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'ticket_tienda.tecnicosid', '=', 'tecnicos.tecnicosid')
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->tecnicoid, function ($query, $tecnicoid) {
-                return $query->where('tecnicosid', $tecnicoid);
+                return $query->where('ticket_tienda.tecnicosid', $tecnicoid);
             })
             ->whereBetween("fecha_asignacion", [$desde, $hasta])
             ->groupBy('ticket_tienda.estado')
             ->get();
 
         $ticketsPorTiempo = Ticket::selectRaw("DATE_FORMAT(fecha_asignacion, '%Y-%m-%d %H') as 'fecha', COUNT(DATE_FORMAT(fecha_asignacion, '%Y-%m-%d %H')) as 'cantidad'")
-            ->join('usuarios', 'ticket_tienda.tecnicosid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'ticket_tienda.tecnicosid', '=', 'tecnicos.tecnicosid')
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->tecnicoid, function ($query, $tecnicoid) {
-                return $query->where('tecnicosid', $tecnicoid);
+                return $query->where('ticket_tienda.tecnicosid', $tecnicoid);
             })
             ->whereBetween("fecha_asignacion", [$desde, $hasta])
             ->groupByRaw("DATE_FORMAT(fecha_asignacion, '%Y-%m-%d %H')")
@@ -968,7 +969,7 @@ class TicketSoporteController extends Controller
         }
 
         foreach ($ticketsPorTecnicos as $key => $item) {
-            $tempUser = User::select('nombres')->firstWhere('usuariosid', $item->tecnicosid);
+            $tempUser = Tecnicos::select('nombres')->firstWhere('tecnicosid', $item->tecnicosid);
             if (!$tempUser) continue;
             array_push($data["tecnicos"]["labels"], strtoupper($tempUser->nombres));
             array_push($data["tecnicos"]["values"], $item->cantidad);
@@ -1011,13 +1012,13 @@ class TicketSoporteController extends Controller
     public function filtrado_reporte_calificaciones(Request $request)
     {
         $encuestas = $this->filtrado_base_query($request)
-            ->select('encuesta_soporte.pregunta_1', 'encuesta_soporte.pregunta_2', 'encuesta_soporte.comentario', 'ticket_tienda.ruc', 'ticket_tienda.razon_social', 'ticket_tienda.whatsapp', 'ticket_tienda.correo', 'usuarios.nombres as tecnico')
+            ->select('encuesta_soporte.pregunta_1', 'encuesta_soporte.pregunta_2', 'encuesta_soporte.comentario', 'ticket_tienda.ruc', 'ticket_tienda.razon_social', 'ticket_tienda.whatsapp', 'ticket_tienda.correo', 'tecnicos.nombres as tecnico')
             ->join('ticket_tienda', 'encuesta_soporte.ticketid', '=', 'ticket_tienda.ticketid')
             ->orderBy('comentario')
             ->get();
 
         $resultsPregunta1 = $this->filtrado_base_query($request)
-            ->selectRaw("pregunta_1 as 'puntaje' , C  11OUNT(pregunta_1) as 'total'")
+            ->selectRaw("pregunta_1 as 'puntaje' , COUNT(pregunta_1) as 'total'")
             ->groupBy('pregunta_1')->get();
 
         $resultsPregunta2 = $this->filtrado_base_query($request)
@@ -1065,15 +1066,15 @@ class TicketSoporteController extends Controller
             $hasta = date('Y-m-d H:i:s', $date2);
         }
 
-        return EncuestaSoporte::join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+        return EncuestaSoporte::join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
-            ->whereBetween("fecha_creacion", [$desde, $hasta])
+            ->whereBetween("encuesta_soporte.fecha_creacion", [$desde, $hasta])
             ->when($request->tecnicoid, function ($query, $tecnico) {
-                return $query->where('tecnicoid', $tecnico);
+                return $query->where('encuesta_soporte.tecnicoid', $tecnico);
             })
-            ->where('justificado', '=', 0);
+            ->where('encuesta_soporte.justificado', '=', 0);
     }
 
     public function procesarResultados($results)
@@ -1102,7 +1103,7 @@ class TicketSoporteController extends Controller
     private function calificaciones_por_tecnico(Request $request)
     {
         $resultadosPregunta1 = EncuestaSoporte::select(
-            'usuarios.nombres as tecnico',
+            'tecnicos.nombres as tecnico',
             DB::raw('SUM(CASE WHEN pregunta_1 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
             DB::raw('SUM(CASE WHEN pregunta_1 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
             DB::raw('SUM(CASE WHEN pregunta_1 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
@@ -1110,12 +1111,12 @@ class TicketSoporteController extends Controller
             DB::raw('SUM(CASE WHEN pregunta_1 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
             DB::raw('COUNT(pregunta_1) AS total_respuestas')
         )
-            ->join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->when($request->tecnicoid, function ($query, $tecnico) {
                 return $query->where('tecnicoid', $tecnico);
             })
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->fecha, function ($query, $fecha) {
                 $dates = explode(" / ", $fecha);
@@ -1127,11 +1128,11 @@ class TicketSoporteController extends Controller
                 $hasta = date('Y-m-d H:i:s', $date2);
                 return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
             })
-            ->groupBy('usuarios.nombres')
+            ->groupBy('tecnicos.nombres')
             ->get();
 
         $resultadosPregunta2 = EncuestaSoporte::select(
-            'usuarios.nombres as tecnico',
+            'tecnicos.nombres as tecnico',
             DB::raw('SUM(CASE WHEN pregunta_2 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
             DB::raw('SUM(CASE WHEN pregunta_2 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
             DB::raw('SUM(CASE WHEN pregunta_2 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
@@ -1139,12 +1140,12 @@ class TicketSoporteController extends Controller
             DB::raw('SUM(CASE WHEN pregunta_2 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
             DB::raw('COUNT(pregunta_2) AS total_respuestas')
         )
-            ->join('usuarios', 'encuesta_soporte.tecnicoid', '=', 'usuarios.usuariosid')
+            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
             ->when($request->tecnicoid, function ($query, $tecnico) {
                 return $query->where('tecnicoid', $tecnico);
             })
             ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('usuarios.distribuidoresid', $distribuidor);
+                return $query->where('tecnicos.distribuidoresid', $distribuidor);
             })
             ->when($request->fecha, function ($query, $fecha) {
                 $dates = explode(" / ", $fecha);
@@ -1156,7 +1157,7 @@ class TicketSoporteController extends Controller
                 $hasta = date('Y-m-d H:i:s', $date2);
                 return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
             })
-            ->groupBy('usuarios.nombres')
+            ->groupBy('tecnicos.nombres')
             ->get();
 
         $resultados = $resultadosPregunta1->concat($resultadosPregunta2)
@@ -1222,11 +1223,11 @@ class TicketSoporteController extends Controller
     public function filtro_listado_calificaciones(Request $request)
     {
         if ($request->ajax()) {
-            $encuestas = EncuestaSoporte::select('encuesta_soporte.*', 'ticket_tienda.razon_social', 'ticket_tienda.whatsapp', 'ticket_tienda.numero_ticket', 'ticket_tienda.correo', 'ticket_tienda.ruc', 'usuarios.nombres as nombre_tecnico')
+            $encuestas = EncuestaSoporte::select('encuesta_soporte.*', 'ticket_tienda.razon_social', 'ticket_tienda.whatsapp', 'ticket_tienda.numero_ticket', 'ticket_tienda.correo', 'ticket_tienda.ruc', 'tecnicos.nombres as nombre_tecnico')
                 ->join('ticket_tienda', 'ticket_tienda.ticketid', 'encuesta_soporte.ticketid')
-                ->join('usuarios', 'usuarios.usuariosid', 'encuesta_soporte.tecnicoid')
+                ->join('tecnicos', 'tecnicos.tecnicosid', 'encuesta_soporte.tecnicoid')
                 ->when($request->distribuidor, function ($query, $distribuidor) {
-                    return $query->where('usuarios.distribuidoresid', $distribuidor);
+                    return $query->where('tecnicos.distribuidoresid', $distribuidor);
                 })
                 ->when($request->tecnico, function ($query, $tecnico) {
                     return $query->where('tecnicoid', $tecnico);
@@ -1311,26 +1312,6 @@ class TicketSoporteController extends Controller
         }
     }
 
-    // TODO: funcion de pruebas
-    public function pruebas()
-    {
-        $encuestas = EncuestaSoporte::all();
-
-        $encuestas->forEach(function ($encuesta) {
-            $encuesta->estado_revision = 1;
-            $encuesta->save();
-        });
-
-        $encuestas->ftp_fget(1, "prueba.txt", "prueba.txt", FTP_ASCII);
-
-        // $encuests->
-
-        $encuestas->flatten();
-
-
-        return $encuestas;
-    }
-
     public function registrar_justificacion(EncuestaSoporte $encuesta, Request $request)
     {
         try {
@@ -1342,7 +1323,7 @@ class TicketSoporteController extends Controller
 
             if ($encuesta->save()) {
                 $log = new Log();
-                $log->usuario = Auth::user()->nombres;
+                $log->usuario = Auth::guard('tecnico')->user()->nombres;
                 $log->pantalla = "Calificacion";
                 $log->operacion = "Registrar justificacion";
                 $log->fecha = now();
@@ -1367,10 +1348,10 @@ class TicketSoporteController extends Controller
     public function filtro_listado_justificadas(Request $request)
     {
         if ($request->ajax()) {
-            $encuestas = EncuestaSoporte::select('encuesta_soporte.*', 'ticket_tienda.razon_social', 'ticket_tienda.numero_ticket', 'ticket_tienda.whatsapp', 'ticket_tienda.motivo', 'ticket_tienda.correo', 'ticket_tienda.ruc', 'usuarios.nombres as nombre_tecnico')
+            $encuestas = EncuestaSoporte::select('encuesta_soporte.*', 'ticket_tienda.razon_social', 'ticket_tienda.numero_ticket', 'ticket_tienda.whatsapp', 'ticket_tienda.motivo', 'ticket_tienda.correo', 'ticket_tienda.ruc', 'tecnicos.nombres as nombre_tecnico')
                 ->join('ticket_tienda', 'ticket_tienda.ticketid', 'encuesta_soporte.ticketid')
-                ->join('usuarios', 'usuarios.usuariosid', 'encuesta_soporte.tecnicoid')
-                ->where('usuarios.distribuidoresid', Auth::user()->distribuidoresid)
+                ->join('tecnicos', 'tecnicos.tecnicosid', 'encuesta_soporte.tecnicoid')
+                ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
                 ->whereNotNull('encuesta_soporte.comentario_revision')
                 ->where('justificado', $request->justificadas)
                 ->get();
@@ -1396,8 +1377,8 @@ class TicketSoporteController extends Controller
         if (!$ticket->tecnicosid) return;
 
         DB::beginTransaction();
-        $tecnico = UserSoporte::firstWhere('usuariosid', $ticket->tecnicosid);
-        $ticketsActivos = $this->obtener_numero_tickets_activos($tecnico->usuariosid);
+        $tecnico = Tecnicos::firstWhere('tecnicosid', $ticket->tecnicosid);
+        $ticketsActivos = $this->obtener_numero_tickets_activos($tecnico->tecnicosid);
 
         try {
             $numTickets = $ticketsActivos - 1;
@@ -1420,8 +1401,8 @@ class TicketSoporteController extends Controller
     {
         DB::beginTransaction();
         try {
-            $tecnico = UserSoporte::firstWhere('usuariosid', $tecnicosId);
-            $ticketsActivos = $this->obtener_numero_tickets_activos($tecnico->usuariosid);
+            $tecnico = Tecnicos::firstWhere('tecnicosid', $tecnicosId);
+            $ticketsActivos = $this->obtener_numero_tickets_activos($tecnico->tecnicosid);
 
             $numTickets = $ticketsActivos + 1;
             $tecnico->tickets_activos = $numTickets;
@@ -1436,8 +1417,8 @@ class TicketSoporteController extends Controller
     private function asignacion_tickets()
     {
         try {
-            $horaEntrada = env('HORA_ENTRADA') || "08:10";
-            $horaSalida = env('HORA_SALIDA') || "16:55";
+            $horaEntrada = env('HORA_ENTRADA') ?? "08:10";
+            $horaSalida = env('HORA_SALIDA') ?? "16:55";
 
             $current = date('G:i');
             $current = strtotime($current);
@@ -1446,7 +1427,7 @@ class TicketSoporteController extends Controller
 
             if (!($current >= $entrada && $current <= $salida)) return;
 
-            $tickets = Ticket::all()->where('tecnicosid', null);
+            $tickets = Ticket::whereNull('tecnicosid')->get();
 
             foreach ($tickets as $ticket) {
 
@@ -1468,17 +1449,18 @@ class TicketSoporteController extends Controller
                 if ($tecnicoLibre == null) continue;
 
 
-                $ticket->tecnicosid = $tecnicoLibre->usuariosid;
+                $ticket->tecnicosid = $tecnicoLibre->tecnicosid;
                 $ticket->fecha_asignacion = now();
 
                 if ($ticket->save()) {
-                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->usuariosid);
+                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->tecnicosid);
                     $tecnicoLibre->tickets_activos = $ticketsActivos;
                     $tecnicoLibre->save();
-                    $this->notificar_asignacion_ticket($tecnicoLibre->usuariosid, $ticket);
+                    $this->notificar_asignacion_ticket($tecnicoLibre->tecnicosid, $ticket);
                 }
             }
         } catch (\Throwable $th) {
+            dd($th);
         }
     }
 
@@ -1489,12 +1471,18 @@ class TicketSoporteController extends Controller
         $tecnicos = [];
 
         if ($producto == "pc") {
-            $tecnicos = UserSoporte::where('estado', 1)->where('distribuidor', $distribuidor)->where('productos', 'LIKE', '%' . $producto . '%')->get();
+            $tecnicos = Tecnicos::where('activo', 1)
+                ->where('distribuidoresid', $distribuidor)
+                ->where('productos', 'LIKE', '%' . $producto . '%')
+                ->get();
         } else {
-            $tecnicos = UserSoporte::where('estado', 1)->where('distribuidor', 2)->where('productos', 'LIKE', '%' . $producto . '%')->get();
+            $tecnicos = Tecnicos::where('activo', 1)
+                ->where('distribuidoresid', 2)
+                ->where('productos', 'LIKE', '%' . $producto . '%')
+                ->get();
         }
 
-        foreach ($tecnicos as $key => $tecnico) {
+        foreach ($tecnicos as $tecnico) {
             if ($tecnico->tickets_activos < $tecnico->tickets_maximos) {
                 if ($tecnico->tickets_activos < $maximoTickets) {
                     $maximoTickets = $tecnico->tickets_activos;
@@ -1542,8 +1530,7 @@ class TicketSoporteController extends Controller
         try {
             if (!$idTecnico) return false;
 
-            $tecnico = User::find($idTecnico);
-            $tecnicoSoporte = UserSoporte::firstWhere('usuariosid', $idTecnico);
+            $tecnico = Tecnicos::find($idTecnico);
 
             if (!$tecnico) return false;
 
@@ -1563,7 +1550,7 @@ class TicketSoporteController extends Controller
     {
         $numero = Ticket::selectRaw("COUNT(*) as 'total'")
             ->where('estado', '<=', 2)
-            ->where('tecnicosid', $idTecnico)
+            ->where('ticket_tienda.tecnicosid', $idTecnico)
             ->first();
 
         return intval($numero->total);
@@ -1592,27 +1579,10 @@ class TicketSoporteController extends Controller
         }
     }
 
-    private function obtener_producto_ticket($producto)
-    {
-        $producto = strtolower($producto);
-        switch ($producto) {
-            case 'facturito':
-                return 1;
-            case 'web':
-                return 2;
-            case 'pc':
-                return 3;
-            case 'contafacil':
-                return 4;
-            default:
-                return 5;
-        }
-    }
-
     private function obtener_tecnicos_distribuidor()
     {
-        $tecnicos = User::select('usuariosid', 'nombres', 'correo')
-            ->when(Auth::user()->distribuidoresid, function ($query, $distribuidor) {
+        $tecnicos = Tecnicos::select('tecnicosid', 'nombres', 'correo')
+            ->when(Auth::guard('tecnico')->user()->distribuidoresid, function ($query, $distribuidor) {
                 if ($distribuidor == 1) {
                     return $query->where('distribuidoresid', 1);
                 } else if ($distribuidor == 2) {
@@ -1630,8 +1600,8 @@ class TicketSoporteController extends Controller
 
     public function obtener_historial_tickets(string $ruc, string $numero_ticket = null)
     {
-        return Ticket::select('ticketid', 'numero_ticket', 'motivo', 'fecha_asignacion', 'usuarios.nombres as tecnico')
-            ->join('usuarios', 'usuarios.usuariosid', '=', 'ticket_tienda.tecnicosid')
+        return Ticket::select('ticketid', 'numero_ticket', 'motivo', 'fecha_asignacion', 'tecnicos.nombres as tecnico')
+            ->join('tecnicos', 'tecnicos.tecnicosid', '=', 'ticket_tienda.tecnicosid')
             ->where('ruc', $ruc)
             ->when($numero_ticket, function ($query, $numero_ticket) {
                 return $query->where('numero_ticket', '<>', $numero_ticket);
@@ -1642,7 +1612,7 @@ class TicketSoporteController extends Controller
 
     public function obtener_historial_implementaciones(string $ruc, int $current = null)
     {
-        return SoporteEspecial::select('soporteid', 'fecha_agendado', 'tipo', 'usuarios.nombres as tecnico')
+        return SoporteEspecial::select('soporteid', 'fecha_agendado', 'tipo', 'tecnicos.nombres as tecnico')
             ->selectRaw(
                 'CASE tipo
             WHEN 1 THEN "Demostración"
@@ -1650,7 +1620,7 @@ class TicketSoporteController extends Controller
             ELSE "LITE"
             END as tipo'
             )
-            ->join('usuarios', 'usuarios.usuariosid', '=', 'soportes_especiales.tecnicoid')
+            ->join('tecnicos', 'tecnicos.tecnicosid', '=', 'soportes_especiales.tecnicoid')
             ->where('ruc', $ruc)
             ->when($current, function ($query, $soporteid) {
                 return $query->where('soporteid', '<>', $soporteid);

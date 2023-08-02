@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\UserSoporte;
+use App\Models\Tecnicos;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,20 +25,21 @@ class SoporteController extends Controller
                 'clave.required' => 'Ingrese su contraseña',
             ],
         );
-        $identificacion = trim($request->identificacion) . '-SOP';
-        $usuario = User::where('identificacion', $identificacion)->where('estado', 1)->where('rol', '>=', '5')->first();
 
-        if (!$usuario) {
+        $identificacion = trim($request->identificacion);
+        $tecnico = Tecnicos::where('identificacion', $identificacion)->where('estado', 1)->first();
+
+        if (!$tecnico) {
             flash('Usuario Incorrecto o Usuario Inactivo')->error();
             return back();
         }
 
-        if ($usuario->clave !== $request->clave) {
+        if ($tecnico->clave !== $request->clave) {
             flash('Usuario o Contraseña Incorrectos')->error();
             return back();
         }
 
-        Auth::guard()->login($usuario, false);
+        Auth::guard('tecnico')->login($tecnico, false);
         $request->session()->regenerate();
 
         $estadoWhatsapp = new WhatsappController();
@@ -47,21 +47,31 @@ class SoporteController extends Controller
             flash("El servicio de WhatsAapp está desconectado")->important();
         }
 
-        if (Auth::user()->rol == 5) {
+        if (Auth::guard('tecnico')->user()->rol == 5) {
             $hora = strtotime(date('G:i'));
             $inicio = strtotime('08:00');
             $fin = strtotime('16:55');
             if ($hora >= $inicio && $hora <= $fin) {
-                UserSoporte::where('usuariosid', Auth::user()->usuariosid)->update(['estado' => 1, 'fecha_de_ingreso' => now()]);
+                $tecnico->fecha_de_ingreso = now();
+                $tecnico->activo = 1;
+                $tecnico->save();
             }
         }
 
         return $this->redirect_by_rol();
     }
 
+    public function logout_tecnico(Request $request){
+        Tecnicos::where('tecnicosid', Auth::guard('tecnico')->user()->tecnicosid)->update(['activo' => 0, 'fecha_de_salida' => now()]);
+        Auth::guard('tecnico')->logout();
+        return redirect()->route('soporte.auth.login');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    }
+
     public function redirect_by_rol()
     {
-        switch (Auth::user()->rol) {
+        switch (Auth::guard('tecnico')->user()->rol) {
             case 5:
                 return redirect()->route('soporte.listado.activos');
                 break;
@@ -77,6 +87,41 @@ class SoporteController extends Controller
             case 9:
                 return redirect()->route('especiales.listado_supervisor');
                 break;
+        }
+    }
+
+    public function clave(){
+        return view('soporte.auth.cambiarclave');
+    }
+
+    public function actualizar_clave(Request $request)
+    {
+        $request->validate(
+            [
+                'clave_confirmacion' => 'required',
+                'clave' => 'required',
+            ],
+            [
+                'clave.required' => 'Ingrese su contraseña',
+                'clave_confirmacion.required' => 'Ingrese la verificación de la contraseña ',
+            ],
+        );
+
+
+        if ($request->clave == $request->clave_confirmacion) {
+
+            $usuarios = Tecnicos::where('tecnicosid', Auth::guard('tecnico')->user()->tecnicosid)->first();
+
+            $usuarios->clave = $request->clave;
+            if ($usuarios->save()) {
+                flash('La contraseña se ha guardado correctamente')->success();
+            } else {
+                flash('Ocurrió un error, vuelva a intentarlo')->error();
+            }
+            return back();
+        } else {
+            flash('La verificación de la contraseña no coincide')->error();
+            return back();
         }
     }
 }

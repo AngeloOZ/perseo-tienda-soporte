@@ -4,8 +4,10 @@
     $disabled = 'disabled';
     $isVisible = false;
     $selected = 'pc';
+
+    $currentUser = Auth::guard('tecnico')->user();
     
-    if (Auth::user()->distribuidoresid == 2) {
+    if ($currentUser->distribuidoresid == 2) {
         $selected = '';
         $disabled = '';
         $isVisible = true;
@@ -49,17 +51,17 @@
                                                     <option value="" selected>Todos</option>
                                                 @endif
                                                 <option value="1"
-                                                    {{ Auth::user()->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
+                                                    {{ $currentUser->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
                                                 </option>
                                                 <option value="2"
-                                                    {{ Auth::user()->distribuidoresid == 2 ? 'selected' : '' }}>Perseo
+                                                    {{ $currentUser->distribuidoresid == 2 ? 'selected' : '' }}>Perseo
                                                     Matriz
                                                 </option>
                                                 <option value="3"
-                                                    {{ Auth::user()->distribuidoresid == 3 ? 'selected' : '' }}>Perseo Delta
+                                                    {{ $currentUser->distribuidoresid == 3 ? 'selected' : '' }}>Perseo Delta
                                                 </option>
                                                 <option value="4"
-                                                    {{ Auth::user()->distribuidoresid == 4 ? 'selected' : '' }}>Perseo Omega
+                                                    {{ $currentUser->distribuidoresid == 4 ? 'selected' : '' }}>Perseo Omega
                                                 </option>
                                                 <option value="5">OTROS</option>
                                             </select>
@@ -70,7 +72,7 @@
                                             <select class="form-control select2 datatable-input" id="filtroTecnicos">
                                                 <option value="" selected>Todos</option>
                                                 @foreach ($tecnicos as $tecnico)
-                                                    <option value="{{ $tecnico->usuariosid }}">{{ $tecnico->nombres }}
+                                                    <option value="{{ $tecnico->tecnicosid }}">{{ $tecnico->nombres }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -265,7 +267,7 @@
                 $("#filtroEstado").val('1');
                 $("#filtroAsignados").val('si');
                 $("#filtroFecha").val('');
-                $("#filtroDistribuidor").val('{{ Auth::user()->distribuidoresid }}');
+                $("#filtroDistribuidor").val('{{ $currentUser->distribuidoresid }}');
                 $("#filtroProducto").val('{{ $selected }}');
                 table.draw();
             });

@@ -47,7 +47,7 @@
                                             <select class="form-control select2 datatable-input" id="filtroTecnicos">
                                                 <option value="" selected>Todos</option>
                                                 @foreach ($tecnicos as $tecnico)
-                                                    <option value="{{ $tecnico->usuariosid }}">{{ $tecnico->nombres }}
+                                                    <option value="{{ $tecnico->tecnicosid }}">{{ $tecnico->nombres }}
                                                     </option>
                                                 @endforeach
                                             </select>

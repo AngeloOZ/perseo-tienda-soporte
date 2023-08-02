@@ -8,6 +8,7 @@ use App\Models\Log;
 use App\Models\Factura;
 use App\Models\Producto;
 use App\Models\SoporteEspecial;
+use App\Models\Tecnicos;
 use App\Models\User;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
@@ -28,7 +29,7 @@ class SoporteEspcialController extends Controller
     {
         if ($request->ajax()) {
             $data = SoporteEspecial::select('soporteid', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'tipo', 'plan')
-                ->where('tecnicoid', Auth::user()->usuariosid)
+                ->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid)
                 ->when($request->plan, function($query, $plan){
                     $query->where('plan', $plan);
                 })
@@ -122,14 +123,14 @@ class SoporteEspcialController extends Controller
             $this->notificar_asignacion($soporte->tecnicoid);
 
             $log = new Log();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
             $log->fecha = now();
             $log->detalle = $soporte;
             $log->save();
 
-            if (Auth::user()->rol == 7) {
+            if (Auth::guard('tecnico')->user()->rol == 7) {
                 return redirect()->route('soporte.revisor_listar_soporte_especial');
             }
             return redirect()->route('sop.listar_soporte_especial');
@@ -221,7 +222,7 @@ class SoporteEspcialController extends Controller
 
             $log = new Log();
             $soporteLog =  SoporteEspecial::find($soporte->soporteid);
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Actualizar";
             $log->fecha = now();
@@ -242,9 +243,9 @@ class SoporteEspcialController extends Controller
             $data = [];
             if ($soporte->actividades) {
                 $data = json_decode($soporte->actividades, true);
-                $data[] = ["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $request->contenido];
+                $data[] = ["fecha" => now(), "escritor" => Auth::guard('tecnico')->user()->nombres, "contenido" => $request->contenido];
             } else {
-                $data[] = ["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $request->contenido];
+                $data[] = ["fecha" => now(), "escritor" => Auth::guard('tecnico')->user()->nombres, "contenido" => $request->contenido];
             }
 
             $soporte->update(["actividades" => json_encode($data)]);
@@ -297,7 +298,7 @@ class SoporteEspcialController extends Controller
         }
 
         $contenido .= "</ul>";
-        $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $contenido]]);
+        $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::guard('tecnico')->user()->nombres, "contenido" => $contenido]]);
 
         try {
             $soporte->save();
@@ -308,7 +309,7 @@ class SoporteEspcialController extends Controller
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
 
             $log = new Log();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
             $log->fecha = now();
@@ -350,16 +351,16 @@ class SoporteEspcialController extends Controller
                     'soportes_especiales.whatsapp',
                     'soportes_especiales.tipo',
                     'soportes_especiales.tecnicoid',
-                    'usuarios.usuariosid',
-                    'usuarios.nombres',
-                    'usuarios.distribuidoresid',
+                    'tecnicos.tecnicosid',
+                    'tecnicos.nombres',
+                    'tecnicos.distribuidoresid',
                 )
-                    ->join('usuarios', 'usuarios.usuariosid', 'soportes_especiales.tecnicoid')
+                    ->join('tecnicos', 'tecnicos.tecnicosid', 'soportes_especiales.tecnicoid')
                     ->when($request->tecnico, function ($query, $tecnico) {
                         return $query->where('tecnicoid', $tecnico);
                     })
                     ->when($request->distribuidor, function ($query, $distribuidor) {
-                        return $query->where('usuarios.distribuidoresid', $distribuidor);
+                        return $query->where('tecnicos.distribuidoresid', $distribuidor);
                     })
                     ->when($request->estado, function ($query, $estado) {
                         return $query->where('soportes_especiales.estado', $estado);
@@ -428,11 +429,11 @@ class SoporteEspcialController extends Controller
             'soportes_especiales.tipo',
             'soportes_especiales.plan',
             'soportes_especiales.tecnicoid',
-            'usuarios.nombres',
-            'usuarios.distribuidoresid',
+            'tecnicos.nombres',
+            'tecnicos.distribuidoresid',
         )
-            ->join('usuarios', 'usuarios.usuariosid', 'soportes_especiales.tecnicoid')
-            ->where('usuarios.distribuidoresid', Auth::user()->distribuidoresid)
+            ->join('tecnicos', 'tecnicos.tecnicosid', 'soportes_especiales.tecnicoid')
+            ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
             ->when($request->tecnico, function ($query, $tecnico) {
                 return $query->where('tecnicoid', $tecnico);
             })
@@ -498,7 +499,7 @@ class SoporteEspcialController extends Controller
         try {
             if (!$idTecnico) return false;
 
-            $tecnico = User::find($idTecnico);
+            $tecnico = Tecnicos::find($idTecnico);
 
             if (!$tecnico) return false;
 
@@ -527,8 +528,7 @@ class SoporteEspcialController extends Controller
             $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
 
             $nombreRevisor = "Katherine Sarabia";
-            // $mailRevisor = "katherine.sarabia@perseo.ec";
-            $mailRevisor = "angello.ordonez@hotmail.com";
+            $mailRevisor = "katherine.sarabia@perseo.ec";
             // $mailRevisor = "desarrollo@perseo.ec";
 
             $array = [
@@ -552,7 +552,9 @@ class SoporteEspcialController extends Controller
     private function notificar_nuevo_estado($soporte, $estadoNum)
     {
         try {
-            $revisor = User::where('rol', 9)->first();
+            $revisor = Tecnicos::where('rol', 8)->first();
+
+            if(!$revisor) return false;
 
             $estado = "";
 
@@ -584,8 +586,8 @@ class SoporteEspcialController extends Controller
 
     private function obtener_tecnicos_distribuidor()
     {
-        $tecnicos = User::select('usuariosid', 'nombres', 'correo')
-            ->when(Auth::user()->distribuidoresid, function ($query, $distribuidor) {
+        $tecnicos = Tecnicos::select('tecnicosid', 'nombres', 'correo')
+            ->when(Auth::guard('tecnico')->user()->distribuidoresid, function ($query, $distribuidor) {
                 if ($distribuidor == 1) {
                     return $query->where('distribuidoresid', 1);
                 } else if ($distribuidor == 2) {
@@ -595,6 +597,7 @@ class SoporteEspcialController extends Controller
                 }
             })
             ->where('rol', 5)
+            ->where('estado', 1)
             ->get();
 
         return $tecnicos;

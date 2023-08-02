@@ -25,6 +25,8 @@ Route::prefix('dev')->group(function () {
         Route::get('/', function () {
             $user = Auth::guard('tecnico')->user();
 
+            dd($user);
+
             return "hola tecnico {$user->nombres}";
         })->name('tecnicos.index');
 

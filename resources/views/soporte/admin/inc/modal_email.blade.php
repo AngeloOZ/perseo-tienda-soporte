@@ -1,3 +1,6 @@
+@php
+    $currentUser = Auth::guard('tecnico')->user();
+@endphp
 <div class="modal fade" id="modalEmail" tabindex="-1" role="dialog" aria-labelledby="modalEmail" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -19,7 +22,7 @@
                                 </select>
                             </div>
 
-                            @if (Auth::user()->rol == 7 || Auth::user()->rol == 6)
+                            @if ($currentUser->rol == 7 || $currentUser->rol == 6)
                                 <div class="col-12 mb-3 col-md-3 mb-md-0">
                                     <label for="rolCliente">Técnico</label>
                                     <select class="form-control" id="rolTecnico">
@@ -30,7 +33,7 @@
                             @endif
 
 
-                            @if (Auth::user()->rol != 6)
+                            @if ($currentUser->rol != 6)
                                 <div class="col-12 mb-3 col-md-3 mb-md-0">
                                     <label for="rolDesarrollador">Desarrollador</label>
                                     <select class="form-control" id="rolDesarrollador">
@@ -43,7 +46,7 @@
                                 </div>
                             @endif
 
-                            @if (Auth::user()->rol == 5 || Auth::user()->rol == 6)
+                            @if ($currentUser->rol == 5 || $currentUser->rol == 6)
                                 <div class="col-12 mb-3 col-md-3 mb-md-0">
                                     <label for="rolSupervisor">Supervisor</label>
                                     <select class="form-control" id="rolSupervisor">

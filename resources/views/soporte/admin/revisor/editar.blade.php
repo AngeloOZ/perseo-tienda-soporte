@@ -106,8 +106,8 @@
                                                         {{ $ticket->estado >= 4 ? 'disabled' : '' }}>
                                                         <option value="">Sin asignar</option>
                                                         @foreach ($tecnicos as $tecnico)
-                                                            <option value="{{ $tecnico->usuariosid }}"
-                                                                {{ $tecnico->usuariosid == $ticket->tecnicosid ? 'selected' : '' }}>
+                                                            <option value="{{ $tecnico->tecnicosid }}"
+                                                                {{ $tecnico->tecnicosid == $ticket->tecnicosid ? 'selected' : '' }}>
                                                                 {{ $tecnico->nombres }}</option>
                                                         @endforeach
                                                     </select>
@@ -195,7 +195,7 @@
                 enviar_mail: sendMail
             };
 
-            if (sendMail && cliente == "" && tecnico == "" && supervisor == "") {
+            if (sendMail && cliente == "" && desarrollo == "" && tecnico == "") {
                 Swal.fire("Destinatarios no seleccionado", "No ha seleccionado a quien enviar el correo", "error");
                 return;
             }

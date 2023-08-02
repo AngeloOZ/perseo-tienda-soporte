@@ -2,7 +2,7 @@
     $disabled = 'disabled';
     $readOnly = 'readonly';
     
-    if (Auth::user()->rol === 7) {
+    if (Auth::guard('tecnico')->user()->rol === 7) {
         $disabled = '';
         $readOnly = '';
     }
@@ -93,7 +93,7 @@
         <select class="form-control select2 @error('estado') is-invalid @enderror" name="estado">
             @foreach ($estados as $estado)
                 <option value="{{ $estado->id }}" {{ $soporte->estado == $estado->id ? 'selected' : '' }}
-                    {{ !in_array(Auth::user()->rol, $estado->permisos) ? 'disabled' : '' }}>
+                    {{ !in_array(Auth::guard('tecnico')->user()->rol, $estado->permisos) ? 'disabled' : '' }}>
                     {{ $estado->nombre }}
                 </option>
             @endforeach

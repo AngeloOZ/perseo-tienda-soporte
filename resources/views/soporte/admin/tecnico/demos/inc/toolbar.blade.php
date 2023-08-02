@@ -1,4 +1,4 @@
-@switch(Auth::user()->rol)
+@switch(Auth::guard('tecnico')->user()->rol)
     @case(5)
         <a href="{{ route('sop.listar_soporte_especial') }}" class="btn btn-secondary btn-icon" data-toggle="tooltip"
             title="Volver"><i class="la la-long-arrow-left"></i></a>

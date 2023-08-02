@@ -1,6 +1,8 @@
 @php
     $horaSalida = env('HORA_SALIDA') || "16:55";
-    $user = App\Models\UserSoporte::firstWhere('usuariosid', Auth::user()->usuariosid);
+
+    $currentUser = Auth::guard('tecnico')->user();
+
     $hora = date('G:i');
     $hora1 = strtotime($hora);
     $hora2 = strtotime($horaSalida);
@@ -16,15 +18,15 @@
             <div class="d-flex flex-column">
                 <div>
                     <a href="#" class="font-weight-bold font-size-5 text-dark-75 ">
-                        {{ Auth::user()->nombres }}
+                        {{ $currentUser->nombres }}
                     </a>
                 </div>
 
                 <div class="navi mt-4">
-                    <small>{{ Auth::user()->correo }}</small>
+                    <small>{{ $currentUser->correo }}</small>
                 </div>
                 <div class="navi my-3">
-                    <small>{{ Auth::user()->telefono }}</small>
+                    <small>{{ $currentUser->telefono }}</small>
                 </div>
             </div>
 
@@ -36,33 +38,33 @@
         <div class="col-6">
             <form action="" method="POST">
                 @csrf
-                <a href="{{ route('logout_usuarios') }}"
+                <a href="{{ route('soporte.logout') }}"
                     class="btn btn-sm btn-light-primary font-weight-bolder py-2 my-2 px-5" onclick="">Cerrar
                     Sesion</a>
             </form>
         </div>
         <div class="col-6">
-            <a href="{{ route('usuarios.clave') }}">Cambiar Contraseña</a>
+            <a href="{{ route('soporte.clave') }}">Cambiar Contraseña</a>
         </div>
     </div>
-    @if ($user)
+    @if ($currentUser->rol == 5)
         <div class="separator separator-dashed my-1 mb-3"></div>
         <div class="d-flex justify-content-between px-5">
             <p class="d-flex align-items-center m-0" style="height: 30px">
                 <strong class="mr-3">Estado: </strong>
                 <i style="font-size: 10px" @class([
                     'fas fa-circle',
-                    'text-success' => $user->estado == 1,
-                    'text-danger' => $user->estado == 0,
+                    'text-success' => $currentUser->activo == 1,
+                    'text-danger' => $currentUser->activo == 0,
                 ])></i>
-                <span class="ml-1">{{ $user->estado == 1 ? 'Disponible' : 'Desconectado' }}</span>
+                <span class="ml-1">{{ $currentUser->activo == 1 ? 'Disponible' : 'Desconectado' }}</span>
             </p>
 
             @if ($showButton)
                 <a href="{{ route('soporte.cambiar.disponibilidad') }}" @class([
                     'btn btn-icon btn-circle btn-sm ml-8',
-                    'btn-success' => $user->estado == 0,
-                    'btn-danger' => $user->estado == 1,
+                    'btn-success' => $currentUser->activo == 0,
+                    'btn-danger' => $currentUser->activo == 1,
                 ])>
                     <i class="fas fa-power-off"></i>
                 </a>

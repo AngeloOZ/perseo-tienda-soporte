@@ -1,5 +1,5 @@
 @php
-    $userRol = Auth::user()->rol;
+    $userRol = Auth::guard('tecnico')->user()->rol;
 @endphp
 <div class="aside aside-left aside-fixed d-flex flex-column flex-row-auto aside" id="kt_aside">
     <div class="brand flex-column-auto " id="kt_brand">

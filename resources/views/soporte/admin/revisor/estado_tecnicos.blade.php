@@ -33,13 +33,13 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($usuarios as $key => $item)
+                                            @foreach ($tecnicos as $key => $item)
                                                 <tr>
                                                     <th>{{ $key + 1 }}</th>
                                                     <td>{{ $item->identificacion }}</td>
                                                     <td>{{ $item->nombres }}</td>
                                                     <td>
-                                                        @if ($item->estado == 1)
+                                                        @if ($item->activo == 1)
                                                             <span class="label label-inline label-success font-weight-bold">
                                                                 Conectado </span>
                                                         @else

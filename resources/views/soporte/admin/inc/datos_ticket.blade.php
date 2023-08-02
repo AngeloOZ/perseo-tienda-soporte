@@ -1,6 +1,7 @@
 @php
+    $currentUser = Auth::guard('tecnico')->user();
     $disabled = 'disabled';
-    if (Auth::user()->rol == 7 && Auth::user()->distribuidoresid == 2) {
+    if ($currentUser->rol == 7 && $currentUser->distribuidoresid == 2) {
         $disabled = '';
     }
 @endphp

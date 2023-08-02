@@ -1,8 +1,9 @@
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Reporte de calificaciones')
 @php
+    $currentUser = Auth::guard('tecnico')->user();
     $disabled = 'disabled';
-    if (Auth::user()->distribuidoresid == 2) {
+    if ($currentUser->distribuidoresid == 2) {
         $disabled = '';
     }
 @endphp
@@ -33,16 +34,16 @@
                                             <select class="form-control" id="filtroDistribuidor">
                                                 <option value="" selected>Todos</option>
                                                 <option value="1"
-                                                    {{ Auth::user()->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
+                                                    {{ $currentUser->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
                                                 </option>
                                                 <option value="2"
-                                                    {{ Auth::user()->distribuidoresid == 2 ? 'selected' : '' }}>Perseo
+                                                    {{ $currentUser->distribuidoresid == 2 ? 'selected' : '' }}>Perseo
                                                     Matriz</option>
                                                 <option value="3"
-                                                    {{ Auth::user()->distribuidoresid == 3 ? 'selected' : '' }}>Perseo Delta
+                                                    {{ $currentUser->distribuidoresid == 3 ? 'selected' : '' }}>Perseo Delta
                                                 </option>
                                                 <option value="4"
-                                                    {{ Auth::user()->distribuidoresid == 4 ? 'selected' : '' }}>Perseo Omega
+                                                    {{ $currentUser->distribuidoresid == 4 ? 'selected' : '' }}>Perseo Omega
                                                 </option>
                                             </select>
                                         </div>
@@ -53,7 +54,7 @@
                                             <select class="form-control select2" id="filtroTecnico">
                                                 <option value="" selected>Todos</option>
                                                 @foreach ($tecnicos as $tecnico)
-                                                    <option value="{{ $tecnico->usuariosid }}">
+                                                    <option value="{{ $tecnico->tecnicosid }}">
                                                         {{ $tecnico->nombres }}</option>
                                                 @endforeach
                                             </select>

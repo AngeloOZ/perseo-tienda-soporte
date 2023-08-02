@@ -101,20 +101,9 @@ class usuariosController extends Controller
 
     public function logout(Request $request)
     {
-        $rol = Auth::user()->rol;
-        if ($rol == 5) {
-            UserSoporte::where('usuariosid', Auth::user()->usuariosid)->update(['estado' => 0, 'fecha_de_salida' => now()]);
-        }
         Auth::logout();
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
-
-        if ($rol < 5) {
-            return redirect()->route('auth.login');
-        } else {
-            return redirect()->route('soporte.auth.login');
-        }
+        return redirect()->route('auth.login');
     }
 }
