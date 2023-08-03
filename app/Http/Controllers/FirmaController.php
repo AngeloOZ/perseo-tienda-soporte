@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\DB;
-use Laracasts\Flash\Flash;
 use ZipArchive;
 
 
@@ -973,5 +972,56 @@ class FirmaController extends Controller
     {
         $ciudad =  Ciudades::select('ciudad')->where('ciudadesid', str_pad($idCiudad, "4", "0", STR_PAD_LEFT))->first();
         return $ciudad["ciudad"];
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                  Funcion para consular y actualizar estado                 */
+    /* -------------------------------------------------------------------------- */
+
+    public static function consultarEstado(Firma $firma)
+    {
+        $vendedor = User::findOrFail($firma->usuariosid);
+
+        if ($vendedor->uanataca_key == null || $vendedor->uanataca_uuid == null) {
+            return false;
+        }
+
+        $tipo_solicitud = $firma->tipo_persona == 1 ? "PERSONA NATURAL" : "REPRESENTANTE LEGAL";
+        $identificacion = "";
+
+        if ($firma->tipo_persona == 1) {
+            $identificacion = substr($firma->identificacion, 0, 10);
+        } else {
+            $identificacion = $firma->ruc_empresa;
+        }
+
+        $body = [
+            "apikey" => $vendedor->uanataca_key,
+            "uid" => $vendedor->uanataca_uuid,
+            "numerodocumento" => $identificacion,
+            "tipo_solicitud" => $tipo_solicitud,
+        ];
+
+        $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false,])
+            ->withOptions(["verify" => false])
+            ->post(self::URL_API . "/v4/consultarEstado", $body)
+            ->json();
+
+        if ($resultado['result'] != true) {
+            return false;
+        }
+
+        $ultimaSolicitud = end($resultado["data"]["solicitudes"]);
+
+        if ($ultimaSolicitud["estado"] == "NUEVO") {
+            $firma->estado = 4;
+        } else if ($ultimaSolicitud["estado"] == "APROBADO") {
+            $firma->estado = 5;
+        } else if (str_contains($ultimaSolicitud["estado"], "EMITIDO")) {
+            $firma->estado = 5;
+        }
+
+        $firma->save();
+        return true;
     }
 }
