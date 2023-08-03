@@ -1060,24 +1060,15 @@ class FacturasController extends Controller
         try {
             $vendedor = User::find($factura->usuariosid);
 
-            // if ($vendedor->token == null) {
-            //     flash('Ud no esta autorizado para facturar')->warning();
-            //     return back();
-            // }
+            if ($vendedor->token == null) {
+                flash('Ud no esta autorizado para facturar')->warning();
+                return back();
+            }
 
             if ($factura->concepto == null) {
                 flash('El concepto de la factura es requerido')->warning();
                 return back();
             }
-
-            // TODO: init prueba
-
-            ComisionesController::registrar_comision($factura);
-            flash('Factura generada')->success();
-            return back();
-            die;
-
-            // TODO: end prueba
 
             $cliente = $this->crear_cliente($vendedor, $factura);
             $resp = $this->crear_factura($factura, $cliente["cliente"], $cliente["vendedor"]);
@@ -1103,10 +1094,10 @@ class FacturasController extends Controller
                     $log->fecha = now();
                     $log->detalle =  $facturas;
                     $log->save();
-                } finally {
-                    // TODO: Registrar Comision
-
                 }
+
+                $facturaAux =  Factura::where('facturaid', $factura->facturaid)->first();
+                ComisionesController::registrar_comision($facturaAux);
             } else {
                 flash('Hubo un error al generar la factura')->error();
             }
@@ -1149,10 +1140,12 @@ class FacturasController extends Controller
             ];
 
             $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8'])
-                ->withOptions(["verify" => false])
+                ->withOptions([
+                    "verify" => false,
+                    'timeout' => 5,
+                ])
                 ->post($vendedor->api . "/clientes_crear", $cliente)
                 ->json();
-
 
             $cliente = $resultado["clientes"][0];
 
@@ -1302,7 +1295,10 @@ class FacturasController extends Controller
         }
 
         $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8'])
-            ->withOptions(["verify" => false])
+            ->withOptions([
+                "verify" => false,
+                'timeout' => 5,
+            ])
             ->post($vendedor->api . "/facturas_crear", $factura2)
             ->json();
 
@@ -1344,7 +1340,9 @@ class FacturasController extends Controller
             ];
 
             $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8'])
-                ->withOptions(["verify" => false])
+                ->withOptions([
+                    "verify" => false,
+                ])
                 ->post($vendedor->api . "/facturas_autorizar", $solicitud)
                 ->json();
 
@@ -1405,5 +1403,4 @@ class FacturasController extends Controller
             flash("No se pudo enviar el correo de notificación")->warning();
         }
     }
-
 }
