@@ -41,7 +41,7 @@ class ActualizarEstadoFirma extends Command
     {
         $firmas = Firma::whereBetween('estado', [3, 4])
             ->whereNotNull('uanatacaid')
-            ->limit(350)
+            ->limit(100)
             ->get();
 
         foreach ($firmas as $key => $firma) {
