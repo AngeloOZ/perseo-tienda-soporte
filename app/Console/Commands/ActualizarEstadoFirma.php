@@ -39,7 +39,8 @@ class ActualizarEstadoFirma extends Command
      */
     public function handle()
     {
-        $firmas = Firma::whereBetween('estado', [3, 4])
+        $firmas = Firma::select('estado', 'ruc_empresa', 'tipo_persona', 'usuariosid', 'identificacion')
+            ->whereBetween('estado', [3, 4])
             ->whereNotNull('uanatacaid')
             ->limit(100)
             ->get();

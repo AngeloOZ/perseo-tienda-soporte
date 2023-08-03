@@ -978,7 +978,7 @@ class FirmaController extends Controller
     /*                  Funcion para consular y actualizar estado                 */
     /* -------------------------------------------------------------------------- */
 
-    public static function consultarEstado(Firma $firma)
+    public static function consultarEstado($firma)
     {
         $vendedor = User::findOrFail($firma->usuariosid);
 
@@ -1014,14 +1014,13 @@ class FirmaController extends Controller
         $ultimaSolicitud = end($resultado["data"]["solicitudes"]);
 
         if ($ultimaSolicitud["estado"] == "NUEVO") {
-            $firma->estado = 4;
+            Firma::updated(["estado" => 4]);
         } else if ($ultimaSolicitud["estado"] == "APROBADO") {
-            $firma->estado = 5;
+            Firma::updated(["estado" => 5]);
         } else if (str_contains($ultimaSolicitud["estado"], "EMITIDO")) {
-            $firma->estado = 5;
+            Firma::updated(["estado" => 5]);
         }
-
-        $firma->save();
+        
         return true;
     }
 }
