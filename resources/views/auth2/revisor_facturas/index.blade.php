@@ -20,7 +20,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="row mb-8">
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-2">
                                         <label>Estado:</label>
                                         <select class="form-control datatable-input" id="filtroEstadoPagado">
                                             <option value="" selected>Todos</option>
@@ -51,7 +51,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3 pt-8">
+                                    <div class="col-12 col-md-4 pt-8">
                                         <button class="btn btn-primary btn-primary--icon" id="kt_search">
                                             <span>
                                                 <i class="la la-search"></i>
@@ -64,6 +64,7 @@
                                                 <span>Reiniciar</span>
                                             </span>
                                         </button>
+                                        @include('auth.comisiones.inc.buttons')
                                     </div>
                                 </div>
 
@@ -187,6 +188,37 @@
                         className: "text-center"
                     },
                 ],
+                buttons: [{
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                ],
             });
 
             $('#kt_fecha').daterangepicker({
@@ -264,6 +296,27 @@
                     `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
                 );
             }
+
+            /* Botones para exportar datos */
+            $('#export_print').on('click', function(e) {
+                e.preventDefault();
+                table.button(0).trigger();
+            });
+
+            $('#export_copy').on('click', function(e) {
+                e.preventDefault();
+                table.button(1).trigger();
+            });
+
+            $('#export_excel').on('click', function(e) {
+                e.preventDefault();
+                table.button(2).trigger();
+            });
+
+            $('#export_csv').on('click', function(e) {
+                e.preventDefault();
+                table.button(3).trigger();
+            });
         });
 
         /* -------------------------------------------------------------------------- */
