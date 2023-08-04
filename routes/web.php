@@ -4,13 +4,10 @@ use App\Http\Controllers\adminController;
 use App\Http\Controllers\CiudadesController;
 use App\Http\Controllers\CobrosController;
 use App\Http\Controllers\ComisionesController;
-use App\Http\Controllers\CotizacionController;
 use App\Http\Controllers\CuponesController;
 use App\Http\Controllers\FacturasController;
 use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\ProductosController;
-use App\Http\Controllers\ProspectoController;
-use App\Http\Controllers\PruebaController;
 use App\Http\Controllers\usuariosController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,8 +57,6 @@ Route::post('/registrar/compra',  [FacturasController::class, 'registar_compra']
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
 Route::group(['middleware' => 'auth'], function () {
-
-    Route::get('/prueba-controller', [PruebaController::class, 'index']);
 
     Route::get('/logout', [usuariosController::class, 'logout'])->name('logout_usuarios');
 
@@ -160,30 +155,14 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/marcar-comision-pagado-soportes', [ComisionesController::class, 'marcar_pagado_soportes'])->name('comisiones.marcar_pagado.soportes');
     });
 
-    /* Rutas para cotizaciones */
-    Route::controller(CotizacionController::class)->prefix('cotizacion')->group(function () {
-        Route::get('/listado', 'index')->name('cotizacion.listado');
-        Route::post('/guardar', 'registrar_cotizacion')->name('cotizacion.guardar');
-    });
-
-    /* Rutas para prospectos */
-    Route::controller(ProspectoController::class)->prefix('prospecto')->group(function () {
-        Route::get('/listado', 'listar')->name('prospecto.listado');
-        Route::get('/comprobar/{identificacion}', 'comprobar')->name('prospecto.editar');
-        Route::get('/crear', 'crear')->name('prospecto.vista_crear');
-        Route::get('/editar/{prospecto}', 'editar')->name('prospecto.editar');
-        Route::post('/guardar', 'guardar')->name('prospecto.guardar');
-        Route::put('/actualizar/{prospecto}', 'actualizar')->name('prospecto.actualizar');
-        Route::delete('/eliminar/{prospecto}', 'eliminar')->name('prospecto.eliminar');
-    });
-
-
     /* Rutas anteriores */
     Route::get('/principal', function () {
         return view('auth.principal');
     });
 
     Route::get('/listado', [FirmaController::class, 'listado'])->name('firma.listado');
+    Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado'])->name('facturas.filtrado.listado');
+    
     Route::get('/clave', function () {
         return view('auth.cambiarclave');
     })->name('usuarios.clave');

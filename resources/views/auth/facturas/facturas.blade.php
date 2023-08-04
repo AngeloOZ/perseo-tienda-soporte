@@ -150,7 +150,6 @@
                         d.liberado = $("#filtroEstadoLiberado").val();
                         d.fecha = $("#filtroFecha").val();
                     },
-
                 },
                 columns: [{
                         data: 'facturaid',
