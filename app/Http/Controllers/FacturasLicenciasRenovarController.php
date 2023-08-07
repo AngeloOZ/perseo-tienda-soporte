@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Factura;
-use App\Models\Log;
 use App\Models\Producto;
 use App\Models\ProductoHomologado;
 use App\Models\ProductosLicenciadorRenovacion;
 use App\Models\User;
 use Error;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class FacturasLicenciasRenovarController extends Controller
@@ -21,10 +17,9 @@ class FacturasLicenciasRenovarController extends Controller
         $licencias = $this->obtener_licencias();
 
         return $licencias;
-
         if (count($licencias) == 0) return;
 
-        $facturadas = 1;
+        $facturadas = 0;
         foreach ($licencias as $licencia) {
             try {
                 $productos = $this->buscar_producto($licencia);
@@ -131,15 +126,12 @@ class FacturasLicenciasRenovarController extends Controller
         $dis = $this->homologar_distribuidor($distribuidor);
 
         return User::where([['distribuidoresid', $dis], ['rol', 1]])
-            ->where('nombres', 'default')
+            ->where('nombres', 'PREDETERMINADO')
             ->first();
     }
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
-        // TODO: Borrar la siguiente linea
-        return $this->obtener_vendedor_default($distribuidor);
-
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
