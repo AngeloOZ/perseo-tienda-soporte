@@ -15,15 +15,15 @@
                     </select>
                     <span class="text-danger d-none" id="mesajeEstado">Seleccione el estado del pago</span>
                 </div>
-
+                
                 <div class="form-group mt-2">
-                    <label for="textObsPago2">Obseración del pago vendedor</label>
+                    <label for="textObsPago2">Observación del pago vendedor</label>
                     <textarea class="form-control" disabled id="textObsPago2" style="resize: none" rows="2">{{ $factura->observacion_pago_vendedor }}</textarea>
                 </div>
 
                 <div class="form-group mt-2">
-                    <label for="textObsPago">Obseración del pago revisor</label>
-                    <textarea class="form-control" name="observacion_pago" id="textObsPago" style="resize: none" rows="3">{{ $factura->observacion_pago }}</textarea>
+                    <label for="textObsPago">Observación del pago</label>
+                    <textarea class="form-control" name="observacion_pago" id="textObsPago" style="resize: none" rows="4">{{ $factura->observacion_pago }}</textarea>
                 </div>
 
                 <div class="form-group mt-2">

@@ -37,7 +37,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-12 col-md-2">
+                                    <div class="col-12 col-md-3">
                                         <label>Estado:</label>
                                         <select class="form-control select" id="filtroEstado">
                                             <option value="" selected>Todos</option>
@@ -59,7 +59,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-4">
+                                    <div class="col-12 col-md-3">
                                         <div class="pt-8">
                                             <button class="btn btn-primary btn-primary--icon" id="kt_search">
                                                 <span>
@@ -73,7 +73,6 @@
                                                     <span>Reiniciar</span>
                                                 </span>
                                             </button>
-
                                             @include('auth.comisiones.inc.buttons')
                                         </div>
                                     </div>
@@ -130,37 +129,6 @@
                     [15, 25, 50, -1],
                     [15, 25, 50, 'Todos']
                 ],
-                buttons: [{
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'copyHtml5',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        exportOptions: {
-                            columns: ':not(.no-export)'
-                        }
-                    },
-                ],
                 //Registros por pagina
                 pageLength: 15,
                 //Orden inicial
@@ -185,7 +153,7 @@
                         data: 'firmasid',
                         name: 'firmasid',
                         searchable: false,
-                        visible: false,
+                        visible: false
                     },
                     {
                         data: 'tipo_persona',
@@ -226,6 +194,37 @@
                         orderable: false,
                         searchable: false,
                         className: "text-center"
+                    },
+                ],
+                buttons: [{
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        exportOptions: {
+                            columns: ':not(.no-export)'
+                        }
                     },
                 ],
             });
@@ -304,7 +303,7 @@
                     `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
                 );
             }
-
+            
             /* Botones para exportar datos */
             $('#export_print').on('click', function(e) {
                 e.preventDefault();
