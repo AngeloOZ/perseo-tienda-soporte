@@ -529,8 +529,8 @@ class SoporteEspcialController extends Controller
             $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
 
             $nombreRevisor = "Katherine Sarabia";
-            // $mailRevisor = "katherine.sarabia@perseo.ec";
-            $mailRevisor = "desarrollo@perseo.ec";
+            $mailRevisor = "katherine.sarabia@perseo.ec";
+            // $mailRevisor = "desarrollo@perseo.ec";
 
             $array = [
                 'from' => "noresponder@perseo.ec",
