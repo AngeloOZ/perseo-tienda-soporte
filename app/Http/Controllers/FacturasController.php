@@ -234,23 +234,23 @@ class FacturasController extends Controller
                     'productos.required' => 'La factura debe tener productos',
                 ],
             );
-
+            
             DB::beginTransaction();
             $cupon = null;
             if (isset($request->cupon_code)) {
                 CuponesController::validarCupones();
                 $cupon = Cupones::where('codigo', $request->cupon_code)->where('estado', '1')->first();
-
+    
                 if ($cupon == null) {
                     setcookie("cupon_code", "", time() - 3600, "/");
                     flash('El cupón que intentas usar ya ha expirado')->warning();
                     return redirect()->route('tienda', ['referido' => $request->referido]);
                 }
             }
-
+            
             $comproFirma = $request->redireccion;
             $comproFirma = ($comproFirma == "true") ? true : false;
-
+    
             $vendedor = User::findOrFail($request->referido);
             $factura = new Factura();
             $factura->identificacion = $request->identificacion;
@@ -265,18 +265,17 @@ class FacturasController extends Controller
             $factura->fecha_creacion = now();
             $factura->cuponid = $cupon != null ? $cupon->cuponid : null;
             $factura->distribuidoresid = $vendedor->distribuidoresid;
-
+    
             if (isset($request->id_transaccion) && isset($request->voucher)) {
-                $factura->estado_pago = 1;
-                $factura->observacion_pago_vendedor = "Pago realizado mediante tarjeta de credito/debito\nTipo: " . $request->nombre_tarjeta . "\nVaucher: " . $request->voucher . "\nNo de transaccion: " . $request->id_transaccion;
-
+                $factura->observacion_pago_vendedor = "Pago realizado mediante tarjeta de credito/debito\nTipo: ".$request->nombre_tarjeta."\nVaucher: ".$request->voucher."\nNo de transaccion: ".$request->id_transaccion;
+    
                 $factura->pago_tarjeta = json_encode([
                     "id_transaccion" => $request->id_transaccion,
                     "voucher" => $request->voucher,
                     "nombre_tarjeta" => $request->nombre_tarjeta,
                 ]);
             }
-
+    
             if (isset($request->comprobante_pago)) {
                 $temp = [];
                 foreach ($request->comprobante_pago as $file) {
@@ -284,13 +283,12 @@ class FacturasController extends Controller
                     $temp[$id] = base64_encode(file_get_contents($file->getRealPath()));
                 }
                 $factura->comprobante_pago = json_encode($temp);
-                $factura->estado_pago = 1;
             }
 
             if ($factura->save()) {
-
+                
                 $this->notificar_nueva_venta($factura);
-
+                
                 Cookie::forget('cxt');
                 Cookie::forget('cart_tienda');
                 Cookie::forget('cupon_code');
@@ -299,9 +297,9 @@ class FacturasController extends Controller
                     $cupon->save();
                     CuponesController::validarCupones();
                 }
-
+                
                 DB::commit();
-
+                
                 if ($comproFirma) {
                     flash('Compra registrada, complete los datos de la firma')->success();
                     return redirect()->route('inicio', ['id' => $request->referido]);
@@ -315,7 +313,7 @@ class FacturasController extends Controller
             }
         } catch (\Throwable $th) {
             DB::rollBack();
-            flash('Error 500, contacta con soporte ')->error();
+            flash('Error interno, por favor contacte con soporte: ' . $th->getMessage())->error();
             return redirect()->route('tienda', ['referido' => $request->referido]);
         }
     }
