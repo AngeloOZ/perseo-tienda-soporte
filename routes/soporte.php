@@ -95,8 +95,6 @@ Route::prefix('soporte')->group(function () {
         });
 
         Route::prefix('soporte-especial')->group(function () {
-            /* tienda */
-            Route::post('/registrar-capacitacion-ventas/{factura}', [SoporteEspcialController::class, 'registrar_capacitacion_ventas'])->name('soporte.registrar_capacitacion_ventas');
 
             /* tecnico */
             Route::get('/listado', [SoporteEspcialController::class, 'listar_soporte_especial'])->name('sop.listar_soporte_especial');

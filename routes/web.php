@@ -8,6 +8,7 @@ use App\Http\Controllers\CuponesController;
 use App\Http\Controllers\FacturasController;
 use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\ProductosController;
+use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
 use Illuminate\Support\Facades\Route;
 
@@ -74,6 +75,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('/cancelar-factura', [FacturasController::class, 'cancelar_factura'])->name('facturas.cancelar');
     Route::delete('/facturas/eliminar/{factura}', [FacturasController::class, 'eliminar'])->name('facturas.eliminar');
 
+    /* Crear capacitacion */
+    Route::post('/registrar-capacitacion-ventas/{factura}', [SoporteEspcialController::class, 'registrar_capacitacion_ventas'])->name('soporte.registrar_capacitacion_ventas');
+
     /* Rutas para liberar */
     Route::get('/facturas/liberar-productos/{factura}/{ruc?}', [FacturasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
     Route::post('/liberar-producto/{factura}', [FacturasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
@@ -87,7 +91,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/enviadas-correo', [FirmaController::class, 'listado_revisor_enviadas_correo'])->name('firma.revisor_correo');
         Route::post('/filtrado-listado-enviadas-correo', [FirmaController::class, 'filtrado_listado_revisor_enviadas_correo'])->name('firma.filtrado_revisor_correo');
-        
+
         Route::get('/editar-firma/{firma}', [FirmaController::class, 'editar_revisor'])->name('firma.revisor_editar');
     });
 
@@ -162,7 +166,7 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/listado', [FirmaController::class, 'listado'])->name('firma.listado');
     Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado'])->name('facturas.filtrado.listado');
-    
+
     Route::get('/clave', function () {
         return view('auth.cambiarclave');
     })->name('usuarios.clave');

@@ -132,6 +132,7 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
+        // TODO: Delete next line
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
