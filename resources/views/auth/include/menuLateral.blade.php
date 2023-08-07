@@ -78,15 +78,14 @@
                                 <span class="menu-text">Comisiones vendedores</span>
                             </a>
                         </li>
-                        @if (Auth::user()->usuariosid === 13)
-                            <li class="menu-item {{ areActiveRoutes(['comisiones.mi_listado']) }} "
-                                aria-haspopup="true">
-                                <a href="{{ route('comisiones.mi_listado') }}" class="menu-link">
-                                    <i class="menu-icon fas fa-file-invoice"></i>
-                                    <span class="menu-text">Mis comisiones</span>
-                                </a>
-                            </li>
-                        @endif
+                    @endif
+                    @if (Auth::user()->usuariosid === 12 || Auth::user()->usuariosid === 13)
+                        <li class="menu-item {{ areActiveRoutes(['comisiones.mi_listado']) }} " aria-haspopup="true">
+                            <a href="{{ route('comisiones.mi_listado') }}" class="menu-link">
+                                <i class="menu-icon fas fa-file-invoice"></i>
+                                <span class="menu-text">Mis comisiones</span>
+                            </a>
+                        </li>
                     @endif
                 @endif
                 @if (in_array(Auth::user()->rol, [2]))
