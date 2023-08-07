@@ -309,7 +309,7 @@ class SoporteEspcialController extends Controller
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
 
             $log = new Log();
-            $log->usuario = Auth::guard('tecnico')->user()->nombres;
+            $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
             $log->fecha = now();
