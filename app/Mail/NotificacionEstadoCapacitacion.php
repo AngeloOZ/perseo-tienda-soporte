@@ -31,7 +31,7 @@ class NotificacionEstadoCapacitacion extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->view('emails.notificacion_capacitacion')
+        return $this->view('emails.notificacion_estado_spe')
             ->from($this->array['from'], "Perseo Capacitaciones")
             ->subject($this->array['subject']);
     }
