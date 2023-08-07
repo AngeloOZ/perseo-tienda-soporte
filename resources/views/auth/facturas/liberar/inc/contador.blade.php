@@ -8,27 +8,27 @@
             <div class="modal-body">
                 <form id="formContador" action="#">
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Ruc Contador</label>
+                        <label for="tiempoRenovacion">Ruc Contador <small>Contador</small></label>
                         <input type="text" class="form-control" id="rucContador" value="{{ $factura->identificacion }}">
                     </div>
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Identificación cliente</label>
+                        <label for="tiempoRenovacion">Identificación <small>Cliente</small></label>
                         <input type="text" class="form-control" id="rucCliente" value="{{ $factura->identificacion }}">
                     </div>
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Nombres y Apellidos</label>
+                        <label for="tiempoRenovacion">Nombres y Apellidos <small>Cliente</small></label>
                         <input type="text" class="form-control" id="nombresCliente" value="{{ $factura->nombre }}">
                     </div>
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Dirección</label>
+                        <label for="tiempoRenovacion">Dirección <small>Cliente</small></label>
                         <input type="text" class="form-control" id="direccionCliente" value="{{ $factura->direccion }}">
                     </div>
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Teléfono</label>
+                        <label for="tiempoRenovacion">Teléfono <small>Cliente</small></label>
                         <input type="text" class="form-control" id="telefonoCliente" value="{{ $factura->telefono }}">
                     </div>
                     <div class="form-group m-2">
-                        <label for="tiempoRenovacion">Correo</label>
+                        <label for="tiempoRenovacion">Correo <small>Cliente</small></label>
                         <input type="text" class="form-control" id="correoCliente" value="{{ $factura->correo }}">
                     </div>
                     <div class="text-center mt-4">

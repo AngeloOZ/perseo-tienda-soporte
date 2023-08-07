@@ -49,7 +49,8 @@
                             {{-- Fin de tabs buttons --}}
                             {{-- Contenido TABS --}}
                             <div class="tab-content " id="myTabContent1">
-                                <div class="tab-pane fade show active" id="datosTab" role="tabpanel" aria-labelledby="datos-tab">
+                                <div class="tab-pane fade show active" id="datosTab" role="tabpanel"
+                                    aria-labelledby="datos-tab">
                                     <form class="form" action="{{ route('facturas.actualizar', $factura->facturaid) }}"
                                         id="formFactura" method="POST" enctype="multipart/form-data">
                                         @method('PUT')
@@ -86,7 +87,6 @@
         var comprobantePago = new KTImageInput('kt_image_1');
 
         let listaProductos = {{ Illuminate\Support\Js::from($factura->productos2) }}
-
         $(document).ready(function() {
             const btnSubmit = document.getElementById('buttonSave')
             const form = document.getElementById('formFactura');
@@ -135,9 +135,7 @@
                 const TR = document.createElement('TR');
                 TR.innerHTML = `
                 <td class="d-flex align-items-center ">
-                    <p class="text-dark ">
-                        ${item.descripcion}
-                    </p>
+                    <p class="text-dark ">${item.descripcion}</p>
                 </td>
                 <td class="text-right align-middle font-weight-bolder font-size-h5">${item.cantidad}</td>
                 <td class="text-right align-middle font-weight-bolder font-size-h5">$${item.precio.toFixed(2)}</td>
@@ -154,7 +152,7 @@
         }
 
         function calcularTotal() {
-            const subTotalText = document.getElementById('subTotal');
+             const subTotalText = document.getElementById('subTotal');
             const ivaText = document.getElementById('iva');
             const totalText = document.getElementById('total');
             const descuentoText = document.getElementById('descuento');
@@ -167,8 +165,6 @@
                 total2 = 0;
             listaProductos.forEach(item => {
                 subTotal += item.cantidad * item.precio;
-                // iva += item.cantidad * ((item.precio * 12) / 100).toFixed(2);
-                // total += item.cantidad * item.precioiva.toFixed(2)
             })
             if (subTotal > 0) {
                 descuento = (subTotal * descuentoValue) / 100;
@@ -176,7 +172,6 @@
 
                 iva = ((subTotal - descuento) * 12) / 100;
                 iva = parseFloat(iva.toFixed(3));
-
                 total = subTotal - descuento + iva;
             }
 
@@ -196,7 +191,7 @@
             })
             input.value = JSON.stringify($prod);
         }
-
+        
         function cancelar_factura() {
             const numeroNotaCredito = document.getElementById('numeroNotaCredito');
             const btnAnularFactura = document.getElementById('btnAnularFactura');
@@ -233,14 +228,14 @@
                     })
                 }
                 this.files.forEach(file => {
-                    if (!validar_peso(file)) {
+                    if(!validar_peso(file)){
                         this.value = ""
                         return
-                    }
+                    } 
                 })
             })
 
-            form_pagos.addEventListener('submit', function(event) {
+            form_pagos.addEventListener('submit', function(event){
                 event.preventDefault();
                 btnSubmit.setAttribute('disabled', 'true');
 
@@ -275,13 +270,13 @@
                 })
                 return false;
             }
-            return validarExtensionArchivo(file);
+           return validarExtensionArchivo(file);
         }
 
         function validarExtensionArchivo(file) {
             const extensionesValidas = ['jpg', 'jpeg', 'png', ];
 
-            const extension = file.name.split('.').pop();
+            const extension = file.name.toLowerCase().split('.').pop();
             if (!extensionesValidas.includes(extension)) {
                 Swal.fire({
                     title: "Tipo de archivo no válido",
@@ -293,7 +288,8 @@
             }
             return true;
         }
-
+        
+        
         /* -------------------------------------------------------------------------- */
         /*                      functiones para implementaciones                      */
         /* -------------------------------------------------------------------------- */
@@ -303,7 +299,7 @@
             $("#implementacion-modal").modal("show");
             $("#implementacion-link").attr("action", url);
         });
-
+        
         const formModalImplementacion = document.getElementById('implementacion-link');
 
         formModalImplementacion?.addEventListener('submit', function(event) {
@@ -314,14 +310,14 @@
         })
 
         function validateNumber(text) {
+
             if (text.value.length > 10) {
                 text.value = text.value.slice(0, 10);
             }
             if (text.value.length == 10) {
                 $('#btnSendNumber').removeAttr('disabled')
             }
-
-
         }
+        
     </script>
 @endsection
