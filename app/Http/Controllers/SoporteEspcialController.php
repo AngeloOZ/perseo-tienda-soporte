@@ -319,6 +319,7 @@ class SoporteEspcialController extends Controller
             flash("Capacitación registrada exitosamente")->success();
             return back();
         } catch (\Throwable $th) {
+            dd($th);
             flash("Hubo un error al registrar el soporte: " . $th->getMessage())->error();
             return back();
         }
@@ -528,8 +529,8 @@ class SoporteEspcialController extends Controller
             $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
 
             $nombreRevisor = "Katherine Sarabia";
-            $mailRevisor = "katherine.sarabia@perseo.ec";
-            // $mailRevisor = "desarrollo@perseo.ec";
+            // $mailRevisor = "katherine.sarabia@perseo.ec";
+            $mailRevisor = "desarrollo@perseo.ec";
 
             $array = [
                 'from' => "noresponder@perseo.ec",
@@ -545,6 +546,7 @@ class SoporteEspcialController extends Controller
 
             Mail::to($mailRevisor)->queue(new NotificacionCapacitacion($array));
         } catch (\Throwable $th) {
+            dd($th);
             flash("No se pudo enviar el correo de notificación")->error();
         }
     }
