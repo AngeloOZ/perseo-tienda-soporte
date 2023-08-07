@@ -30,7 +30,7 @@ class SoporteEspcialController extends Controller
         if ($request->ajax()) {
             $data = SoporteEspecial::select('soporteid', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'tipo', 'plan')
                 ->where('tecnicoid', Auth::guard('tecnico')->user()->tecnicosid)
-                ->when($request->plan, function($query, $plan){
+                ->when($request->plan, function ($query, $plan) {
                     $query->where('plan', $plan);
                 })
                 ->when($request->tipo, function ($query, $tipo) {
@@ -59,7 +59,7 @@ class SoporteEspcialController extends Controller
                 ->editColumn('tipo', function ($soporte) {
                     return $this->obtener_tipo_soporte($soporte->tipo);
                 })
-                ->editColumn('plan', function($soporte){
+                ->editColumn('plan', function ($soporte) {
                     return $this->obtener_plan_soporte($soporte->plan);
                 })
                 ->editColumn('acciones', function ($soporte) {
@@ -298,7 +298,7 @@ class SoporteEspcialController extends Controller
         }
 
         $contenido .= "</ul>";
-        $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::guard('tecnico')->user()->nombres, "contenido" => $contenido]]);
+        $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $contenido]]);
 
         try {
             $soporte->save();
@@ -554,7 +554,7 @@ class SoporteEspcialController extends Controller
         try {
             $revisor = Tecnicos::where('rol', 8)->first();
 
-            if(!$revisor) return false;
+            if (!$revisor) return false;
 
             $estado = "";
 
@@ -665,7 +665,8 @@ class SoporteEspcialController extends Controller
         }
     }
 
-    private function obtener_plan_soporte($plan){
+    private function obtener_plan_soporte($plan)
+    {
         switch ($plan) {
             case 1:
                 return "WEB";
