@@ -20,7 +20,7 @@
                             </div>
                             <div class="card-body">
                                 <div class="row mb-8">
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-2">
                                         <label>Estado:</label>
                                         <select class="form-control datatable-input" id="filtroEstadoFacturado">
                                             <option value="" selected>Todos</option>
@@ -52,7 +52,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3 pt-8">
+                                    <div class="col-12 col-md-4 pt-8">
                                         <button class="btn btn-primary btn-primary--icon" id="kt_search">
                                             <span>
                                                 <i class="la la-search"></i>
