@@ -234,25 +234,6 @@
             </div>
         </div>
     </div>
-    {{-- <div class="col-12 mt-2 col-lg-3 mt-lg-0">
-        <label for="">Estado del pago</label>
-        <div>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn por_pagar"
-                    @if ($firma->estado_pago == 0) style="border: 1px solid #f8f8ff; background-color: #babcc3" @else style="border: 1px solid #c8c8c8; background-color: #f8f8ff" @endif>
-                    <input type="radio" class="form-control" name="estado_pago" id="por_pagar" value="0"
-                        autocomplete="off">
-                    Por pagar
-                </label>
-                <label class="btn pagado"
-                    @if ($firma->estado_pago == 1) style="border: 1px solid #f8f8ff; ; background-color:#babcc3" @else style="border: 1px solid #c8c8c8; background-color: #f8f8ff" @endif>
-                    <input type="radio" class="form-control" name="estado_pago" id="pagado" value="1"
-                        autocomplete="off">
-                    Pagado
-                </label>
-            </div>
-        </div>
-    </div> --}}
 </div>
 
 <div class="form-group row">

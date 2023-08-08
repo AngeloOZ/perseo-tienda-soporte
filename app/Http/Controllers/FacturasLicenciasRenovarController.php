@@ -15,36 +15,29 @@ class FacturasLicenciasRenovarController extends Controller
     public static function generar_facturas_renovacion()
     {
         $instancia = new self();
-        // $licencias = $this->obtener_licencias();
+
         $licencias = $instancia->obtener_licencias();
 
-        return $licencias;
         if (count($licencias) == 0) return;
 
         $facturadas = 0;
         foreach ($licencias as $licencia) {
             try {
-                // $productos = $this->buscar_producto($licencia);
                 $productos = $instancia->buscar_producto($licencia);
-
-                // $vendedor = $this->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
                 $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
-
-
-                // $cliente = $this->crear_cliente($vendedor, $licencia);
                 $cliente = $instancia->crear_cliente($vendedor, $licencia);
                 $cliente->concepto = $licencia->concepto;
-
-                // $factura = $this->crear_factura($cliente, $vendedor, $productos);
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
-
-                $facturadas++;
-
-                // $autorizada = $this->autorizar_factura($factura, $vendedor);
                 $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
-                // TODO: enviar mensaje de whatsapp
-
+                WhatsappRenovacionesController::enviar_mensaje([
+                    "phone" => "0996921873",
+                    "caption" => "🎉 ¡Hola *{$licencia->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
+                    "filename" => "factura_{$factura->secuencia}.pdf",
+                    "filebase64" => "data:application/png;base64," . $autorizada->pdf,
+                    "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                ]);
+                $facturadas++;
             } catch (\Throwable $th) {
                 continue;
             }
@@ -54,7 +47,6 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_licencias()
     {
-        // TODO: BETA => solo distribuidor 1
         $url = "https://perseo.app/api/proximas_caducar/1";
 
         $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
@@ -62,9 +54,12 @@ class FacturasLicenciasRenovarController extends Controller
             ->post($url)
             ->json();
 
-        $arrayDeObjetos = Collection::make($resultado)->map(function ($item) {
-            return (object)$item;
-        })->toArray();
+        $arrayDeObjetos = Collection::make($resultado)
+            ->map(function ($item) {
+                return (object)$item;
+            })
+            // ->take(1)
+            ->toArray();
         return $arrayDeObjetos;
     }
 
@@ -145,7 +140,6 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
-        // TODO: Delete next line
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
@@ -348,6 +342,6 @@ class FacturasLicenciasRenovarController extends Controller
             throw new Error("No se autorizo la factura: " . $resultado["fault"]["faultstring"]);
         }
 
-        return $resultado;
+        return (object)$resultado;
     }
 }

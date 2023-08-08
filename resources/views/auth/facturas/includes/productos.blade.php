@@ -40,11 +40,7 @@
             @foreach ($factura->productos2 as $item)
                 <tr>
                     <td class="d-flex align-items-ritext-right ">
-                        <p class="text-dark ">{{ $item->descripcion }} 
-                            <button href="#" class="btn btn-icon btn-outline-success btn-circle btn-sm mr-4">
-                                <i class="la la-comment"></i>
-                            </button>
-                        </p>
+                        <p class="text-dark ">{{ $item->descripcion }}</p>
                     </td>
                     <td class="text-right align-middle font-weight-bolder font-size-h5">{{ $item->cantidad }}</td>
                     <td class="text-right align-middle font-weight-bolder font-size-h5">
