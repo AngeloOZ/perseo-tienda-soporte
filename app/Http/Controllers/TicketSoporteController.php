@@ -23,6 +23,16 @@ use Yajra\DataTables\Facades\DataTables;
 
 class TicketSoporteController extends Controller
 {
+    public function obtener_registro_actividades($id)
+    {
+        try {
+            $actividades = ActividadTicket::where('ticketid', $id)->get();
+            return response($actividades, 200)->header('Content-Type', 'application/json');
+        } catch (\Throwable $th) {
+            return response([], 200)->header('Content-Type', 'application/json');
+        }
+    }
+
     public function index($producto = "web", $distribuidorid = "6")
     {
         return view('soporte.ticket.index', ["producto" => $producto, "distribuidor" => $distribuidorid]);
@@ -835,12 +845,11 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket_revisor(Ticket $ticket)
     {
-        
+
         $desarrolladores = Tecnicos::where('rol', 6)->get();
         $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
-        $actividades = ActividadTicket::where('ticketid', $ticket->ticketid)->get();
-        
+
         $bind = [
             "ticket" => $ticket,
             "tecnicos" => $tecnicos,
@@ -848,9 +857,8 @@ class TicketSoporteController extends Controller
             "tecnicoAsignado" => $tecnicoAsignado,
             "historialTickets" => $this->obtener_historial_tickets($ticket->ruc, $ticket->numero_ticket),
             "historialCapacitaciones" => $this->obtener_historial_implementaciones($ticket->ruc),
-            "actividades" => $actividades,
         ];
-        
+
         return view("soporte.admin.revisor.editar", $bind);
     }
 

@@ -35,6 +35,8 @@ Route::prefix('soporte')->group(function () {
         Route::get('/editar-ticket/{ticket}', [TicketSoporteController::class, 'editar_ticket'])->name('soporte.editar');
         Route::put('/actualizar-ticket/{ticket}', [TicketSoporteController::class, 'actualizar_estado_ticket'])->name('soporte.actualizar_estado_ticket');
 
+        Route::get('obtener-registro-actividades/ticket/{id}', [TicketSoporteController::class, 'obtener_registro_actividades'])->name('soporte.obtener.actividades');
+
         Route::prefix('tecnico')->group(function () {
             Route::get('/listado-tickets-activos', [TicketSoporteController::class, 'listado_de_tickets_activos'])->name("soporte.listado.activos");
 
@@ -67,11 +69,10 @@ Route::prefix('soporte')->group(function () {
             Route::prefix('reportes')->group(function () {
                 Route::get('/tickets-tecnicos', [TicketSoporteController::class, 'ver_resporte_soportes'])->name('soporte.reporte_soporte');
                 Route::post('/tickets-tecnicos', [TicketSoporteController::class, 'filtrado_reporte_soporte'])->name('soporte.filtrado_reporte_soporte');
-    
+
                 Route::get('/calificaciones-tecnicos', [TicketSoporteController::class, 'ver_resporte_calificaciones'])->name('soporte.reporte_calificaicones');
                 Route::post('/calificaciones-tecnicos', [TicketSoporteController::class, 'filtrado_reporte_calificaciones'])->name('soporte.filtrado_reporte_calificaicones');
             });
-
         });
 
         Route::prefix('calificaciones')->group(function () {

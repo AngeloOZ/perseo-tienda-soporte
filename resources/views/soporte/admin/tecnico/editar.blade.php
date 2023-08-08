@@ -103,7 +103,8 @@
 
                                                 <div class="col-12 mb-3 col-md-6 mb-md-0">
                                                     <label>Actividad de la empresa</label>
-                                                    <input type="text" class="form-control" name="actividad_empresa" value="{{ $ticket->actividad_empresa }}" />
+                                                    <input type="text" class="form-control" name="actividad_empresa"
+                                                        value="{{ $ticket->actividad_empresa }}" />
                                                 </div>
                                             </div>
                                             @include('soporte.admin.inc.datos_ticket')
@@ -113,7 +114,7 @@
                                     <div class="tab-pane fade" id="archivos-1" role="tabpanel"
                                         aria-labelledby="archivos-tab-1">
                                         <div class="card-body">
-                                            @include('soporte.admin.inc.list_ticket')
+                                            @include('soporte.admin.registro-actividades.registro')
                                         </div>
                                     </div>
 
@@ -137,7 +138,6 @@
     @include('soporte.admin.inc.modal_email')
 @endsection
 @section('script')
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         var KTSummernoteDemo = function() {
             var demos = function() {
@@ -169,7 +169,6 @@
                 this.removeAttribute('disabled');
             });
         });
-
 
         function validateData() {
             if ($('#kt_summernote_1').val().length <= 5) {
@@ -241,4 +240,5 @@
             $("#rolSupervisor").val('');
         }
     </script>
+    @include('soporte.admin.registro-actividades.script')
 @endsection

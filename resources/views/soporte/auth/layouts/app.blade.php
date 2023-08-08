@@ -130,8 +130,8 @@
     <script src="{{ asset('assets/plugins/scripts.bundle.js') }}"></script>
     <script src="{{ asset('assets/plugins/custom/datatables.bundle.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        //Notificaciones
         @foreach (session('flash_notification', collect())->toArray() as $message)
             @if ($message['level'] == 'info')
                 Swal.fire({

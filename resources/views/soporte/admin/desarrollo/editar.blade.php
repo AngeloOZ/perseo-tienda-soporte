@@ -93,7 +93,7 @@
                                     <div class="tab-pane fade" id="archivos-1" role="tabpanel"
                                         aria-labelledby="archivos-tab-1">
                                         <div class="card-body">
-                                            @include('soporte.admin.inc.list_ticket')
+                                            @include('soporte.admin.registro-actividades.registro')
                                         </div>
                                     </div>
                                 </div>
@@ -109,7 +109,6 @@
     @include('soporte.admin.inc.modal_email')
 @endsection
 @section('script')
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         var KTSummernoteDemo = function() {
             var demos = function() {
@@ -213,4 +212,5 @@
             $("#rolSupervisor").val('');
         }
     </script>
+    @include('soporte.admin.registro-actividades.script')
 @endsection
