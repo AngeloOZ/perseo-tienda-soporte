@@ -38,8 +38,7 @@ class GenerarFacturaLicencias extends Command
      */
     public function handle()
     {
-        $renovador = new FacturasLicenciasRenovarController();
-        $numeroFacturas = $renovador->generar_facturas_renovacion();
+        $numeroFacturas = FacturasLicenciasRenovarController::generar_facturas_renovacion();
         return $numeroFacturas;
     }
 }

@@ -12,9 +12,11 @@ use Illuminate\Support\Facades\Http;
 
 class FacturasLicenciasRenovarController extends Controller
 {
-    public function generar_facturas_renovacion()
+    public static function generar_facturas_renovacion()
     {
-        $licencias = $this->obtener_licencias();
+        $instancia = new self();
+        // $licencias = $this->obtener_licencias();
+        $licencias = $instancia->obtener_licencias();
 
         return $licencias;
         if (count($licencias) == 0) return;
@@ -22,13 +24,24 @@ class FacturasLicenciasRenovarController extends Controller
         $facturadas = 0;
         foreach ($licencias as $licencia) {
             try {
-                $productos = $this->buscar_producto($licencia);
-                $vendedor = $this->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
-                $cliente = $this->crear_cliente($vendedor, $licencia);
+                // $productos = $this->buscar_producto($licencia);
+                $productos = $instancia->buscar_producto($licencia);
+
+                // $vendedor = $this->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
+                $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
+
+
+                // $cliente = $this->crear_cliente($vendedor, $licencia);
+                $cliente = $instancia->crear_cliente($vendedor, $licencia);
                 $cliente->concepto = $licencia->concepto;
-                $factura = $this->crear_factura($cliente, $vendedor, $productos);
+
+                // $factura = $this->crear_factura($cliente, $vendedor, $productos);
+                $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
+
                 $facturadas++;
-                $autorizada = $this->autorizar_factura($factura, $vendedor);
+
+                // $autorizada = $this->autorizar_factura($factura, $vendedor);
+                $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
                 // TODO: enviar mensaje de whatsapp
 
