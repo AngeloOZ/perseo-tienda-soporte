@@ -1460,7 +1460,6 @@ class TicketSoporteController extends Controller
 
                 if ($tecnicoLibre == null) continue;
 
-
                 $ticket->tecnicosid = $tecnicoLibre->tecnicosid;
                 $ticket->fecha_asignacion = now();
 
@@ -1472,7 +1471,7 @@ class TicketSoporteController extends Controller
                 }
             }
         } catch (\Throwable $th) {
-            dd($th);
+            // dd($th);
         }
     }
 
@@ -1483,13 +1482,13 @@ class TicketSoporteController extends Controller
         $tecnicos = [];
 
         if ($producto == "pc") {
-            $tecnicos = Tecnicos::where('activo', 1)
-                ->where('distribuidoresid', $distribuidor)
+            $tecnicos = Tecnicos::where('distribuidoresid', $distribuidor)
+                ->where([['activo', 1], ['rol', 5]])
                 ->where('productos', 'LIKE', '%' . $producto . '%')
                 ->get();
         } else {
-            $tecnicos = Tecnicos::where('activo', 1)
-                ->where('distribuidoresid', 2)
+            $tecnicos = Tecnicos::where('distribuidoresid', 2)
+                ->where([['activo', 1], ['rol', 5]])
                 ->where('productos', 'LIKE', '%' . $producto . '%')
                 ->get();
         }
