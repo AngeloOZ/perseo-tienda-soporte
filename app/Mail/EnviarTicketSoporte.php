@@ -33,6 +33,6 @@ class EnviarTicketSoporte extends Mailable implements ShouldQueue
         return $this->view('emails.ticket_soporte')
             ->from($this->array['from'], env('MAIL_FROM_NAME'))
             ->subject($this->array['subject'])
-            ->replyTo(Auth::user()->correo);
+            ->replyTo(Auth::guard('tecnico')->user()->correo);
     }
 }
