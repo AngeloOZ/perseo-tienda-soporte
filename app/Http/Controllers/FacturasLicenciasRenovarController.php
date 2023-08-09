@@ -32,7 +32,7 @@ class FacturasLicenciasRenovarController extends Controller
                 WhatsappRenovacionesController::enviar_archivo_mensaje([
                     // "phone" => "0996921873",
                     "phone" => $licencia->telefono2,
-                    "caption" => "🎉 ¡Hola *{$licencia->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
+                    "caption" => "🎉 ¡Hola *{$licencia->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
                     "filename" => "factura_{$factura->secuencia}.pdf",
                     "filebase64" => "data:application/png;base64," . $autorizada->pdf,
                     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
