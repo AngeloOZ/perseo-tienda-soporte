@@ -234,23 +234,23 @@ class FacturasController extends Controller
                     'productos.required' => 'La factura debe tener productos',
                 ],
             );
-            
+
             DB::beginTransaction();
             $cupon = null;
             if (isset($request->cupon_code)) {
                 CuponesController::validarCupones();
                 $cupon = Cupones::where('codigo', $request->cupon_code)->where('estado', '1')->first();
-    
+
                 if ($cupon == null) {
                     setcookie("cupon_code", "", time() - 3600, "/");
                     flash('El cupón que intentas usar ya ha expirado')->warning();
                     return redirect()->route('tienda', ['referido' => $request->referido]);
                 }
             }
-            
+
             $comproFirma = $request->redireccion;
             $comproFirma = ($comproFirma == "true") ? true : false;
-    
+
             $vendedor = User::findOrFail($request->referido);
             $factura = new Factura();
             $factura->identificacion = $request->identificacion;
@@ -265,17 +265,17 @@ class FacturasController extends Controller
             $factura->fecha_creacion = now();
             $factura->cuponid = $cupon != null ? $cupon->cuponid : null;
             $factura->distribuidoresid = $vendedor->distribuidoresid;
-    
+
             if (isset($request->id_transaccion) && isset($request->voucher)) {
-                $factura->observacion_pago_vendedor = "Pago realizado mediante tarjeta de credito/debito\nTipo: ".$request->nombre_tarjeta."\nVaucher: ".$request->voucher."\nNo de transaccion: ".$request->id_transaccion;
-    
+                $factura->observacion_pago_vendedor = "Pago realizado mediante tarjeta de credito/debito\nTipo: " . $request->nombre_tarjeta . "\nVaucher: " . $request->voucher . "\nNo de transaccion: " . $request->id_transaccion;
+
                 $factura->pago_tarjeta = json_encode([
                     "id_transaccion" => $request->id_transaccion,
                     "voucher" => $request->voucher,
                     "nombre_tarjeta" => $request->nombre_tarjeta,
                 ]);
             }
-    
+
             if (isset($request->comprobante_pago)) {
                 $temp = [];
                 foreach ($request->comprobante_pago as $file) {
@@ -286,9 +286,9 @@ class FacturasController extends Controller
             }
 
             if ($factura->save()) {
-                
+
                 $this->notificar_nueva_venta($factura);
-                
+
                 Cookie::forget('cxt');
                 Cookie::forget('cart_tienda');
                 Cookie::forget('cupon_code');
@@ -297,9 +297,9 @@ class FacturasController extends Controller
                     $cupon->save();
                     CuponesController::validarCupones();
                 }
-                
+
                 DB::commit();
-                
+
                 if ($comproFirma) {
                     flash('Compra registrada, complete los datos de la firma')->success();
                     return redirect()->route('inicio', ['id' => $request->referido]);
@@ -814,7 +814,6 @@ class FacturasController extends Controller
             if ($licencias != null) {
                 if ($licencias->liberar &&  $licencias->id_producto != 0) {
                     foreach ($productos_liberables as $producto) {
-
                         $productoAux = ProductosLicenciador::firstWhere('id_producto_local', $producto['producto_id']);
                         if ($productoAux->id_licenciador != $licencias->id_producto) {
                             $licencias->liberar = false;
@@ -886,7 +885,6 @@ class FacturasController extends Controller
     public function renovar_licencia(Factura $factura, Request $request)
     {
         try {
-
             $url = "https://perseo.app/api/renovar_web";
             $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
                 ->withOptions(["verify" => false])

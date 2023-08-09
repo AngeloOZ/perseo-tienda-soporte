@@ -9,26 +9,19 @@
 
 
     @if ($factura->liberado == 0 && Auth::user()->liberador == 1)
-        @if (!$contador->esContador)
-            @if ($licencias != null)
-                @if ($licencias->liberar == true)
-                    @if ($licencias->accion == 'nuevo')
-                        <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip"
-                            title="Liberar licencia" id="btnLiberar"><i class="la la-rocket"></i>
-                        </button>
-                    @elseif($licencias->accion == 'renovar')
-                        <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip"
-                            title="Renovar licencia" id="btnLiberar"><i class="la la-rocket"></i>
-                        </button>
-                    @endif
-                @endif
-            @else
-                <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip" title="Liberar licencia"
-                    id="btnLiberar"><i class="la la-rocket"></i>
+
+        @if ($licencias != null)
+            @if ($licencias->liberar == true)
+                <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip"
+                    title="{{ $licencias->accion == 'nuevo' ? 'Liberar' : 'Renovar' }} licencia" id="btnLiberar"><i
+                        class="la la-rocket"></i>
                 </button>
             @endif
+        @else
+            <button type="button" class="btn btn-success btn-icon modal-contador" data-toggle="tooltip"
+                title="Confirmar datos btn"><i class="la la-rocket"></i>
+            </button>
         @endif
-
 
         @if ($contador->esContador && $licencias != null)
             @if ($licencias->liberar == true && $licencias->accion == 'renovar')
@@ -37,14 +30,5 @@
                 </button>
             @endif
         @endif
-
-        @if ($contador->esContador && $licencias == null)
-            <button type="button" class="btn btn-primary btn-icon modal-contador" data-toggle="tooltip"
-                title="Confirmar datos"><i class="la la-address-card"></i>
-            </button>
-        @endif
     @endif
-
-
-
 </div>
