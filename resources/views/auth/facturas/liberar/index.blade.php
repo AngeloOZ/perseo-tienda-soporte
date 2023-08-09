@@ -80,8 +80,8 @@
                                         @csrf
                                         <div class="form-group row">
                                             <div class="col-4">
-                                                <label for="ruc">Ingrese un RUC para validar si posee
-                                                    renovación</label>
+                                                <label for="ruc">Ingrese un <strong>RUC</strong> en caso sea
+                                                    <strong>renovación</strong></label>
                                                 <input type="text" onkeypress="return validarNumero(event)"
                                                     maxlength="13" class="form-control" name="ruc" id="ruc"
                                                     value="{{ $ruc_renovacion }}">
@@ -121,9 +121,7 @@
     </div>
 @endsection
 @section('modal')
-    @if ($contador->esContador)
-        @include('auth.facturas.liberar.inc.contador')
-    @endif
+    @include('auth.facturas.liberar.inc.modal_liberar')
     @if ($licencias != null && $licencias->accion == 'renovar')
         @if ($licencias->facturito == true)
             @include('auth.facturas.liberar.inc.modal_facturito')
@@ -134,6 +132,8 @@
 @endsection
 @if ($factura->liberado == 0)
     @section('script')
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        
         <script>
             const formRenovacion = document.getElementById('formRenovacion');
             const mensajeCedula = document.getElementById('mensajeCedula');
@@ -150,7 +150,6 @@
                 location.href = url;
             })
         </script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
         @if ($contador->esContador)
             <script>
@@ -174,18 +173,17 @@
                         }
                     })
                 @endif
-
-
-                $(document).on('click', '.modal-contador', function(e) {
-                    e.preventDefault();
-                    $("#modal-contador").modal("show");
-                });
             </script>
         @endif
 
         {{-- Liberaciones de planes nuevos --}}
         @if ($licencias == null || ($licencias != null && $licencias->accion == 'nuevo'))
             <script>
+                $(document).on('click', '.modal-contador', function(e) {
+                    e.preventDefault();
+                    $("#modal-contador").modal("show");
+                });
+
                 const spiner = document.getElementById('spinnerLicenciador');
                 const btnLiberar = document.getElementById('btnLiberar');
                 const modalContador = document.getElementById('formContador');
@@ -213,7 +211,9 @@
                     solicitudLicencidador.cliente.direccion = this.direccionCliente.value;
                     solicitudLicencidador.cliente.correos = this.correoCliente.value;
                     solicitudLicencidador.cliente.telefono2 = this.telefonoCliente.value;
-                    solicitudLicencidador.cliente.contador = this.rucContador.value;
+                    if (this.rucContador) {
+                        solicitudLicencidador.cliente.contador = this.rucContador.value;
+                    }
                     $("#btnLiberar").click();
                 });
 
@@ -228,7 +228,6 @@
                 })
 
                 function peticionLiberarProducto(url) {
-
                     axios.post(url, {
                             _token: '{{ csrf_token() }}',
                             factura_id: "{{ $factura->facturaid }}",
@@ -251,7 +250,6 @@
                                     timer: 2500
                                 }).then(onCloseAlert)
                             }
-
                         })
                         .catch(error => {
                             console.error(error);
@@ -261,7 +259,6 @@
                                 title: "No se pudo liberar",
                                 text: mensaje,
                                 icon: "error",
-                                // timer: 2500
                             }).then(onCloseAlert)
                         })
                         .finally(() => {
