@@ -1458,7 +1458,7 @@ class TicketSoporteController extends Controller
                 $ticket->fecha_asignacion = now();
 
                 if ($ticket->save()) {
-                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->tecnicosid) + 1;
+                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->tecnicosid);
                     $tecnicoLibre->tickets_activos = $ticketsActivos;
                     $tecnicoLibre->save();
                     $this->notificar_asignacion_ticket($tecnicoLibre->tecnicosid, $ticket);
