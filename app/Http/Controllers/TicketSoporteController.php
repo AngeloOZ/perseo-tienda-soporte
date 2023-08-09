@@ -530,7 +530,6 @@ class TicketSoporteController extends Controller
 
     public function listado_de_tickets_desarrollo(Request $request)
     {
-        $this->asignacion_tickets();
         $tecnicos = $this->obtener_tecnicos_distribuidor();
         return view('soporte.admin.tecnico.desarrollo', compact('tecnicos'));
     }
@@ -576,7 +575,6 @@ class TicketSoporteController extends Controller
 
     public function listado_de_tickets_cerrados(Request $request)
     {
-        $this->asignacion_tickets();
         if ($request->ajax()) {
             $data = Ticket::select()->where([['tecnicosid', Auth::guard('tecnico')->user()->tecnicosid], ['estado', '>=', '4',]])->get();
 
@@ -695,7 +693,6 @@ class TicketSoporteController extends Controller
     /* -------------------------------------------------------------------------- */
     public function listado_de_tickets_desarrollo_revisor(Request $request)
     {
-        $this->asignacion_tickets();
         if ($request->ajax()) {
             $data = Ticket::select()->where([['estado', '3',]])->get();
 
@@ -825,7 +822,6 @@ class TicketSoporteController extends Controller
     public function eliminar_soporte_revisor(Ticket $ticket)
     {
         try {
-
             $log = new Log();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
@@ -1227,7 +1223,6 @@ class TicketSoporteController extends Controller
     /* -------------------------------------------------------------------------- */
     public function listado_calificaciones(Request $request)
     {
-        $this->asignacion_tickets();
         $tecnicos = $this->obtener_tecnicos_distribuidor();
         return view('soporte.admin.calificaciones.index', ['tecnicos' => $tecnicos]);
     }
@@ -1408,7 +1403,6 @@ class TicketSoporteController extends Controller
         }
     }
 
-
     private function asignar_tecnico_manual(int $tecnicosId)
     {
         DB::beginTransaction();
@@ -1464,7 +1458,7 @@ class TicketSoporteController extends Controller
                 $ticket->fecha_asignacion = now();
 
                 if ($ticket->save()) {
-                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->tecnicosid);
+                    $ticketsActivos = $this->obtener_numero_tickets_activos($tecnicoLibre->tecnicosid) + 1;
                     $tecnicoLibre->tickets_activos = $ticketsActivos;
                     $tecnicoLibre->save();
                     $this->notificar_asignacion_ticket($tecnicoLibre->tecnicosid, $ticket);
