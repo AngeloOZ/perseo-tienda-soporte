@@ -79,9 +79,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/registrar-capacitacion-ventas/{factura}', [SoporteEspcialController::class, 'registrar_capacitacion_ventas'])->name('soporte.registrar_capacitacion_ventas');
 
     /* Rutas para liberar */
+
     Route::get('/facturas/liberar-productos/{factura}/{ruc?}', [FacturasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
     Route::post('/liberar-producto/{factura}', [FacturasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
     Route::post('/renovar-licencia-producto/{factura}', [FacturasController::class, 'renovar_licencia'])->name("facturas.renovar_licencia_producto");
+    Route::put('/reactivar-liberacion/{factura}', [FacturasController::class, 'reactivar_liberacion'])->name('facturas.reactivar_liberacion');
 
 
     /* Rutas para admin firmas (Steban)*/
