@@ -16,8 +16,8 @@ class WhatsappRenovacionesController extends Controller
     {
         switch ($das) {
             case 1:
-                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa";
-                $this->bearToken = '$2b$10$xfdweVAim.6SSIYfR3ZQw.ZYjqgxA04SZVIqjtULfPJvPqxqe.Doq';
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
+                $this->bearToken = '$2b$10$cP6GXhvUy_IVSEyFP47ZB.OROcbKWR5JdU9bCQT3c3alazASDtrtO';
                 break;
                 // case 2:
                 //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporte";
@@ -33,7 +33,6 @@ class WhatsappRenovacionesController extends Controller
                 //     break;
         }
     }
-
 
     public static function enviar_mensaje($data)
     {
