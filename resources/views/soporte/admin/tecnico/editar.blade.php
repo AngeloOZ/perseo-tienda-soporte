@@ -188,7 +188,7 @@
                 enviar_mail: sendMail,
             };
 
-            if (sendMail && cliente == "" && tecnico == "" && supervisor == "") {
+            if (sendMail && cliente == "" && supervisor == "") {
                 Swal.fire("Destinatarios no seleccionado", "No ha seleccionado a quien enviar el correo", "error");
                 return;
             }
