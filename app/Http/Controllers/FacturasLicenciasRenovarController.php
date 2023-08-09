@@ -38,6 +38,7 @@ class FacturasLicenciasRenovarController extends Controller
                 ]);
                 $facturadas++;
             } catch (\Throwable $th) {
+                echo $th->getMessage() . "\n";
                 continue;
             }
         }
