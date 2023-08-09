@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command("actualizar-estado-firma:run")->hourly();
-        $schedule->command("renovar:factura_licencias")->dailyAt('12:00');
+        $schedule->command("renovar:factura_licencias")->dailyAt('8:30');
     }
 
     /**
