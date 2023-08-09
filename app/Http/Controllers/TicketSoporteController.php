@@ -309,6 +309,7 @@ class TicketSoporteController extends Controller
 
             return response(["status" => 200, "message" => "correo o nota registrado"], 200)->header('Content-Type', 'application/json');
         } catch (\Throwable $th) {
+            dd($th);
             return response(["status" => 500, "message" => $th->getMessage()], 500)->header('Content-Type', 'application/json');
         }
     }
