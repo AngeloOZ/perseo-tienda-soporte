@@ -6,7 +6,7 @@
             name="tecnico">
             <option value="" disabled selected>Seleccionar tecnico</option>
             @foreach ($tecnicos as $item)
-                <option value="{{ $item->usuariosid }}">{{ $item->nombres }}</option>
+                <option value="{{ $item->tecnicosid }}">{{ $item->nombres }}</option>
             @endforeach
         </select>
         @error('tecnico')
