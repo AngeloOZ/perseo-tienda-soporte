@@ -23,9 +23,18 @@ class usuariosController extends Controller
         return view('firma.facturacion', ["user" => $user]);
     }
 
+    public function redirect_login()
+    {
+        return redirect()->route('auth.login');
+    }
+
+    public function vista_login()
+    {
+        return view('auth.login');
+    }
+
     public function login(Request $request)
     {
-
         $request->validate(
             [
                 'identificacion' => 'required',
@@ -36,7 +45,7 @@ class usuariosController extends Controller
                 'clave.required' => 'Ingrese su contraseña',
             ],
         );
-        
+
         $identificacionIngresada = $request->identificacion;
         $usuarios = User::where('identificacion', $identificacionIngresada)->where('estado', 1)->first();
 
@@ -66,6 +75,11 @@ class usuariosController extends Controller
             flash('Usuario Incorrecto o Usuario Inactivo')->error();
             return back();
         }
+    }
+
+    public function cambiar_clave()
+    {
+        return view('auth.cambiarclave');
     }
 
     public function clave(Request $request)

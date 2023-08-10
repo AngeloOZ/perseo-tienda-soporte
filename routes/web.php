@@ -23,26 +23,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return redirect()->route('auth.login');
-});
-
-Route::get('/login', function () {
-    return view('auth.login');
-})->name('auth.login');
-
-Route::get("/fuera-de-servicio", function () {
-    return view("errors.fuera_servicio");
-});
-
 Route::get('/referido/{id}', [usuariosController::class, 'validarVendedor'])->name('inicio');
-
 Route::get('/facturacion/{id}', [usuariosController::class, 'datosFacturacion'])->name('inicio.facturacion');
-
 Route::get('/estado-solicitud/{id}', [FirmaController::class, 'rastrearProceso'])->name('firma.estadosolicitud');
-
 Route::get('/status/{cedula}', [FirmaController::class, 'validarProceso'])->name('validarestado');
-
 
 Route::post('/ciudades', [CiudadesController::class, 'recuperarciudades'])->name('firma.recuperarciudades');
 Route::post('/datos', [FirmaController::class, 'recuperardatos'])->name('firma.index');
@@ -55,39 +39,44 @@ Route::get('/{referido}/tienda/resumen', [FacturasController::class, 'resumen_co
 Route::get('/{referido}/tienda/finalizar-compra/{pago?}', [FacturasController::class, 'finalizar_compra'])->name('tienda.finalizar_compra');
 Route::post('/registrar/compra',  [FacturasController::class, 'registar_compra'])->name('tienda.guardarcompra');
 
+Route::get('/', [usuariosController::class, 'redirect_login']);
+Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.login');
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
 Route::group(['middleware' => 'auth'], function () {
 
-    Route::get('/logout', [usuariosController::class, 'logout'])->name('logout_usuarios');
+    /* Rutas para seccion facturas */
+    Route::prefix('factura')->group(function () {
+        Route::get('/descargar/{id_factura}/{id_comprobante}', [FacturasController::class, 'descargar_comprobante'])->name("factura.descargar_comprobante");
 
-    Route::get('/factura/{id_factura}/{id_comprobante}', [FacturasController::class, 'descargar_comprobante'])->name("factura.descargar_comprobante");
-    Route::get('/generar-factura/{factura}', [FacturasController::class, 'generar_factura'])->name('factura.generar');
-    Route::get('/autorizar-factura/{factura}', [FacturasController::class, 'autorizar_factura'])->name('factura.autorizar');
-    Route::get('/ver-factura/{factura}', [FacturasController::class, 'visualizar_factura'])->name('factura.visualizar');
+        Route::get('/generar/{factura}', [FacturasController::class, 'generar_factura'])->name('factura.generar');
+        Route::get('/autorizar/{factura}', [FacturasController::class, 'autorizar_factura'])->name('factura.autorizar');
+        Route::get('/visualizar/{factura}', [FacturasController::class, 'visualizar_factura'])->name('factura.visualizar');
+        Route::get('/listado', [FacturasController::class, 'listado'])->name('facturas.listado');
+        Route::post('/filtrado-listado', [FacturasController::class, 'filtrado_listado'])->name('facturas.filtrado_listado');
 
-    Route::get('/facturas', [FacturasController::class, 'listado'])->name('facturas.listado');
-    Route::post('/facturas/filtrado-listado', [FacturasController::class, 'filtrado_listado'])->name('facturas.filtrado_listado');
+        Route::get('/editar/{factura}', [FacturasController::class, 'editar'])->name('facturas.editar');
+        Route::put('/actualizar/{factura}', [FacturasController::class, 'actualizar'])->name('facturas.actualizar');
+        Route::put('/subir-pago/{factura}', [FacturasController::class, 'subir_comprobantes'])->name('facturas.subir_comprobantes');
+        Route::put('/cancelar', [FacturasController::class, 'cancelar_factura'])->name('facturas.cancelar');
+        Route::delete('/eliminar/{factura}', [FacturasController::class, 'eliminar'])->name('facturas.eliminar');
 
-    Route::get('/facturas/editar/{factura}', [FacturasController::class, 'editar'])->name('facturas.editar');
-    Route::put('/facturas/subir-pago/{factura}', [FacturasController::class, 'subir_comprobantes'])->name('facturas.subir_comprobantes');
-    Route::put('/facturas/actualizar/{factura}', [FacturasController::class, 'actualizar'])->name('facturas.actualizar');
-    Route::put('/cancelar-factura', [FacturasController::class, 'cancelar_factura'])->name('facturas.cancelar');
-    Route::delete('/facturas/eliminar/{factura}', [FacturasController::class, 'eliminar'])->name('facturas.eliminar');
+        Route::post('/registrar-capacitacion/{factura}', [SoporteEspcialController::class, 'registrar_capacitacion_ventas'])->name('soporte.registrar_capacitacion_ventas');
+    });
 
-    /* Crear capacitacion */
-    Route::post('/registrar-capacitacion-ventas/{factura}', [SoporteEspcialController::class, 'registrar_capacitacion_ventas'])->name('soporte.registrar_capacitacion_ventas');
+    /* Rutas para liberar licencias */
+    Route::prefix('factura/liberar')->group(function () {
+        Route::post('/producto/{factura}', [FacturasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
 
-    /* Rutas para liberar */
+        Route::get('/productos/{factura}/{ruc?}', [FacturasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
 
-    Route::get('/facturas/liberar-productos/{factura}/{ruc?}', [FacturasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
-    Route::post('/liberar-producto/{factura}', [FacturasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
-    Route::post('/renovar-licencia-producto/{factura}', [FacturasController::class, 'renovar_licencia'])->name("facturas.renovar_licencia_producto");
-    Route::put('/reactivar-liberacion/{factura}', [FacturasController::class, 'reactivar_liberacion'])->name('facturas.reactivar_liberacion');
+        Route::post('/renovar-producto/{factura}', [FacturasController::class, 'renovar_licencia'])->name("facturas.renovar_licencia_producto");
 
+        Route::put('/reactivacion/{factura}', [FacturasController::class, 'reactivar_liberacion'])->name('facturas.reactivar_liberacion');
+    });
 
     /* Rutas para admin firmas (Steban)*/
-    Route::group(['prefix' => 'revisor-firmas'], function () {
+    Route::prefix('revisor-firmas')->group(function () {
         Route::get('/', [FirmaController::class, 'listado_revisor'])->name('firma.revisor');
         Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado_revisor'])->name('firma.filtrado_revisor');
 
@@ -98,13 +87,15 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     /* Rutas para admin facturas (Joyce) */
-    Route::get('/listado-facturados', [FacturasController::class, 'listado_revisor'])->name("facturas.revisor");
-    Route::post('/facturas/filtrado-facturados', [FacturasController::class, 'filtrado_listado_revisor'])->name("facturas.filtrado_revisor");
+    Route::prefix('revisor-facturas')->group(function () {
+        Route::get('/', [FacturasController::class, 'listado_revisor'])->name('facturas.revisor');
+        Route::post('/filtrado-listado', [FacturasController::class, 'filtrado_listado_revisor'])->name('facturas.filtrado_revisor');
 
-    Route::get('/revisor-editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name("facturas.revisor_editar");
-    Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name("facturas.liberar_producto_manual");
+        Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
+        Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name('facturas.liberar_producto_manual');
+    });
 
-    // Rutas para productos admin
+    /* Rutas para productos admin */
     Route::prefix('productos')->group(function () {
         Route::get('/listado-admin', [ProductosController::class, 'listado'])->name('productos.listado');
         Route::post('/filtro-listado-admin', [ProductosController::class, 'listado_ajax'])->name('productos.listado.ajax');
@@ -114,7 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/resetear-precios-defecto', [ProductosController::class, 'resetear_precios'])->name('productos.resetear_precios');
     });
 
-    // Rutas para cupones 
+    /* Rutas para cupones */
     Route::prefix('cupones')->group(function () {
         Route::get('/listado', [CuponesController::class, 'listado'])->name('cupones.listado');
         Route::post('/filtrado-listado', [CuponesController::class, 'listado_ajax'])->name('cupones.listado.ajax');
@@ -161,24 +152,25 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('/marcar-comision-pagado-soportes', [ComisionesController::class, 'marcar_pagado_soportes'])->name('comisiones.marcar_pagado.soportes');
     });
 
-    /* Rutas anteriores */
-    Route::get('/principal', function () {
-        return view('auth.principal');
+    /* Rutas para firmas */
+    Route::prefix('firma')->group(function () {
+        Route::get('/listado', [FirmaController::class, 'listado'])->name('firma.listado');
+        Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado'])->name('facturas.filtrado.listado');
+
+        Route::get('/editar/{firma}', [FirmaController::class, 'editar'])->name('firma.editar');
+        Route::put('/actualizar/{firma}', [FirmaController::class, 'actualizar'])->name('firma.actualizar');
+
+        Route::delete('/eliminar/{firma}', [FirmaController::class, 'eliminar'])->name('firma.eliminar');
+
+        Route::get('/descarga/{firma}/{tipo}', [FirmaController::class, 'descarga'])->name('firma.descarga');
+        Route::get('/visualizar-fotos/{firma}/{tipo}', [FirmaController::class, 'visualizar_imagen'])->name('firma.visualizar_imagen');
+        Route::get('subir/uanataca/{solicitud}', [FirmaController::class, 'registrar_solicitud'])->name('firma.subirapi');
     });
 
-    Route::get('/listado', [FirmaController::class, 'listado'])->name('firma.listado');
-    Route::post('/filtrado-listado', [FirmaController::class, 'filtrado_listado'])->name('facturas.filtrado.listado');
-
-    Route::get('/clave', function () {
-        return view('auth.cambiarclave');
-    })->name('usuarios.clave');
-
-    Route::post('/guardarclave', [usuariosController::class, 'clave'])->name('usuarios.guardarclave');
-    Route::get('/editar/{firma}', [FirmaController::class, 'editar'])->name('firma.editar');
-    Route::put('/actualizar/{firma}', [FirmaController::class, 'actualizar'])->name('firma.actualizar');
-
-    Route::delete('/eliminar/{firma}', [FirmaController::class, 'eliminar'])->name('firma.eliminar');
-    Route::get('/descarga/{firma}/{tipo}', [FirmaController::class, 'descarga'])->name('firma.descarga');
-    Route::get('/visualizar-fotos/{firma}/{tipo}', [FirmaController::class, 'visualizar_imagen'])->name('firma.visualizar_imagen');
-    Route::get('subir/uanataca/{solicitud}', [FirmaController::class, 'registrar_solicitud'])->name('firma.subirapi');
+    /* Rutas para usuario */
+    Route::prefix('usuario')->group(function () {
+        Route::get('/logout', [usuariosController::class, 'logout'])->name('logout_usuarios');
+        Route::get('/clave', [usuariosController::class, 'cambiar_clave'])->name('usuarios.clave');
+        Route::post('/guardarclave', [usuariosController::class, 'clave'])->name('usuarios.guardarclave');
+    });
 });
