@@ -928,6 +928,35 @@ class FacturasController extends Controller
         }
     }
 
+    public function reactivar_liberacion(Factura $factura){
+        try {
+            $productos = json_decode($factura->productos);
+            foreach ($productos as $producto) {
+                if ($producto->licenciador == 1 && $producto->liberado == 1) {
+                    $producto->liberado = 0;
+                }
+            }
+
+            $factura->productos = json_encode($productos);
+            $factura->liberado = 0;
+            $factura->save();
+                        
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Facturas";
+            $log->operacion = "Reactivar liberacion";
+            $log->fecha = now();
+            $log->detalle = $factura;
+            $log->save();
+
+            flash("Liberacion reactivada")->success();
+            return back();
+        } catch (\Throwable $th) {
+            flash("No se pudo reactivar la liberacion: " . $th->getMessage())->error();
+            return back();
+        }
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                    Funciones para administrador Facturas                   */
     /* -------------------------------------------------------------------------- */

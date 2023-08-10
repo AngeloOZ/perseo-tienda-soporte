@@ -9,7 +9,6 @@
 
 
     @if ($factura->liberado == 0 && Auth::user()->liberador == 1)
-
         @if ($licencias != null)
             @if ($licencias->liberar == true)
                 <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip"
@@ -19,7 +18,7 @@
             @endif
         @else
             <button type="button" class="btn btn-success btn-icon modal-contador" data-toggle="tooltip"
-                title="Confirmar datos btn"><i class="la la-rocket"></i>
+                title="Confirmar datos"><i class="la la-rocket"></i>
             </button>
         @endif
 
@@ -30,5 +29,15 @@
                 </button>
             @endif
         @endif
+    @endif
+
+    @if ($factura->liberado == 1 && Auth::user()->liberador == 1)
+        <form action="{{ route('facturas.reactivar_liberacion', $factura->facturaid) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <button type="submit" class="btn btn-danger btn-icon" data-toggle="tooltip" title="Reactivar liberación"><i
+                    class="la la-undo-alt"></i>
+            </button>
+        </form>
     @endif
 </div>
