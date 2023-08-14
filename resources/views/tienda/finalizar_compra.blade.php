@@ -48,11 +48,11 @@
                                                 <td class="text-right">{{ number_format($carrito->subTotal, 2) }}</td>
                                             </tr>
                                             @if ($carrito->descuento != 0)
-                                            <tr>
-                                                <td colspan="2"></td>
-                                                <td class="text-left">Descuento</td>
-                                                <td class="text-right">{{ number_format($carrito->descuento, 2) }}</td>
-                                            </tr>
+                                                <tr>
+                                                    <td colspan="2"></td>
+                                                    <td class="text-left">Descuento</td>
+                                                    <td class="text-right">{{ number_format($carrito->descuento, 2) }}</td>
+                                                </tr>
                                             @endif
                                             <tr>
                                                 <td colspan="2"></td>
@@ -91,9 +91,7 @@
 @section('script')
     {{-- Sandbox:  --}}
     @if ($carrito->tipo_pago == 'tarjeta')
-        <script src="https://sandbox-paybox.pagoplux.com/paybox/index.js"></script>
-        {{-- Producción:  --}}
-        {{-- <script src="https://paybox.pagoplux.com/paybox/index.js"></script> --}}
+        <script src="https://paybox.pagoplux.com/paybox/index.js"></script>
         <script type="text/javascript">
             var data = {
                 PayboxRemail: "{{ $vendedor->correo_pagoplux }}",
@@ -102,9 +100,9 @@
                 PayboxSendname: $('#nombreCliente').val(),
                 PayboxBase0: $('#subTotal').val(),
                 PayboxBase12: $('#total ').val(),
-                PayboxDescription: "Pago tienda perseo",
-                PayboxProduction: false,
-                PayboxEnvironment: "sandbox",
+                PayboxDescription: "Pago tienda socio-perseo",
+                PayboxProduction: true,
+                PayboxEnvironment: "prod",
                 PayboxLanguage: "es",
                 PayboxRequired: [],
                 PayboxDirection: $('#direccionCliente').val(),
@@ -123,7 +121,7 @@
                     form.voucher.value = response.detail.token;
                     form.nombre_tarjeta.value = response.detail.cardIssuer;
                     form.btnSendMessage.click();
-                } else {
+                }else{
                     console.error("Error...!!");
                 }
             };
@@ -193,7 +191,7 @@
                 })
                 this.inputRedireccion.value = result.isConfirmed;
             }
-
+            
             const totalText = document.getElementById('total');
             $prod = carritoProductos.map(item => {
                 return {
@@ -204,10 +202,11 @@
                 }
             })
             this.inputProductos.value = JSON.stringify($prod);
-            Cookies.remove('cupon_code');
+
+            sessionStorage.clear();
             Cookies.remove('cxt');
             Cookies.remove('cart_tienda');
-            sessionStorage.clear();
+            Cookies.remove('cupon_code');
             this.submit();
             btnSend.removeAttribute('disabled');
         }
@@ -256,10 +255,9 @@
                 })
                 return false;
             }
-            
             return validarExtensionArchivo(file);
         }
-
+        
         function validarExtensionArchivo(file) {
             const extensionesValidas = ['jpg', 'jpeg', 'png', ];
 

@@ -23,11 +23,17 @@ class FacturasLicenciasRenovarController extends Controller
         foreach ($licencias as $licencia) {
             try {
                 $productos = $instancia->buscar_producto($licencia);
-                $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
-                $cliente = $instancia->crear_cliente($vendedor, $licencia);
-                $cliente->concepto = $licencia->concepto;
+                $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
+
+                $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
+                $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
+
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
                 $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+
+                if ($datos_cliente->telefono2 == "" || $datos_cliente->telfono2 == null) {
+                    $datos_cliente->telefono2 = "0991649018";
+                }
 
                 WhatsappRenovacionesController::enviar_archivo_mensaje([
                     "phone" => $licencia->telefono2,
@@ -113,11 +119,16 @@ class FacturasLicenciasRenovarController extends Controller
         ])->first();
 
         if (str_contains(strtolower($productoHomologado->descripcion), "facturito")) {
-            $licencia->concepto = "FTR - " . $licencia->identificacion;
+            $licencia->concepto = "FTR - {$licencia->nombres} {$licencia->identificacion}";
         } else if (str_contains(strtolower($productoHomologado->descripcion), "web")) {
-            $licencia->concepto = "RNW - " . $licencia->identificacion;
+            $licencia->concepto = "RNW - {$licencia->nombres} {$licencia->identificacion}";
         } else if (str_contains(strtolower($productoHomologado->descripcion), "pc")) {
-            $licencia->concepto = "RRP - " . $licencia->identificacion;
+            $licencia->concepto = "RRP - {$licencia->nombres} {$licencia->identificacion}";
+        }
+
+        // COMMENT 5 y 8 son los id de los productos SoyContador en el admin
+        if (in_array($licencia->producto, [5, 8])) {
+            $licencia->esContador = true;
         }
 
         return [
@@ -151,6 +162,28 @@ class FacturasLicenciasRenovarController extends Controller
         }
 
         return $vendedor;
+    }
+
+    private function obtener_datos_facturacion($licencia)
+    {
+        $datos = (object)[
+            "nombres" => $licencia->nombres,
+            "identificacion" => $licencia->identificacion,
+            "direccion" => $licencia->direccion,
+            "telefono2" => $licencia->telefono2,
+            "correos" => $licencia->correos,
+            "concepto" => $licencia->concepto,
+        ];
+
+        if (isset($licencia->esContador) && $licencia->esContador) {
+            $datos->nombres = $licencia->contador_nombres;
+            $datos->identificacion = $licencia->contador_identificacion;
+            $datos->direccion = $licencia->contador_direccion;
+            $datos->telefono2 = $licencia->contador_telfono ?? "";
+            $datos->correos = $licencia->contador_correo;
+        }
+
+        return $datos;
     }
 
     private function crear_cliente($vendedor, $datosCliente)
@@ -195,6 +228,8 @@ class FacturasLicenciasRenovarController extends Controller
         if ($cliente == null) {
             throw new Error("No se pudo crear el cliente");
         }
+
+        $cliente["concepto"] = $datosCliente->concepto;
 
         return (object)$cliente;
     }
@@ -294,7 +329,7 @@ class FacturasLicenciasRenovarController extends Controller
                         "total" => round($valoresFactura["total"], 2),
                         "totalneto" => round($valoresFactura["totalneto"], 2),
                         "concepto" => $cliente->concepto,
-                        "observacion" => "",
+                        "observacion" => $cliente->concepto,
                         "detalles" => $detalleFactura,
                         "usuariocreacion" => $vendedor->identificacion,
                     ],
