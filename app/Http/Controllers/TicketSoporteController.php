@@ -10,7 +10,6 @@ use App\Models\Log;
 use App\Models\SoporteEspecial;
 use App\Models\Tecnicos;
 use App\Models\Ticket;
-use App\Models\UserSoporte;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
 use App\Rules\ValidarRUC;
@@ -1471,31 +1470,26 @@ class TicketSoporteController extends Controller
 
     private function buscar_tecnico_libre($producto = "web", $distribuidor = 1)
     {
-        $maximoTickets = 50;
         $tecnicoLibre = null;
-        $tecnicos = [];
-
         if ($producto == "pc") {
-            $tecnicos = Tecnicos::where('distribuidoresid', $distribuidor)
-                ->where([['activo', 1], ['rol', 5]])
-                ->where('productos', 'LIKE', '%' . $producto . '%')
-                ->get();
+            $tecnicoLibre = Tecnicos::where('rol', 5)
+                ->where('estado', 1)
+                ->where('activo', 1)
+                ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
+                ->where('distribuidoresid', $distribuidor)
+                ->where('productos', 'like', '%pc%')
+                ->orderBy('tickets_activos')
+                ->first();
         } else {
-            $tecnicos = Tecnicos::where('distribuidoresid', 2)
-                ->where([['activo', 1], ['rol', 5]])
-                ->where('productos', 'LIKE', '%' . $producto . '%')
-                ->get();
+            $tecnicoLibre = Tecnicos::where('rol', 5)
+                ->where('estado', 1)
+                ->where('activo', 1)
+                ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
+                ->where('distribuidoresid', 2)
+                ->where('productos', 'like', '%' . $producto . '%')
+                ->orderBy('tickets_activos')
+                ->first();
         }
-
-        foreach ($tecnicos as $tecnico) {
-            if ($tecnico->tickets_activos < $tecnico->tickets_maximos) {
-                if ($tecnico->tickets_activos < $maximoTickets) {
-                    $maximoTickets = $tecnico->tickets_activos;
-                    $tecnicoLibre = $tecnico;
-                }
-            }
-        }
-
         return $tecnicoLibre;
     }
 
