@@ -24,7 +24,7 @@ class FacturasLicenciasRenovarController extends Controller
     {
         $instancia = new self();
         $licencias = $instancia->obtener_licencias();
-        // return $licencias;
+        return $licencias;
 
         if (count($licencias) == 0) return 0;
         $facturadas = 0;
@@ -39,16 +39,18 @@ class FacturasLicenciasRenovarController extends Controller
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
                 $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
-                if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
-                    $datos_cliente->telefono2 = "0996921873";
-                    WhatsappRenovacionesController::enviar_archivo_mensaje([
-                        "phone" => $datos_cliente->telefono2,
-                        "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
-                        "filename" => "factura_{$factura->secuencia}.pdf",
-                        "filebase64" => "data:application/png;base64," . $autorizada->pdf,
-                        "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
-                    ]);
+                if ($datos_cliente->telefono2 == "" || $datos_cliente->telefono2 == null) {
+                    $datos_cliente->telefono2 = "0998661687";
                 }
+
+                WhatsappRenovacionesController::enviar_archivo_mensaje([
+                    "phone" => $datos_cliente->telefono2,
+                    "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
+                    "filename" => "factura_{$factura->secuencia}.pdf",
+                    "filebase64" => "data:application/png;base64," . $autorizada->pdf,
+                    "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                ]);
+
                 $facturadas++;
             } catch (\Throwable $th) {
                 echo $th->getMessage() . "<br />";
@@ -62,7 +64,11 @@ class FacturasLicenciasRenovarController extends Controller
     {
         $url = "https://perseo.app/api/proximas_caducar/1";
 
-        $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
+        $resultado = Http::withHeaders([
+            'Content-Type' => 'application/json; charset=UTF-8',
+            'verify' => false,
+            'usuario' => 'Perseo', "clave" => "Perseo1232*"
+        ])
             ->withOptions(["verify" => false])
             ->post($url)
             ->json();
@@ -71,25 +77,9 @@ class FacturasLicenciasRenovarController extends Controller
             ->map(function ($item) {
                 return (object)$item;
             })
-            ->filter(function ($item) {
-                return $item->producto == 5;
-            })
-            ->flatten()
-            ->take(1)
             ->toArray();
 
-        // TODO: borrar esto
-        $arrayDeObjetos2 = Collection::make($resultado)
-            ->map(function ($item) {
-                return (object)$item;
-            })
-            ->filter(function ($item) {
-                return $item->producto == 2;
-            })
-            ->flatten()
-            ->take(1)
-            ->toArray();
-        return [...$arrayDeObjetos, ...$arrayDeObjetos2];
+        return $arrayDeObjetos;
     }
 
     private function homologar_distribuidor($distribuidor)
@@ -141,12 +131,13 @@ class FacturasLicenciasRenovarController extends Controller
             ['distribuidoresid', $this->homologar_distribuidor($licencia->sis_distribuidoresid)],
         ])->first();
 
-        if (str_contains(strtolower($productoHomologado->descripcion), "facturito")) {
-            $licencia->concepto = "FTR - {$licencia->nombres} {$licencia->identificacion}";
-        } else if (str_contains(strtolower($productoHomologado->descripcion), "web")) {
-            $licencia->concepto = "RNW - {$licencia->nombres} {$licencia->identificacion}";
-        } else if (str_contains(strtolower($productoHomologado->descripcion), "pc")) {
-            $licencia->concepto = "RRP - {$licencia->nombres} {$licencia->identificacion}";
+        $descripcion = strtolower($productoHomologado->descripcion);
+        if (str_contains($descripcion, "facturito")) {
+            $licencia->concepto = "FTR - {$licencia->identificacion} {$licencia->nombres}";
+        } else if (str_contains($descripcion, "web")) {
+            $licencia->concepto = "RNW - {$licencia->identificacion} {$licencia->nombres}";
+        } else if (str_contains($descripcion, "pc")) {
+            $licencia->concepto = "RRP - {$licencia->identificacion} {$licencia->nombres}";
         }
 
         // COMMENT 5 y 8 son los id de los productos SoyContador en el admin
