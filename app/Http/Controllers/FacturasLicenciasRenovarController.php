@@ -122,7 +122,7 @@ class FacturasLicenciasRenovarController extends Controller
         ])->first();
 
         if ($productoHomologado == null) {
-            throw new Error("No se encontro el producto");
+            throw new Error("No se encontro el producto homologado tipo_licencia: {$licencia->tipo_licencia} producto: {$tipo_producto} periodo: {$licencia->periodo}");
         }
 
         $producto = ProductoHomologado::where([
@@ -225,7 +225,7 @@ class FacturasLicenciasRenovarController extends Controller
         $cliente = $resultado["clientes"][0] ?? null;
 
         if ($cliente == null) {
-            throw new Error("No se pudo crear el cliente");
+            throw new Error("No se pudo crear el cliente {$datosCliente->identificacion}");
         }
 
         $cliente["concepto"] = $datosCliente->concepto;
@@ -346,7 +346,7 @@ class FacturasLicenciasRenovarController extends Controller
 
 
         if (isset($resultado["fault"])) {
-            throw new Error("No se genero la factura");
+            throw new Error("No se genero la factura {$cliente->concepto}");
         }
 
         $response = (object)[
