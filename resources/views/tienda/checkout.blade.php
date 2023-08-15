@@ -100,7 +100,7 @@
                             </div>
                         </div>
                         <div class="col-12 col-lg-6">
-                            @include('tienda.datos_facturacion');
+                            @include('tienda.datos_facturacion')
                         </div>
                     </div>
                 </div>
