@@ -52,7 +52,7 @@ class FacturasLicenciasRenovarController extends Controller
 
                 $facturadas++;
             } catch (\Throwable $th) {
-                echo $th->getMessage() . "<br />";
+                echo $th->getMessage() . "\n";
                 continue;
             }
         }
