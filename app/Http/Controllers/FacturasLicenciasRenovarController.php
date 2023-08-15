@@ -24,36 +24,34 @@ class FacturasLicenciasRenovarController extends Controller
     {
         $instancia = new self();
         $licencias = $instancia->obtener_licencias();
+        // return $licencias;
 
         if (count($licencias) == 0) return 0;
-
         $facturadas = 0;
+
         foreach ($licencias as $licencia) {
             try {
                 $productos = $instancia->buscar_producto($licencia);
-                $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
+                $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
 
                 $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
-                
                 $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
-                // $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+                $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
-                if ($datos_cliente->telefono2 == "" || $datos_cliente->telefono2 == null) {
-                    // TODO: poner los numeros en base a los distribuidores
-                    $datos_cliente->telefono2 = "0991649018";
+                if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
+                    $datos_cliente->telefono2 = "0996921873";
+                    WhatsappRenovacionesController::enviar_archivo_mensaje([
+                        "phone" => $datos_cliente->telefono2,
+                        "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
+                        "filename" => "factura_{$factura->secuencia}.pdf",
+                        "filebase64" => "data:application/png;base64," . $autorizada->pdf,
+                        "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                    ]);
                 }
-
-                // WhatsappRenovacionesController::enviar_archivo_mensaje([
-                //     "phone" => $datos_cliente->telefono2,
-                //     "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
-                //     "filename" => "factura_{$factura->secuencia}.pdf",
-                //     "filebase64" => "data:application/png;base64," . $autorizada->pdf,
-                //     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
-                // ]);
                 $facturadas++;
             } catch (\Throwable $th) {
-                echo $th->getMessage() . "\n";
+                echo $th->getMessage() . "<br />";
                 continue;
             }
         }
@@ -73,9 +71,25 @@ class FacturasLicenciasRenovarController extends Controller
             ->map(function ($item) {
                 return (object)$item;
             })
-            ->take(3)
+            ->filter(function ($item) {
+                return $item->producto == 5;
+            })
+            ->flatten()
+            ->take(1)
             ->toArray();
-        return $arrayDeObjetos;
+
+        // TODO: borrar esto
+        $arrayDeObjetos2 = Collection::make($resultado)
+            ->map(function ($item) {
+                return (object)$item;
+            })
+            ->filter(function ($item) {
+                return $item->producto == 2;
+            })
+            ->flatten()
+            ->take(1)
+            ->toArray();
+        return [...$arrayDeObjetos, ...$arrayDeObjetos2];
     }
 
     private function homologar_distribuidor($distribuidor)
@@ -155,6 +169,7 @@ class FacturasLicenciasRenovarController extends Controller
 
         return User::where([['distribuidoresid', $dis], ['rol', 1]])
             ->where('nombres', 'PREDETERMINADO')
+            ->where('identificacion', 'PREDETERMINADO')
             ->first();
     }
 
@@ -173,7 +188,7 @@ class FacturasLicenciasRenovarController extends Controller
             $datos->nombres = $licencia->contador_nombres;
             $datos->identificacion = $licencia->contador_identificacion;
             $datos->direccion = $licencia->contador_direccion;
-            $datos->telefono2 = $licencia->contador_telfono ?? "";
+            $datos->telefono2 = $licencia->contador_telfono ?? null;
             $datos->correos = $licencia->contador_correo;
         }
 
@@ -374,7 +389,6 @@ class FacturasLicenciasRenovarController extends Controller
         return (object)$resultado;
     }
 
-    // REVIEW: Deprecated function 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
         $vendedor = User::where('identificacion', $cedula)->first();
