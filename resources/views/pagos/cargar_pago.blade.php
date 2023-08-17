@@ -184,6 +184,75 @@
                 max-width: 30px;
             }
         }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            width: 100%;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+
+            display: grid;
+            place-content: center;
+        }
+
+        .loader-upload {
+            width: 175px;
+            height: 80px;
+            display: block;
+            margin: auto;
+            background-image: radial-gradient(circle 25px at 25px 25px, #FFF 100%, transparent 0), radial-gradient(circle 50px at 50px 50px, #FFF 100%, transparent 0), radial-gradient(circle 25px at 25px 25px, #FFF 100%, transparent 0), linear-gradient(#FFF 50px, transparent 0);
+            background-size: 50px 50px, 100px 76px, 50px 50px, 120px 40px;
+            background-position: 0px 30px, 37px 0px, 122px 30px, 25px 40px;
+            background-repeat: no-repeat;
+            position: relative;
+            box-sizing: border-box;
+
+            transform: scale(1.8);
+        }
+
+        .loader-upload::after {
+            content: '';
+            left: 50%;
+            bottom: 30px;
+            transform: translate(-50%, 0);
+            position: absolute;
+            border: 15px solid transparent;
+            border-bottom-color: #181C32;
+            box-sizing: border-box;
+            animation: fadePull 1s linear infinite;
+        }
+
+        .loader-upload::before {
+            content: '';
+            left: 50%;
+            bottom: 15px;
+            transform: translate(-50%, 0);
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #181C32;
+            box-sizing: border-box;
+            animation: fadePull 1s linear infinite;
+        }
+
+        @keyframes fadePull {
+            0% {
+                transform: translate(-50%, 15px);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translate(-50%, 0px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -15px);
+                opacity: 0;
+            }
+        }
     </style>
     <div class="content d-flex flex-column flex-column-fluid w-100 mx-auto ">
         <div class="d-flex flex-column-fluid">
@@ -215,7 +284,11 @@
     </div>
     </div>
 @endsection
-
+@section('modal')
+    <div class="overlay d-none" id="overlay-loader-upload">
+        <span class="loader-upload"></span>
+    </div>
+@endsection
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
     <script>
@@ -281,6 +354,7 @@
             })
 
             btnUpload.addEventListener('click', async (e) => {
+                $('#overlay-loader-upload').removeClass('d-none');
                 const numberFiles = formData.getAll(nameKey).length;
                 if (numberFiles == 0) return;
                 formData.append('uuid', "{{ $renovacion->uuid }}");
@@ -298,12 +372,12 @@
                     const url =
                         "{{ $renovacion->cobrosid ? route('pagos.actualizar') : route('pagos.guardar') }}";
                     const response = await fetch(url, config);
-
                     if (!response.ok) throw new Error(`Request failed with status ${response.status}`);
                     const data = await response.json();
                     window.location.reload()
                 } catch (error) {
                     console.log(error);
+                    $('#overlay-loader-upload').addClass('d-none');
                     showAlert(
                         "Hubo un error",
                         "No se pudo registrar el pago, por favor inténtalo más tarde",
@@ -372,8 +446,8 @@
             return true;
         }
 
-        function showAlert(title, message, icon = "warning") {
-            Swal.fire({
+        async function showAlert(title, message, icon = "warning") {
+            await Swal.fire({
                 title: title,
                 html: message,
                 icon: icon,

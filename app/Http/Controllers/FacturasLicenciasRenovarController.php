@@ -53,10 +53,11 @@ class FacturasLicenciasRenovarController extends Controller
                     "factura" => $factura,
                 ]);
                 $renovacion->save();
+                
                 // TODO: reactivar
                 // WhatsappRenovacionesController::enviar_archivo_mensaje([
                 //     "phone" => $datos_cliente->telefono2,
-                //     "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
+                //     "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n" . route('pagos.registrar', $renovacion->uuid),
                 //     "filename" => "factura_{$factura->secuencia}.pdf",
                 //     "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
                 //     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
@@ -65,7 +66,7 @@ class FacturasLicenciasRenovarController extends Controller
                 WhatsappRenovacionesController::enviar_mensaje([
                     "phone" => $datos_cliente->telefono2,
                     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
-                    "message" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar tu comprobante de pago en el siguiente enlace " . route('pagos.registrar', $renovacion->uuid),
+                    "message" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n" . route('pagos.registrar', $renovacion->uuid),
                 ]);
 
                 $facturadas++;
@@ -96,7 +97,7 @@ class FacturasLicenciasRenovarController extends Controller
             })
             ->take(1)
             ->toArray();
-            // TODO: borrar take
+        // TODO: borrar take
         return $arrayDeObjetos;
     }
 

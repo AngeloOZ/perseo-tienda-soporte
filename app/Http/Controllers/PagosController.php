@@ -12,11 +12,18 @@ class PagosController extends Controller
 {
     public function registrar_pago_cliente($factura)
     {
-        $renovacion = RenovacionLicencias::where('uuid', $factura)->first();
+        $renovacion = RenovacionLicencias::where('uuid', $factura)->firstOrfail();
 
         if ($renovacion->registrado === 1) {
-            return view('pagos.resultado', ["renovacion" => $renovacion]);
+            $isRenewed = null;
+
+            if (session()->has('isRenewedLicence')) {
+                $isRenewed = session('isRenewedLicence') ? 'renovado' : 'error';
+                session()->forget('isRenewedLicence');
+            }
+            return view('pagos.resultado', ["renovacion" => $renovacion, 'isRenewed' => $isRenewed]);
         }
+
 
         return view('pagos.cargar_pago', ['renovacion' => $renovacion]);
     }
@@ -29,9 +36,6 @@ class PagosController extends Controller
         $factura = $datos->factura;
         $distribuidor = $this->homologar_distribuidor($licencia->sis_distribuidoresid);
         $default = $this->obtener_vendedor_default($distribuidor);
-
-        dd($this->renovar_licencia($licencia));
-
 
         try {
             $cobro = new Cobros();
@@ -60,6 +64,7 @@ class PagosController extends Controller
             $renovacion->save();
 
             $isRenewed = $this->renovar_licencia($licencia);
+            session()->put('isRenewedLicence', $isRenewed);
 
             return response()->json([
                 "status" => 201,
@@ -184,10 +189,7 @@ class PagosController extends Controller
             if (!isset($renovacion->renovar) && !$renovacion->renovar) {
                 return false;
             }
-
             return true;
-            return [$renovacion, $licencia];
-            return $licencia;
         } catch (\Throwable $th) {
             return false;
         }
