@@ -104,6 +104,14 @@
                         </a>
                     </li>
                 @endif
+                @if (in_array(Auth::user()->rol, [2]))
+                    <li class="menu-item {{ areActiveRoutes(['facturas.whatsapp.config']) }} " aria-haspopup="true">
+                        <a href="{{ route('facturas.whatsapp.config') }}" class="menu-link">
+                            <i class="menu-icon fab fa-whatsapp"></i>
+                            <span class="menu-text">Configurar Whatsapp</span>
+                        </a>
+                    </li>
+                @endif
                 @if (in_array(Auth::user()->rol, [3]))
                     <li class="menu-item {{ areActiveRoutes(['productos.listado']) }} " aria-haspopup="true">
                         <a href="{{ route('productos.listado') }}" class="menu-link">

@@ -10,6 +10,7 @@ use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
+use App\Http\Controllers\WhatsappRenovacionesController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -93,6 +94,15 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
         Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name('facturas.liberar_producto_manual');
+
+        Route::prefix('whatsapp')->group(function () {
+            Route::get('/configuracion', [WhatsappRenovacionesController::class, 'index'])->name('facturas.whatsapp.config');
+            Route::post('/iniciar', [WhatsappRenovacionesController::class, 'iniciar_whatsapp'])->name('facturas.whatsapp.iniciar');
+            Route::post('/obtener-qr', [WhatsappRenovacionesController::class, 'obtener_qr_whatsapp'])->name('facturas.whatsapp.obtener.qr');
+            Route::post('/cerrar', [WhatsappRenovacionesController::class, 'cerrar_whatsapp'])->name('facturas.whatsapp.cerrar');
+            Route::post('/enviar-sms', [WhatsappRenovacionesController::class, 'enviar_sms_whatsapp'])->name('facturas.whatsapp.enviar.sms');
+            Route::post('/borrar-token', [WhatsappRenovacionesController::class, 'eliminar_token'])->name('facturas.whatsapp.eliminar_token');
+        });
     });
 
     /* Rutas para productos admin */
