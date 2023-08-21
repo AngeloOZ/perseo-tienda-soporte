@@ -53,7 +53,7 @@ class FacturasLicenciasRenovarController extends Controller
                     "factura" => $factura,
                 ]);
                 $renovacion->save();
-                
+
                 // TODO: reactivar
                 // WhatsappRenovacionesController::enviar_archivo_mensaje([
                 //     "phone" => $datos_cliente->telefono2,
@@ -372,6 +372,7 @@ class FacturasLicenciasRenovarController extends Controller
         $response = (object)[
             "facturaid" => $resultado["facturas"][0]["facturasid_nuevo"],
             "secuencia" => $resultado["facturas"][0]["facturas_secuencia"],
+            "total_facturado" => round($valoresFactura["totalneto"], 2)
         ];
 
         return $response;
