@@ -26,7 +26,7 @@ class FacturasLicenciasRenovarController extends Controller
         $instancia = new self();
         $licencias = $instancia->obtener_licencias();
 
-        return $licencias;
+        // return $licencias;
 
         if (count($licencias) == 0) return 0;
         $facturadas = 0;
