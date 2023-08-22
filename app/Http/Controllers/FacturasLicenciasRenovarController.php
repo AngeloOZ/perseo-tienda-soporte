@@ -44,8 +44,6 @@ class FacturasLicenciasRenovarController extends Controller
                 if ($datos_cliente->telefono2 == "" || $datos_cliente->telefono2 == null) {
                     $datos_cliente->telefono2 = "0998661687";
                 }
-                // TODO: borrar
-                $datos_cliente->telefono2 = "0996921873";
 
                 $renovacion = new RenovacionLicencias();
                 $renovacion->uuid = uniqid();
@@ -97,8 +95,6 @@ class FacturasLicenciasRenovarController extends Controller
                 return $item->producto != 9;
             })
             ->flatten()
-            // TODO: borrar take
-            ->take(1)
             ->toArray();
         return $arrayDeObjetos;
     }
@@ -404,9 +400,6 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
-        // TODO: borrar
-        return $this->obtener_vendedor_default($distribuidor);
-
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
