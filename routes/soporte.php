@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\categoriasController;
+use App\Http\Controllers\productosController2;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\SoporteEspcialController;
+use App\Http\Controllers\subcategoriasController;
+use App\Http\Controllers\temasController;
 use App\Http\Controllers\TicketSoporteController;
 use App\Http\Controllers\WhatsappController;
-use App\Models\SoporteEspecial;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('soporte')->group(function () {
@@ -113,6 +115,48 @@ Route::prefix('soporte')->group(function () {
             /* revisor */
             Route::get('/listado-revisor', [SoporteEspcialController::class, 'revisor_listar_soporte_especial'])->name('soporte.revisor_listar_soporte_especial');
             Route::post('/filtrado-revisor', [SoporteEspcialController::class, 'filtrado_soporte_especial'])->name('soporte.filtrado_soporte_especial');
+        });
+
+        // COMMENT: Rutas para integracion de capacitacion LEIDY
+        
+        Route::prefix('asignacion')->group(function () {
+            // ✅ Funcional
+            Route::prefix('asignacion')->group(function () {
+                Route::get('/listado', [productosController2::class, 'index'])->name('asignacion.index');
+
+                Route::get('/editar/{producto}', [productosController2::class, 'asignacion'])->name('asignacion');
+                Route::put('/actualizar/{producto}', [productosController2::class, 'asignacionActualizar'])->name('asignacion.actualizar');
+
+                Route::get('/videos/{producto}', [productosController2::class, 'asignacionvideos'])->name('asignacionvideos');
+                Route::put('/actualizar-videos/{producto}', [productosController2::class, 'asignacionActualizarvideos'])->name('asignacion.actualizarvideos');
+            });
+            
+            Route::prefix('categorias')->group(function () {
+                Route::get('/', [categoriasController::class, 'index'])->name('categorias.index');
+                Route::get('/crear', [categoriasController::class, 'crear'])->name('categorias.crear');
+                Route::post('/guardar', [categoriasController::class, 'guardar'])->name('categorias.guardar');
+                Route::get('/editar/{categorias}', [categoriasController::class, 'editar'])->name('categorias.editar');
+                Route::put('/actualizar/{categorias}', [categoriasController::class, 'actualizar'])->name('categorias.actualizar');
+                Route::delete('/eliminar/{categorias}', [categoriasController::class, 'eliminar'])->name('categorias.eliminar');
+            });
+
+            Route::prefix('sub-categorias')->group(function () {
+                Route::get('/', [subcategoriasController::class, 'index'])->name('subcategorias.index');
+                Route::get('/crear', [subcategoriasController::class, 'crear'])->name('subcategorias.crear');
+                Route::post('/guardar', [subcategoriasController::class, 'guardar'])->name('subcategorias.guardar');
+                Route::get('/editar/{subcategorias}', [subcategoriasController::class, 'editar'])->name('subcategorias.editar');
+                Route::put('/actualizar/{subcategorias}', [subcategoriasController::class, 'actualizar'])->name('subcategorias.actualizar');
+                Route::delete('/eliminar/{subcategorias}', [subcategoriasController::class, 'eliminar'])->name('subcategorias.eliminar');
+            });
+
+            Route::prefix('temas')->group(function () {
+                Route::get('/', [temasController::class, 'index'])->name('temas.index');
+                Route::get('/crear', [temasController::class, 'crear'])->name('temas.crear');
+                Route::post('/guardar', [temasController::class, 'guardar'])->name('temas.guardar');
+                Route::get('/editar/{temas}', [temasController::class, 'editar'])->name('temas.editar');
+                Route::put('/actualizar/{temas}', [temasController::class, 'actualizar'])->name('temas.actualizar');
+                Route::delete('/eliminar/{temas}', [temasController::class, 'eliminar'])->name('temas.eliminar');
+            });
         });
     });
 });
