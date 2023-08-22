@@ -1,4 +1,4 @@
-@extends('backend.layouts.app')
+@extends('soporte.auth.layouts.app')
 @section('contenido')
 <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
     <div class="d-flex flex-column-fluid">
@@ -34,7 +34,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                @include('backend.subcategorias._form')
+                                @include('soporte.admin.capacitaciones.subcategorias._form')
                             </div>
                         </div>
                         <!--end::Card-->

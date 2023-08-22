@@ -118,7 +118,6 @@ Route::prefix('soporte')->group(function () {
         });
 
         // COMMENT: Rutas para integracion de capacitacion LEIDY
-        
         Route::prefix('asignacion')->group(function () {
             // ✅ Funcional
             Route::prefix('asignacion')->group(function () {
@@ -130,7 +129,7 @@ Route::prefix('soporte')->group(function () {
                 Route::get('/videos/{producto}', [productosController2::class, 'asignacionvideos'])->name('asignacionvideos');
                 Route::put('/actualizar-videos/{producto}', [productosController2::class, 'asignacionActualizarvideos'])->name('asignacion.actualizarvideos');
             });
-            
+            // ✅ Funcional
             Route::prefix('categorias')->group(function () {
                 Route::get('/', [categoriasController::class, 'index'])->name('categorias.index');
                 Route::get('/crear', [categoriasController::class, 'crear'])->name('categorias.crear');
@@ -139,7 +138,7 @@ Route::prefix('soporte')->group(function () {
                 Route::put('/actualizar/{categorias}', [categoriasController::class, 'actualizar'])->name('categorias.actualizar');
                 Route::delete('/eliminar/{categorias}', [categoriasController::class, 'eliminar'])->name('categorias.eliminar');
             });
-
+            // ✅ Funcional
             Route::prefix('sub-categorias')->group(function () {
                 Route::get('/', [subcategoriasController::class, 'index'])->name('subcategorias.index');
                 Route::get('/crear', [subcategoriasController::class, 'crear'])->name('subcategorias.crear');
@@ -149,6 +148,7 @@ Route::prefix('soporte')->group(function () {
                 Route::delete('/eliminar/{subcategorias}', [subcategoriasController::class, 'eliminar'])->name('subcategorias.eliminar');
             });
 
+            // ✅ Funcional
             Route::prefix('temas')->group(function () {
                 Route::get('/', [temasController::class, 'index'])->name('temas.index');
                 Route::get('/crear', [temasController::class, 'crear'])->name('temas.crear');

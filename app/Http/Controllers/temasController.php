@@ -23,13 +23,15 @@ class temasController extends Controller
                 ->rawColumns(['action'])
                 ->make(true);
         }
-        return view('backend.temas.index');
+        return view('soporte.admin.capacitaciones.temas.index');
     }
+
     public function crear()
     {
         $temas = new Temas();
-        return view('backend.temas.crear', compact('temas'));
+        return view('soporte.admin.capacitaciones.temas.crear', compact('temas'));
     }
+
     public function guardar(Request $request)
     {
         $request->validate(
@@ -59,7 +61,7 @@ class temasController extends Controller
             $temas->save();
 
             $historial = new Log();
-            $historial->usuario = Auth::guard('admin')->user()->nombres;
+            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
             $historial->pantalla = "Temas";
             $historial->operacion = "Crear";
             $historial->fecha = now();
@@ -69,37 +71,32 @@ class temasController extends Controller
             DB::commit();
             return redirect()->route('temas.editar', $temas->temasid);
         } catch (\Exception $e) {
-         
             DB::rollBack();
             flash('Ocurrió un error vuelva a intentarlo')->warning();
             return back();
-
         }
     }
+
     public function editar(Temas $temas)
     {
-        return view('backend.temas.editar', compact('temas'));
+        return view('soporte.admin.capacitaciones.temas.editar', compact('temas'));
     }
+
     public function actualizar(Request $request, $temas)
     {
         $request->validate(
-
             [
                 'descripcion' => ['required'],
                 'subcategoriasid' => ['required'],
                 'orden' => ['required']
-
-
             ],
             [
                 'descripcion.required' => 'Ingrese una descripción',
                 'subcategoriasid.required' => 'Escoja una Subcategoría',
                 'orden.required' => 'Ingrese el orden a mostrarse'
-
-
             ],
-
         );
+
         DB::beginTransaction();
         try {
             $actualizar = Temas::where('temasid', $temas)->first();
@@ -111,8 +108,9 @@ class temasController extends Controller
             $actualizar->enlace_tutorial = $request->enlace_tutorial;
             $actualizar->enlace_tutorialWeb = $request->enlace_tutorialWeb;
             $actualizar->save();
+
             $historial = new Log();
-            $historial->usuario = Auth::guard('admin')->user()->nombres;
+            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
             $historial->pantalla = "Temas";
             $historial->operacion = "Modificar";
             $historial->fecha = now();
@@ -126,6 +124,7 @@ class temasController extends Controller
         }
         return back();
     }
+
     public function eliminar($temas)
     {
         DB::beginTransaction();
@@ -138,7 +137,7 @@ class temasController extends Controller
                 flash('Registro asociado, no se puede eliminar')->warning();
             } else {
                 $historial = new Log();
-                $historial->usuario = Auth::guard('admin')->user()->nombres;
+                $historial->usuario = Auth::guard('tecnico')->user()->nombres;
                 $historial->pantalla = "Temas";
                 $historial->operacion = "Eliminar";
                 $historial->fecha = now();

@@ -30,13 +30,15 @@ class subcategoriasController extends Controller
                 ->rawColumns(['action', 'visible'])
                 ->make(true);
         }
-        return view('backend.subcategorias.index');
+        return view('soporte.admin.capacitaciones.subcategorias.index');
     }
+
     public function crear()
     {
         $subcategorias = new Subcategorias();
-        return view('backend.subcategorias.crear', compact('subcategorias'));
+        return view('soporte.admin.capacitaciones.subcategorias.crear', compact('subcategorias'));
     }
+
     public function guardar(Request $request)
     {
         $request->validate(
@@ -60,32 +62,33 @@ class subcategoriasController extends Controller
             $subcategorias->orden = $request->orden;
             $subcategorias->visible = $request->visible == 'on' || $request->visible == 1 ? 1 : 0;
             $subcategorias->save();
-            
+
             $historial = new Log();
-            $historial->usuario = Auth::guard('admin')->user()->nombres;
+            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
             $historial->pantalla = "Subcategorias";
             $historial->operacion = "Crear";
             $historial->fecha = now();
             $historial->detalle = $subcategorias;
             $historial->save();
+
             DB::commit();
             flash('Guardado Correctamente')->success();
             return redirect()->route('subcategorias.editar', $subcategorias->subcategoriasid);
         } catch (\Exception $e) {
             DB::rollBack();
             flash('Ocurrió un error vuelva a intentarlo')->warning();
-            return view('subcategorias.crear');
+            return back();
         }
     }
+
     public function editar(Subcategorias $subcategorias)
     {
-        return view('backend.subcategorias.editar', compact('subcategorias'));
+        return view('soporte.admin.capacitaciones.subcategorias.editar', compact('subcategorias'));
     }
+
     public function actualizar(Request $request, $subcategorias)
     {
-
         $request->validate(
-
             [
                 'descripcion' => ['required'],
                 'categoriasid' => ['required'],
@@ -97,8 +100,8 @@ class subcategoriasController extends Controller
                 'orden.required' => 'Ingrese el orden a mostrarse'
 
             ],
-
         );
+
         DB::beginTransaction();
         try {
             $actualizar = Subcategorias::where('subcategoriasid', $subcategorias)->first();
@@ -107,13 +110,15 @@ class subcategoriasController extends Controller
             $actualizar->orden = $request->orden;
             $actualizar->visible = $request->visible == 'on' || $request->visible == 1 ? 1 : 0;
             $actualizar->save();
+
             $historial = new Log();
-            $historial->usuario = Auth::guard('admin')->user()->nombres;
+            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
             $historial->pantalla = "Subcategorias";
             $historial->operacion = "Modificar";
             $historial->fecha = now();
             $historial->detalle = $actualizar;
             $historial->save();
+
             DB::commit();
             flash('Actualizado Correctamente')->success();
         } catch (\Exception $e) {
@@ -122,6 +127,7 @@ class subcategoriasController extends Controller
         }
         return back();
     }
+
     public function eliminar($subcategorias)
     {
         DB::beginTransaction();
@@ -134,7 +140,7 @@ class subcategoriasController extends Controller
                 flash('Registro asociado, no se puede eliminar')->warning();
             } else {
                 $historial = new Log();
-                $historial->usuario = Auth::guard('admin')->user()->nombres;
+                $historial->usuario = Auth::guard('tecnico')->user()->nombres;
                 $historial->pantalla = "Subcategorias";
                 $historial->operacion = "Eliminar";
                 $historial->fecha = now();

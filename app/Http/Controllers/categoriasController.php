@@ -26,11 +26,13 @@ class categoriasController extends Controller
         }
         return view('soporte.admin.capacitaciones.categorias.index');
     }
+    
     public function crear()
     {
         $categorias = new Categorias();
         return view('soporte.admin.capacitaciones.categorias.crear', compact('categorias'));
     }
+
     public function guardar(Request $request)
     {
         $request->validate(
@@ -65,31 +67,28 @@ class categoriasController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             flash('Ocurrió un error vuelva a intentarlo')->warning();
-            return view('soporte.admin.capacitaciones.categorias.crear');
+            return back();
         }
     }
+
     public function editar(Categorias $categorias)
     {
         return view('soporte.admin.capacitaciones.categorias.editar', compact('categorias'));
     }
+
     public function actualizar(Request $request, $categorias)
     {
-
         $request->validate(
-
             [
                 'descripcion' => ['required'],
-
                 'orden' => ['required']
             ],
             [
                 'descripcion.required' => 'Ingrese una descripción',
-
                 'orden.required' => 'Ingrese el orden a mostrarse'
-
             ],
-
         );
+
         DB::beginTransaction();
         try {
             $actualizar = Categorias::where('categoriasid', $categorias)->first();
@@ -115,6 +114,7 @@ class categoriasController extends Controller
         }
         return back();
     }
+
     public function eliminar($categorias)
     {
         DB::beginTransaction();

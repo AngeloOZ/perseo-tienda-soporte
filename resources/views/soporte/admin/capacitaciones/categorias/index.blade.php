@@ -43,7 +43,7 @@
     </div>
 @endsection
 @section('modal')
-    @include('soporte.admin.capacitaciones.categorias.inc.delete_modal')
+    @include('soporte.admin.capacitaciones.inc.delete_modal')
 @endsection
 @section('script')
     <script>
