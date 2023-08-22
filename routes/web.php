@@ -7,6 +7,7 @@ use App\Http\Controllers\ComisionesController;
 use App\Http\Controllers\CuponesController;
 use App\Http\Controllers\FacturasController;
 use App\Http\Controllers\FirmaController;
+use App\Http\Controllers\PagosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
@@ -43,6 +44,15 @@ Route::post('/registrar/compra',  [FacturasController::class, 'registar_compra']
 Route::get('/', [usuariosController::class, 'redirect_login']);
 Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.login');
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
+
+Route::prefix('pagos')->group(function(){
+    Route::get('/registrar-comprobante/{factura}', [PagosController::class, 'registrar_pago_cliente'])->name('pagos.registrar');
+    Route::post('/guardar-comprobantes', [PagosController::class, 'guardar_pago'])->name('pagos.guardar');
+    Route::post('/actualizar-comprobante', [PagosController::class, 'actualizar_pago'])->name('pagos.actualizar');
+
+    Route::get('/reactivar-comprobante/{cobro}', [PagosController::class, 'reactivar_pago'])->name('pagos.reactivar');
+});
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/facturas', function(){

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Producto;
 use App\Models\ProductoHomologado;
 use App\Models\ProductosLicenciadorRenovacion;
+use App\Models\RenovacionLicencias;
 use App\Models\User;
 use Error;
 use Illuminate\Http\Request;
@@ -36,18 +37,36 @@ class FacturasLicenciasRenovarController extends Controller
                 $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
                 $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
-                $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+                // $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
                 if ($datos_cliente->telefono2 == "" || $datos_cliente->telefono2 == null) {
                     $datos_cliente->telefono2 = "0998661687";
                 }
+                $datos_cliente->telefono2 = "0996921873";
 
-                WhatsappRenovacionesController::enviar_archivo_mensaje([
+                $renovacion = new RenovacionLicencias();
+                $renovacion->uuid = uniqid();
+                $renovacion->secuencia = $factura->secuencia;
+                $renovacion->datos = json_encode([
+                    "datos_cliente" => $datos_cliente,
+                    "licencia" => $licencia,
+                    "factura" => $factura,
+                ]);
+                $renovacion->save();
+
+                // TODO: reactivar
+                // WhatsappRenovacionesController::enviar_archivo_mensaje([
+                //     "phone" => $datos_cliente->telefono2,
+                //     "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n" . route('pagos.registrar', $renovacion->uuid),
+                //     "filename" => "factura_{$factura->secuencia}.pdf",
+                //     "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
+                //     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                // ]);
+
+                WhatsappRenovacionesController::enviar_mensaje([
                     "phone" => $datos_cliente->telefono2,
-                    "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙",
-                    "filename" => "factura_{$factura->secuencia}.pdf",
-                    "filebase64" => "data:application/png;base64," . $autorizada->pdf,
                     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                    "message" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n" . route('pagos.registrar', $renovacion->uuid),
                 ]);
 
                 $facturadas++;
@@ -76,8 +95,9 @@ class FacturasLicenciasRenovarController extends Controller
             ->map(function ($item) {
                 return (object)$item;
             })
+            ->take(1)
             ->toArray();
-
+        // TODO: borrar take
         return $arrayDeObjetos;
     }
 
@@ -178,7 +198,7 @@ class FacturasLicenciasRenovarController extends Controller
             $datos->nombres = $licencia->contador_nombres;
             $datos->identificacion = $licencia->contador_identificacion;
             $datos->direccion = $licencia->contador_direccion;
-            $datos->telefono2 = $licencia->contador_telfono ?? null;
+            $datos->telefono2 = $licencia->contador_celular ?? null;
             $datos->correos = $licencia->contador_correo;
         }
 
@@ -352,6 +372,7 @@ class FacturasLicenciasRenovarController extends Controller
         $response = (object)[
             "facturaid" => $resultado["facturas"][0]["facturasid_nuevo"],
             "secuencia" => $resultado["facturas"][0]["facturas_secuencia"],
+            "total_facturado" => round($valoresFactura["totalneto"], 2)
         ];
 
         return $response;
@@ -381,6 +402,9 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
+        // TODO: borrar
+        return $this->obtener_vendedor_default($distribuidor);
+
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
