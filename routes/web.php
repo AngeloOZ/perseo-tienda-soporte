@@ -45,7 +45,10 @@ Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.log
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
 Route::group(['middleware' => 'auth'], function () {
-
+    Route::get('/facturas', function(){
+        return redirect()->route('facturas.listado');
+    });
+    
     /* Rutas para seccion facturas */
     Route::prefix('factura')->group(function () {
         Route::get('/descargar/{id_factura}/{id_comprobante}', [FacturasController::class, 'descargar_comprobante'])->name("factura.descargar_comprobante");
