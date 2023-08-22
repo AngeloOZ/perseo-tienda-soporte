@@ -10,6 +10,7 @@ use App\Models\User;
 use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class FacturasLicenciasRenovarController extends Controller
@@ -26,12 +27,11 @@ class FacturasLicenciasRenovarController extends Controller
         $instancia = new self();
         $licencias = $instancia->obtener_licencias();
 
-        // return $licencias;
-
         if (count($licencias) == 0) return 0;
         $facturadas = 0;
 
         foreach ($licencias as $licencia) {
+            DB::beginTransaction();
             try {
                 $productos = $instancia->buscar_producto($licencia);
                 $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
@@ -57,8 +57,6 @@ class FacturasLicenciasRenovarController extends Controller
                 ]);
                 $renovacion->save();
 
-                $url = "http://perseo-tienda-soporte.test:8080/pagos/registrar-comprobante/{$renovacion->uuid}";
-
                 WhatsappRenovacionesController::enviar_archivo_mensaje([
                     "phone" => $datos_cliente->telefono2,
                     "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
@@ -70,6 +68,7 @@ class FacturasLicenciasRenovarController extends Controller
                 $facturadas++;
                 echo "{$facturadas} facturas creadas\n";
             } catch (\Throwable $th) {
+                DB::rollBack();
                 echo $th->getMessage() . "\n";
                 continue;
             }

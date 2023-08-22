@@ -66,7 +66,8 @@ class PagosController extends Controller
             $renovacion->banco_destino = $request->banco_destino;
             $renovacion->save();
 
-            $isRenewed = $this->renovar_licencia($licencia);
+            // $isRenewed = $this->renovar_licencia($licencia);
+            $isRenewed = false;
             session()->put('isRenewedLicence', $isRenewed);
 
             return response()->json([
