@@ -23,9 +23,9 @@ class PagosController extends Controller
             }
             return view('pagos.resultado', ["renovacion" => $renovacion, 'isRenewed' => $isRenewed]);
         }
+        $datos = json_decode($renovacion->datos);
 
-
-        return view('pagos.cargar_pago', ['renovacion' => $renovacion]);
+        return view('pagos.cargar_pago', ['renovacion' => $renovacion, 'total' => $datos->factura->total_facturado]);
     }
 
     public function guardar_pago(Request $request)
@@ -61,6 +61,9 @@ class PagosController extends Controller
             $cobro->save();
             $renovacion->registrado = 1;
             $renovacion->cobrosid = $cobro->cobrosid;
+            $renovacion->numero_comprobante = $request->numero_comprobante;
+            $renovacion->banco_origen = $request->banco_origen;
+            $renovacion->banco_destino = $request->banco_destino;
             $renovacion->save();
 
             $isRenewed = $this->renovar_licencia($licencia);
@@ -69,7 +72,7 @@ class PagosController extends Controller
             return response()->json([
                 "status" => 201,
                 "message" => "Registro insertado correctamente",
-                "isRenewed" => $isRenewed
+                "isRenewed" => $isRenewed,
             ], 201);
         } catch (\Throwable $th) {
             return response()->json(["status" => 500, "message" => $th->getMessage()], 500);
@@ -95,6 +98,9 @@ class PagosController extends Controller
             $cobro->save();
 
             $renovacion->registrado = 1;
+            $renovacion->numero_comprobante = $request->numero_comprobante;
+            $renovacion->banco_origen = $request->banco_origen;
+            $renovacion->banco_destino = $request->banco_destino;
             $renovacion->save();
 
             return response()->json(["status" => 201, "message" => "Registro insertado correctamente"], 201);

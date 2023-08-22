@@ -196,7 +196,7 @@ class WhatsappRenovacionesController extends Controller
         switch ($das) {
             case 1:
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
-                $this->pathToken = 'ws/whatsapp.config.renovacionesalfa2.json';
+                $this->pathToken = 'public/ws/whatsapp.config.renovacionesalfa2.json';
                 break;
                 // case 2:
                 //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporte";
@@ -243,8 +243,7 @@ class WhatsappRenovacionesController extends Controller
                 ])
                 ->post($instancia->APIWhatsapp . "/send-message", $solicitud)
                 ->json();
-
-
+                
             if (isset($res['status']) && $res['status'] == 'success') {
                 return true;
             }

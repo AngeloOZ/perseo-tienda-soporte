@@ -1,7 +1,12 @@
 @extends('pagos.layouts.app')
 @section('titulo', 'Registrar pago')
 @section('descripcion', 'Productos listos para la compra')
-{{-- @section('imagen', asset('assets/media/firmas.jpg')) --}}
+
+@php
+    $bancoOrigen = ['Banco Pichincha', 'Banco del Pacifíco', 'Banco Guayaquil', 'Banco Internacional', 'Banco Bolivariano', 'Banco de Loja', 'Banco de Machala', 'Coperativa JEP', 'Coperativa 29 de Octubre', 'OTRO'];
+    
+    $bancoDestino = ['Banco Pichincha', 'Banco del Pacifíco'];
+@endphp
 
 @section('contenido')
     <style>
@@ -12,13 +17,17 @@
             background: #181C32;
         }
 
+        .form-input-list {
+            width: 420px;
+            max-width: 100%;
+        }
+
         .file-container {
             width: 420px;
             max-width: 100%;
             background: #fff;
             border-radius: 5px;
-            padding: 40px;
-            border: 2px solid #181C32;
+            border: 0px solid #181C32;
         }
 
         .file-container header {
@@ -32,12 +41,12 @@
             height: 167px;
             display: flex;
             cursor: pointer;
-            margin: 30px 0;
             align-items: center;
             justify-content: center;
             flex-direction: column;
             border-radius: 5px;
             border: 2px dashed #181C32;
+            margin: 0;
         }
 
         form :where(i, p) {
@@ -258,10 +267,43 @@
         <div class="d-flex flex-column-fluid">
             <div class="container-fluid">
                 <div class="card card-custom mb-8">
-                    <div class="card-body ">
+                    <div class="card-header" style="min-height: 50px">
+                        <h3 class="card-title">
+                            Comprobante de factura No: {{ $renovacion->uuid }}
+                        </h3>
+                    </div>
+                    <div class="card-body p-0 py-6">
                         <div class="d-flex justify-content-center flex-column flex-md-row">
                             <div class="file-container m-auto m-md-0">
-                                <header>Subir comprobantes de factura No: {{ $renovacion->uuid }}</header>
+                                <div>
+                                    <div class="form-group m-0 mb-3">
+                                        <label>Valor de la factura</label>
+                                        <input value="{{ $total }}" disabled class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="form-group m-0 mb-3">
+                                        <label>Número de comprobante<span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control form-control-sm" placeholder="XXXXXXXXXX"
+                                            value="{{ $renovacion->numero_comprobante }}" name="numero_comprobante"
+                                            id="numero_comprobante" />
+                                    </div>
+                                    <div class="form-group m-0 mb-3">
+                                        <label>Banco de Origén<span class="text-danger">*</span></label>
+                                        <select class="form-control form-control-sm" name="banco_origen" id="banco_origen">
+                                            @foreach ($bancoOrigen as $banco)
+                                                <option>{{ $banco }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group m-0 mb-5">
+                                        <label>Banco de Destino<span class="text-danger">*</span></label>
+                                        <select class="form-control form-control-sm" name="banco_destino"
+                                            id="banco_destino">
+                                            @foreach ($bancoDestino as $banco)
+                                                <option>{{ $banco }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
                                 <form action="#">
                                     <input class="file-input" type="file" name="file" hidden
                                         accept="image/jpg', image/jpeg, image/png" multiple>
@@ -300,6 +342,16 @@
             const fileInput = document.querySelector(".file-input");
             const uploadedArea = document.querySelector(".uploaded-area");
             const btnUpload = document.getElementById('btnUpload');
+
+            const comprobante = document.getElementById('numero_comprobante');
+            const bancoOrigen = document.getElementById('banco_origen');
+            const bancoDestino = document.getElementById('banco_destino');
+
+            @if ($renovacion->cobrosid != null)
+                $('#numero_comprobante').val("{{ $renovacion->numero_comprobante }}");
+                $('#banco_origen').val("{{ $renovacion->banco_origen }}");
+                $('#banco_destino').val("{{ $renovacion->banco_destino }}");
+            @endif
 
             form.addEventListener("click", () => {
                 const numberFiles = formData.getAll(nameKey).length;
@@ -354,11 +406,21 @@
             })
 
             btnUpload.addEventListener('click', async (e) => {
+                if (comprobante.value == '') {
+                    showAlert("Número de comprobante requerido",
+                        `Por favor ingresa el número de comprobante`
+                    );
+                    return;
+                }
+
                 $('#overlay-loader-upload').removeClass('d-none');
                 const numberFiles = formData.getAll(nameKey).length;
                 if (numberFiles == 0) return;
                 formData.append('uuid', "{{ $renovacion->uuid }}");
                 formData.append('renovacionid', "{{ $renovacion->renovacionid }}");
+                formData.append('numero_comprobante', comprobante.value);
+                formData.append('banco_origen', bancoOrigen.value);
+                formData.append('banco_destino', bancoDestino.value);
 
                 try {
                     const config = {
