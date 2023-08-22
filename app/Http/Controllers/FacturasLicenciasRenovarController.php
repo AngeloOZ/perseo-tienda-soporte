@@ -31,7 +31,6 @@ class FacturasLicenciasRenovarController extends Controller
         $facturadas = 0;
 
         foreach ($licencias as $licencia) {
-            DB::beginTransaction();
             try {
                 $productos = $instancia->buscar_producto($licencia);
                 $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
@@ -66,11 +65,11 @@ class FacturasLicenciasRenovarController extends Controller
                 $facturadas++;
                 echo "{$facturadas} facturas creadas\n";
             } catch (\Throwable $th) {
-                DB::rollBack();
                 echo $th->getMessage() . "\n";
                 continue;
             }
         }
+        echo "Total renovadas $facturadas\n";
         return $facturadas;
     }
 
