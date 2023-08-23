@@ -292,7 +292,7 @@ class CobrosController extends Controller
     {
         try {
             $vendedor = User::firstWhere('usuariosid', $cobro->usuariosid);
-            $revisor = User::where('usuariosid', $cobro->usuariosid)->where('distribuidoresid', $vendedor->distribuidoresid)->first();
+            $revisor = User::where('rol', 2)->where('distribuidoresid', $vendedor->distribuidoresid)->first();
 
             $secuenciasAux = json_decode($cobro->secuencias);
             $secuencias = [];
@@ -301,18 +301,18 @@ class CobrosController extends Controller
                 array_push($secuencias, $item->value);
             }
 
-
-            $correoRevisor = "angello.ordonez@hotmail.com";
+            $correoRevisor = $revisor->correo;
 
             $array = [
                 'from' => "noresponder@perseo.ec",
-                'subject' => "Notificación de pago",
+                'subject' => "Nuevo cobro registrado",
                 'revisora' => $revisor->nombres,
                 'sencuencias' => $secuencias,
             ];
 
             Mail::to($correoRevisor)->queue(new NotificarPago($array));
         } catch (\Throwable $th) {
+            dd($th);
         }
     }
 }
