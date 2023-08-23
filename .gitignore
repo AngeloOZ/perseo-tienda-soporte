@@ -15,4 +15,7 @@ yarn-error.log
 /.vscode
 *g.zip
 /public/ws
+/public/assets/archivos
+/public/.well-known
+/public/.user.ini
 .htaccess
