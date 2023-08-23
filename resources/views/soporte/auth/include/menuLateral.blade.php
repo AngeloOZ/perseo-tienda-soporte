@@ -256,6 +256,15 @@
                         </div>
                     </li>
                 @endif
+
+                @if (in_array($userRol, [7]))
+                    <li class="menu-item {{ areActiveRoutes(['clientes.index']) }}" aria-haspopup="true">
+                        <a href="{{ route('clientes.index') }}" class="menu-link">
+                            <i class="menu-icon fa fa-user-circle"></i>
+                            <span class="menu-text">Clientes</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\adminController;
 use App\Http\Controllers\categoriasController;
+use App\Http\Controllers\clientesController;
 use App\Http\Controllers\productosController2;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\SoporteEspcialController;
@@ -119,6 +121,10 @@ Route::prefix('soporte')->group(function () {
 
         // COMMENT: Rutas para integracion de capacitacion LEIDY
         Route::prefix('asignacion')->group(function () {
+
+            Route::post('/recuperar-Post', [adminController::class, 'recuperarPost'])->name('recuperarInformacionPost');
+
+
             // ✅ Funcional
             Route::prefix('asignacion')->group(function () {
                 Route::get('/listado', [productosController2::class, 'index'])->name('asignacion.index');
@@ -129,6 +135,7 @@ Route::prefix('soporte')->group(function () {
                 Route::get('/videos/{producto}', [productosController2::class, 'asignacionvideos'])->name('asignacionvideos');
                 Route::put('/actualizar-videos/{producto}', [productosController2::class, 'asignacionActualizarvideos'])->name('asignacion.actualizarvideos');
             });
+
             // ✅ Funcional
             Route::prefix('categorias')->group(function () {
                 Route::get('/', [categoriasController::class, 'index'])->name('categorias.index');
@@ -138,6 +145,7 @@ Route::prefix('soporte')->group(function () {
                 Route::put('/actualizar/{categorias}', [categoriasController::class, 'actualizar'])->name('categorias.actualizar');
                 Route::delete('/eliminar/{categorias}', [categoriasController::class, 'eliminar'])->name('categorias.eliminar');
             });
+
             // ✅ Funcional
             Route::prefix('sub-categorias')->group(function () {
                 Route::get('/', [subcategoriasController::class, 'index'])->name('subcategorias.index');
@@ -156,6 +164,20 @@ Route::prefix('soporte')->group(function () {
                 Route::get('/editar/{temas}', [temasController::class, 'editar'])->name('temas.editar');
                 Route::put('/actualizar/{temas}', [temasController::class, 'actualizar'])->name('temas.actualizar');
                 Route::delete('/eliminar/{temas}', [temasController::class, 'eliminar'])->name('temas.eliminar');
+            });
+
+            Route::prefix('cliente')->group(function () {
+                Route::get('/listado', [clientesController::class, 'index'])->name('clientes.index');
+
+                Route::get('/crear', [clientesController::class, 'crear'])->name('clientes.crear');
+                Route::post('/guardar', [clientesController::class, 'guardar'])->name('clientes.guardar');
+
+                Route::get('/editar/{clientes}', [clientesController::class, 'editar'])->name('clientes.editar');
+                Route::put('/actualizar/{clientes}', [clientesController::class, 'actualizar'])->name('clientes.actualizar');
+
+                Route::delete('/eliminar/{clientes}', [clientesController::class, 'eliminar'])->name('clientes.eliminar');
+
+                // Route::get('/clientecotizar/{clientes}/{id}', [cotizarController::class, 'index'])->name('clientes.cotizar');
             });
         });
     });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -13,7 +14,6 @@ class adminController extends Controller
     {
         Session::put('menu', $request->estado);
     }
-
 
     public function verificarEmailCelular(Request $request)
     {
@@ -36,7 +36,7 @@ class adminController extends Controller
         return [$verificacionemail, $verificacioncelular, $verificacioncelular2];
     }
 
-    private function validarEmail($email)
+    private function validarEmail($email)   
     {
         $url = 'https://emailvalidation.abstractapi.com/v1/?api_key=fae435e4569b4c93ac34e0701100778c&email=' . $email;
 
@@ -78,5 +78,21 @@ class adminController extends Controller
         if ($celular['valid'] == false) return 0;
 
         return 1;
+    }
+
+    public function recuperarPost(Request $request)
+    {
+        $cliente = new Client();
+        $res = $cliente->request(
+            'POST',
+            'https://www.perseo.app/api/datos/datos_consulta',
+            [
+                'verify' => false,
+                'headers' => ['Content-Type' => 'application/json; charset=UTF-8', "usuario" => "perseo", "clave" => "Perseo1232*"],
+                'json' => ['identificacion' => $request->cedula]
+            ]
+        );
+        $resultado = json_decode($res->getBody()->getContents());
+        return response()->json($resultado);
     }
 }

@@ -44,6 +44,10 @@ return [
             'driver' => 'session',
             'provider' => 'tecnicos',
         ],
+        'cliente' => [
+            'driver' => 'session',
+            'provider' => 'clientes',
+        ],
     ],
 
     /*
@@ -71,6 +75,10 @@ return [
         'tecnicos' => [
             'driver' => 'eloquent',
             'model' => App\Models\Tecnicos::class,
+        ],
+        'clientes' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Clientes::class,
         ],
 
         // 'users' => [
