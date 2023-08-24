@@ -23,23 +23,26 @@ class sesionesController extends Controller
         return view('soporte.admin.capacitaciones.sesiones.index');
     }
 
-    public function index(Request $request)
+    public function filtradoIndex(Request $request)
     {
-
         if ($request->ajax()) {
             $fecha = $request->fecha;
             $tipo = $request->tipo;
+
             $consulta = Sesiones::select('sesiones.sesionesid', 'sesiones.suma', 'sesiones.enlace', 'sesiones.descripcion', 'sesiones.fechainicio', 'sesiones.fechafin', 'tecnicos.nombres as creador', 'clientes.razonsocial as clientesid', 'productos2.descripcion as productosid', 'planificaciones.planificacionesid')
                 ->join('tecnicos', 'tecnicos.tecnicosid', 'sesiones.tecnicosid')
                 ->join('clientes', 'clientes.clientesid', 'sesiones.clientesid')
                 ->join('planificaciones', 'planificaciones.planificacionesid', 'sesiones.planificacionesid')
                 ->join('productos2', 'productos2.productosid', 'planificaciones.productosid');
 
-
-            if (Auth::guard('tecnico')->user()->administrador == ConstantesTecnicos::ROL_ADMINISTRADOR) {
-                $data = $consulta->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)->where('tecnicos.subdistribuidoresid', Auth::guard('tecnico')->user()->subdistribuidoresid)->get();
+            if (Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR) {
+                $data = $consulta
+                    ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
+                    ->get();
             } else {
-                $data = $consulta->where('sesiones.tecnicosid', Auth::guard('tecnico')->user()->tecnicosid)->get();
+                $data = $consulta
+                    ->where('sesiones.tecnicosid', Auth::guard('tecnico')->user()->tecnicosid)
+                    ->get();
             }
 
             if ($tipo != null) {
@@ -48,22 +51,20 @@ class sesionesController extends Controller
                 if ($fecha) {
                     $desde = date('Y-m-d', strtotime(explode(" / ", $fecha)[0]));
                     $hasta = date('Y-m-d', strtotime(explode(" / ", $fecha)[1]));
-                    if (Auth::guard('tecnico')->user()->administrador == 1) {
-                        $data = $consulta->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)->where('tecnicos.subdistribuidoresid', Auth::guard('tecnico')->user()->subdistribuidoresid);
+                    if (Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR) {
+                        $data = $consulta
+                            ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid);
                     } else {
                         $data = $consulta->where('sesiones.tecnicosid', Auth::guard('tecnico')->user()->tecnicosid);
                     }
-
                     $data = $data->whereBetween(DB::raw("DATE($tipo_fecha)"), [$desde, $hasta])->get();
                 }
             }
-            return DataTables::of($data)
 
+            return DataTables::of($data)
                 ->editColumn('action', function ($sesiones) {
                     return '<a class="btn btn-sm btn-clean btn-icon" href="' . route('sesiones.editar', $sesiones->sesionesid) . '" title="Editar"> <i class="la la-edit"></i> </a>' . '<a class="btn btn-sm btn-clean btn-icon confirm-delete" href="javascript:void(0)" data-href="' . route('sesiones.eliminar', $sesiones->sesionesid) . '" title="Eliminar"> <i class="la la-trash"></i> </a>';
                 })
-
-
                 ->editColumn('fechainicio', function ($sesiones) {
                     if ($sesiones->fechainicio != null) {
                         return Carbon::parse($sesiones->fechainicio)->format('d-m-Y H:i:s');
@@ -78,8 +79,6 @@ class sesionesController extends Controller
                         return '';
                     }
                 })
-
-
                 ->rawColumns(['action', 'fechainicio', 'fechafin'])
                 ->make(true);
         }
@@ -91,13 +90,11 @@ class sesionesController extends Controller
     public function crear()
     {
         $sesiones = new Sesiones();
-
         return view('soporte.admin.capacitaciones.sesiones.crear', compact('sesiones'));
     }
 
     public function guardar(Request $request)
     {
-
         $request->validate(
             [
                 'descripcion' => ['required'],
@@ -113,10 +110,8 @@ class sesionesController extends Controller
             ],
         );
 
-
         DB::beginTransaction();
         try {
-
             $sesion = new Sesiones();
             $sesion->clientesid = $request->clientesid;
             $sesion->descripcion = $request->descripcion;
@@ -149,7 +144,6 @@ class sesionesController extends Controller
 
     public function editar(Sesiones $sesiones)
     {
-
         return view('soporte.admin.capacitaciones.sesiones.editar', compact('sesiones'));
     }
 
@@ -160,25 +154,19 @@ class sesionesController extends Controller
         if ($actualizar->fechainicio == "" || $actualizar->fechainicio == null) {
             $request->validate(
                 [
-
                     'clientesid' => ['required'],
                     'planificacionesid' => ['required'],
                     'tecnicosid' => ['required'],
-
                 ],
                 [
                     'clientesid.required' => 'Escoja un cliente',
                     'planificacionesid.required' => 'Escoja una planificación',
                     'tecnicosid.required' => 'Escoja un técnico',
-
                 ],
             );
         }
 
-
         try {
-
-
             $actualizar->fechahoramodificacion = now();
             $actualizar->usuariomodificacion = Auth::guard('tecnico')->user()->nombres;
 
@@ -220,6 +208,7 @@ class sesionesController extends Controller
         }
         return back();
     }
+
     public function ingresarFechaInicio(Request $request)
     {
 
@@ -359,9 +348,7 @@ class sesionesController extends Controller
 
     public function recuperarDetalles(Request $request)
     {
-
         $detalles = PlanificacionesDetalles::select('temasid', 'calificacioncliente')->where('planificacionesid', $request->detalles)->get();
-
         return $detalles;
     }
 }

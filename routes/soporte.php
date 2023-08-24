@@ -198,14 +198,15 @@ Route::prefix('soporte')->group(function () {
 
 
             Route::prefix('sesiones')->group(function () {
-                Route::post('/', [sesionesController::class, 'index'])->name('sesiones.index');
                 Route::post('/recuperar', [sesionesController::class, 'recuperar'])->name('sesiones.recuperarplanificaciones');
                 Route::get('/recuperar-detalles/{detalles}', [sesionesController::class, 'recuperarDetalles'])->name('sesiones.recuperardetalles');
-
+                
                 Route::post('/inicio', [sesionesController::class, 'ingresarFechaInicio'])->name('sesiones.ingresarFechaInicio');
                 Route::post('/fin', [sesionesController::class, 'ingresarFechaFin'])->name('sesiones.ingresarFechaFin');
-
+                
                 Route::get('/listado', [sesionesController::class, 'indexVista'])->name('sesiones.indexVista');
+                Route::post('/listado', [sesionesController::class, 'filtradoIndex'])->name('sesiones.index');
+
                 Route::get('/crear', [sesionesController::class, 'crear'])->name('sesiones.crear');
                 Route::post('/guardar', [sesionesController::class, 'guardar'])->name('sesiones.guardar');
                 Route::get('/editar/{sesiones}', [sesionesController::class, 'editar'])->name('sesiones.editar');

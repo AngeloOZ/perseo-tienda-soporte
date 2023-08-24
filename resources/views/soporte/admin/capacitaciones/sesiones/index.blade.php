@@ -71,7 +71,6 @@
                             <div class="card-body">
                                 <div class="mb-15" id="filtro" style="display: none;">
                                     <div class="row mb-8">
-
                                         <div class="col-lg-6 mb-lg-0 mb-6">
                                             <label>Tipo:</label>
                                             <select class="form-control select2" id="tipo">
@@ -92,8 +91,6 @@
                                                     placeholder="Rango de Fechas" id="fecha">
                                             </div>
                                         </div>
-
-
                                     </div>
                                     <div class="row ">
                                         <div class="col-lg-12">
@@ -128,8 +125,6 @@
                                             <th>Enlace</th>
                                             <th class="no-exportar">Acciones</th>
                                             <th>Tiempo Ocupado</th>
-
-
                                         </tr>
                                     </thead>
 
@@ -158,6 +153,7 @@
                 $('#kt_fecha .form-control').val(start.format('DD-MM-YYYY') + ' / ' + end.format(
                     'DD-MM-YYYY'));
             };
+
             $('#kt_fecha').daterangepicker({
                 autoUpdateInput: false,
                 format: "DD-MM-YYYY",
@@ -215,10 +211,6 @@
             }, cb);
             cb(start, end);
 
-
-
-
-
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -253,11 +245,8 @@
                     data: function(d) {
                         d.fecha = $('#fecha').val();
                         d.tipo = $('#tipo').val();
-
                     }
                 },
-
-
                 columns: [{
                         data: 'sesionesid',
                         name: 'sesionesid',
@@ -327,7 +316,6 @@
                     },
                 ],
                 buttons: [
-
                     {
                         extend: 'excelHtml5',
                         title: 'Sesiones',
@@ -345,9 +333,9 @@
                             });
                         },
                     }
-
                 ],
             });
+
             table.search('').draw();
             //Clic en boton buscar
             $('#kt_search').on('click', function(e) {
