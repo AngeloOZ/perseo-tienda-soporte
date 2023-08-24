@@ -2,13 +2,15 @@
 @section('titulo', 'Reporte de comisiones')
 
 @php
+    use App\Constants\ConstantesTecnicos;
+    
     $vendedores = App\Models\User::where('estado', 1)
         ->where('rol', 1)
         ->whereIn('distribuidoresid', [1, 2])
         ->get();
     
     $tecnicos = App\Models\User::where('estado', 1)
-        ->where('rol', 5)
+        ->where('rol', ConstantesTecnicos::ROL_TECNICOS)
         ->get();
 @endphp
 
@@ -402,7 +404,9 @@
             // End buttons to export
 
             function initDateMonth() {
-                $("#filtroFecha").val(`${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`);
+                $("#filtroFecha").val(
+                    `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
+                    );
             }
 
             function convertStrToFloat(val) {

@@ -363,6 +363,7 @@
                 $("#filtroAsignados").val(filtro.asignados);
                 $("#filtroFecha").val(filtro.fecha);
                 $("#filtroProducto").val(filtro.producto);
+                $('#filtroTecnicos').trigger('change');
             }
         }
 

@@ -3,7 +3,9 @@
 use App\Http\Controllers\adminController;
 use App\Http\Controllers\categoriasController;
 use App\Http\Controllers\clientesController;
+use App\Http\Controllers\planificacionesController;
 use App\Http\Controllers\productosController2;
+use App\Http\Controllers\sesionesController;
 use App\Http\Controllers\SoporteController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\subcategoriasController;
@@ -120,7 +122,7 @@ Route::prefix('soporte')->group(function () {
         });
 
         // COMMENT: Rutas para integracion de capacitacion LEIDY
-        Route::prefix('asignacion')->group(function () {
+        Route::prefix('capacitaciones')->group(function () {
 
             Route::post('/recuperar-Post', [adminController::class, 'recuperarPost'])->name('recuperarInformacionPost');
 
@@ -178,6 +180,38 @@ Route::prefix('soporte')->group(function () {
                 Route::delete('/eliminar/{clientes}', [clientesController::class, 'eliminar'])->name('clientes.eliminar');
 
                 // Route::get('/clientecotizar/{clientes}/{id}', [cotizarController::class, 'index'])->name('clientes.cotizar');
+            });
+
+            // ✅ Funcional
+            Route::prefix('planificaciones')->group(function () {
+                Route::get('/listado', [planificacionesController::class, 'index'])->name('planificaciones.index');
+                Route::get('/temas/{planificaciones}', [planificacionesController::class, 'temas'])->name('planificaciones.temas');
+
+                Route::get('/crear', [planificacionesController::class, 'crear'])->name('planificaciones.crear');
+                Route::post('/guardar', [planificacionesController::class, 'guardar'])->name('planificaciones.guardar');
+
+                Route::get('/editar/{planificaciones}', [planificacionesController::class, 'editar'])->name('planificaciones.editar');
+                Route::put('/actualizar/{planificaciones}', [planificacionesController::class, 'actualizar'])->name('planificaciones.actualizar');
+
+                Route::delete('/eliminar/{planificaciones}', [planificacionesController::class, 'eliminar'])->name('planificaciones.eliminar');
+            });
+
+
+            Route::prefix('sesiones')->group(function () {
+                Route::post('/', [sesionesController::class, 'index'])->name('sesiones.index');
+                Route::post('/recuperar', [sesionesController::class, 'recuperar'])->name('sesiones.recuperarplanificaciones');
+                Route::get('/recuperar-detalles/{detalles}', [sesionesController::class, 'recuperarDetalles'])->name('sesiones.recuperardetalles');
+
+                Route::post('/inicio', [sesionesController::class, 'ingresarFechaInicio'])->name('sesiones.ingresarFechaInicio');
+                Route::post('/fin', [sesionesController::class, 'ingresarFechaFin'])->name('sesiones.ingresarFechaFin');
+
+                Route::get('/listado', [sesionesController::class, 'indexVista'])->name('sesiones.indexVista');
+                Route::get('/crear', [sesionesController::class, 'crear'])->name('sesiones.crear');
+                Route::post('/guardar', [sesionesController::class, 'guardar'])->name('sesiones.guardar');
+                Route::get('/editar/{sesiones}', [sesionesController::class, 'editar'])->name('sesiones.editar');
+                Route::put('/actualizar/{sesiones}', [sesionesController::class, 'actualizar'])->name('sesiones.actualizar');
+                Route::delete('/eliminar/{sesiones}', [sesionesController::class, 'eliminar'])->name('sesiones.eliminar');
+                Route::get('/correo/{sesiones}', [sesionesController::class, 'enviarCorreo'])->name('sesiones.enviarCorreo');
             });
         });
     });

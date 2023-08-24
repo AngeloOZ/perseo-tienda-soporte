@@ -265,6 +265,27 @@
                         </a>
                     </li>
                 @endif
+
+                @if (in_array($userRol, [5, 7]))
+                    <li class="menu-item {{ areActiveRoutes(['planificaciones.index']) }}" aria-haspopup="true">
+                        <a href="{{ route('planificaciones.index') }}" class="menu-link">
+                            <i class="menu-icon fa fa-book">
+                                <span></span>
+                            </i>
+                            <span class="menu-text">Planificaciones</span>
+                        </a>
+                    </li>
+                @endif
+                @if (in_array($userRol, [5, 7]))
+                    <li class="menu-item {{ areActiveRoutes(['sesiones.indexVista']) }}" aria-haspopup="true">
+                        <a href="{{ route('sesiones.indexVista') }}" class="menu-link">
+                            <i class="menu-icon fas fa-handshake">
+                                <span></span>
+                            </i>
+                            <span class="menu-text">Sesiones</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
         </div>
     </div>

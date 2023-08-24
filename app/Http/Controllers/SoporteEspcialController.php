@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ConstantesTecnicos;
 use App\Mail\NotificacionCapacitacion;
 use App\Mail\NotificacionEstadoCapacitacion;
 use App\Models\Log;
@@ -552,7 +553,7 @@ class SoporteEspcialController extends Controller
     private function notificar_nuevo_estado($soporte, $estadoNum)
     {
         try {
-            $revisor = Tecnicos::where('rol', 8)->first();
+            $revisor = Tecnicos::where('rol', ConstantesTecnicos::ROL_REVISOR)->first();
 
             if (!$revisor) return false;
 
@@ -596,7 +597,7 @@ class SoporteEspcialController extends Controller
                     return $query->where('distribuidoresid', $distribuidor);
                 }
             })
-            ->where('rol', 5)
+            ->where('rol', ConstantesTecnicos::ROL_TECNICOS)
             ->where('estado', 1)
             ->get();
 

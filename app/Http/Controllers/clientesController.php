@@ -235,9 +235,6 @@ class clientesController extends Controller
         return back();
     }
 
-    /* REVIEW: Hasta aqui funciona <- */
-
-
     /* -------------------------------------------------------------------------- */
     /*                          Funciones para el cliente                         */
     /* -------------------------------------------------------------------------- */
@@ -260,7 +257,6 @@ class clientesController extends Controller
             ],
         );
 
-        // $identificacion = substr($request->identificacion, 0, 10);
         $identificacion = $request->identificacion;
 
         $cliente = Clientes::where('identificacion', $identificacion)
@@ -281,6 +277,8 @@ class clientesController extends Controller
         $request->session()->regenerate();
         return redirect()->route('clientesFront.index');
     }
+
+    /* REVIEW: Hasta aqui funciona <- */
 
     public function indexFront(Request $request)
     {

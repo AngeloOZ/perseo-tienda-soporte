@@ -408,6 +408,7 @@
                 $("#filtroTipo").val(filtro.tipo);
                 $("#filtroFecha").val(filtro.fecha);
                 $("#filtroDistribuidor").val(filtro.distribuidor);
+                $('#filtroTecnicos').trigger('change');
             }
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\ConstantesTecnicos;
 use App\Mail\CalificarSoporte;
 use App\Mail\EnviarTicketSoporte;
 use App\Models\ActividadTicket;
@@ -130,8 +131,8 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket(Ticket $ticket)
     {
-        $desarrolladores = Tecnicos::where('rol', 6)->get();
-        $supervisores = Tecnicos::where('rol', 7)
+        $desarrolladores = Tecnicos::where('rol', ConstantesTecnicos::ROL_DESARROLLO)->get();
+        $supervisores = Tecnicos::where('rol', ConstantesTecnicos::ROL_ADMINISTRADOR)
             ->where('distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
             ->get();
 
@@ -719,7 +720,7 @@ class TicketSoporteController extends Controller
     public function editar_ticket_desarrollo(Ticket $ticket)
     {
         $tecnicoAsignado = Tecnicos::findOrFail($ticket->tecnicosid);
-        $supervisores = Tecnicos::where('rol', 7)->where('distribuidoresid', $tecnicoAsignado->distribuidoresid)->get();
+        $supervisores = Tecnicos::where('rol', ConstantesTecnicos::ROL_ADMINISTRADOR)->where('distribuidoresid', $tecnicoAsignado->distribuidoresid)->get();
 
         return view("soporte.admin.desarrollo.editar", ["ticket" => $ticket, "supervisores" => $supervisores, "tecnicoAsignado" => $tecnicoAsignado]);
     }
@@ -842,7 +843,7 @@ class TicketSoporteController extends Controller
     public function editar_ticket_revisor(Ticket $ticket)
     {
 
-        $desarrolladores = Tecnicos::where('rol', 6)->get();
+        $desarrolladores = Tecnicos::where('rol', ConstantesTecnicos::ROL_DESARROLLO)->get();
         $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
 
@@ -862,7 +863,7 @@ class TicketSoporteController extends Controller
     {
         $tecnicos = Tecnicos::orderBy('activo', 'DESC')
             ->select('tecnicosid', 'identificacion', 'nombres', 'activo', 'fecha_de_ingreso', 'fecha_de_salida')
-            ->where('rol', 5)
+            ->where('rol', ConstantesTecnicos::ROL_TECNICOS)
             ->when(Auth::guard('tecnico')->user()->distribuidoresid, function ($query, $distribuidor) {
                 if ($distribuidor == 1) {
                     return $query->where('distribuidoresid', 1);
@@ -1472,7 +1473,7 @@ class TicketSoporteController extends Controller
     {
         $tecnicoLibre = null;
         if ($producto == "pc") {
-            $tecnicoLibre = Tecnicos::where('rol', 5)
+            $tecnicoLibre = Tecnicos::where('rol', ConstantesTecnicos::ROL_TECNICOS)
                 ->where('estado', 1)
                 ->where('activo', 1)
                 ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
@@ -1481,7 +1482,7 @@ class TicketSoporteController extends Controller
                 ->orderBy('tickets_activos')
                 ->first();
         } else {
-            $tecnicoLibre = Tecnicos::where('rol', 5)
+            $tecnicoLibre = Tecnicos::where('rol', ConstantesTecnicos::ROL_TECNICOS)
                 ->where('estado', 1)
                 ->where('activo', 1)
                 ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
@@ -1590,7 +1591,7 @@ class TicketSoporteController extends Controller
                     return $query->where('distribuidoresid', $distribuidor);
                 }
             })
-            ->where('rol', 5)
+            ->where('rol', ConstantesTecnicos::ROL_TECNICOS)
             ->where('estado', 1)
             ->get();
 
