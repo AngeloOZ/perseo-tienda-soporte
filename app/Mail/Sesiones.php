@@ -30,7 +30,7 @@ class Sesiones extends Mailable
      public function build()
      {
 
-          return $this->view('frontend.emails.temasSesiones')
+          return $this->view('emails.temasSesiones')
                ->from($this->array['from'], env('MAIL_FROM_NAME'))
                ->subject($this->array['subject'])->attach(public_path() . '/generados/sesion-'.$this->array['tema'].'.pdf');
      }

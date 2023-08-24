@@ -276,7 +276,7 @@ class sesionesController extends Controller
             $html = str_replace('${fecha}', $fechaP, $html);
             $html = str_replace('${producto}', $horas->producto, $html);
             $html = str_replace('${nombre}', $horas->razonsocial, $html);
-            $html = str_replace('${logo}', env('URL'), $html);
+            $html = str_replace('${logo}', public_path('assets/media/logos/login.png'), $html);
 
             $tablaHtml = '';
             foreach ($temas as $dato) {
@@ -284,9 +284,9 @@ class sesionesController extends Controller
             }
 
             $html = str_replace('${tabla}', $tablaHtml, $html);
-            // $pdf = PDF::loadHTML($html);
+            $pdf = PDF::loadHTML($html);
 
-            // $pdf->save(public_path('generados/Sesion-' . $horas->sesionesid . '.pdf'));
+            $pdf->save(public_path('generados/Sesion-' . $horas->sesionesid . '.pdf'));
 
             try {
                 Mail::to($emails)->queue(new MailSesiones($array));

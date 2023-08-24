@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title></title>
+    <style>
+      /* Estilos para simular el formato A4 */
+
+      header {
+        padding: 0;
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      header img {
+        width: 6.58cm;
+        height: 1.86cm;
+      }
+      body {
+        height: 29.7cm;
+        margin: 0;
+        padding: 0 0.5cm;
+        background-color: white;
+        font-family: Arial, sans-serif;
+      }
+      /* Estilos para la fecha */
+      .fecha {
+        position: absolute;
+        top: 1.5cm;
+        right: 0.5cm;
+        font-size: 13px;
+      }
+      /* Estilos para los nombres */
+      .nombres {
+        font-size: 16px;
+        font-weight: bold;
+        margin-top: 2cm;
+      }
+      /* Estilos para el texto */
+      .texto {
+        margin-top: 1cm;
+        font-size: 14px;
+        margin-bottom: 1.5cm;
+      }
+      table {
+        margin: 0 auto;
+        border-collapse: collapse;
+        width: 60%;
+      }
+
+      tr {
+        border-bottom: 1px solid #000;
+      }
+
+      td,
+      th {
+        padding: 10px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img
+        src="${logo}"
+        alt="Logo de la empresa"
+      />
+    </header>
+
+    <div class="fecha">
+      <p>Santo Domingo, ${fecha}</p>
+    </div>
+    <div class="nombres">
+      <p>Estimado/a ${nombre}</p>
+    </div>
+    <div class="texto">
+      <p>
+        Los temas que han sido calificados en la planificación del producto <b> ${producto}</b>
+         son los siguientes:
+      </p>
+    </div>
+    <div class="tabla" width="50%">
+      <table>
+        <thead>
+          <tr>
+            <th>TEMAS</th>
+            <th>CALIFICACIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tabla}
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
