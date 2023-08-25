@@ -1,8 +1,13 @@
 @php
     $currentUser = Auth::guard('tecnico')->user();
     $disabled = 'disabled';
+    $disabled2 = 'disabled';
     if ($currentUser->rol == 7 && $currentUser->distribuidoresid == 2) {
         $disabled = '';
+    }
+    
+    if ($currentUser->rol == 7) {
+        $disabled2 = '';
     }
 @endphp
 <h3 class="font-size-h6 font-weight-bold">Datos del ticket</h3>
@@ -42,7 +47,8 @@
 <div class="form-group row ">
     <div class="col-12">
         <label>Motivo del soporte</label>
-        <textarea placeholder="Describe la razón del soporte en un mínimo de 50 caracteres" class="form-control" readonly rows="5" style="resize: none">{{ $ticket->motivo }}</textarea>
+        <textarea placeholder="Describe la razón del soporte en un mínimo de 50 caracteres" class="form-control" readonly
+            rows="5" style="resize: none">{{ $ticket->motivo }}</textarea>
     </div>
 </div>
 
@@ -59,8 +65,7 @@
     </div>
     <div class="col-12 mb-3 col-md-6 mb-md-0">
         <label>Distribuidor</label>
-        
-        <select class="form-control" name="distribuidor">
+        <select class="form-control" name="distribuidor" {{ $disabled2 }}>
             <option value="1" {{ $ticket->distribuidor == 1 ? 'selected' : '' }}>Perseo Alfa
             </option>
             <option value="2" {{ $ticket->distribuidor == 2 ? 'selected' : '' }}>Perseo
