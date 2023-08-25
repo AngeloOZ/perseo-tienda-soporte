@@ -1,4 +1,4 @@
-@extends('frontend.layouts.app')
+@extends('cliente.layouts.app')
 @section('contenido')
     <style>
         #kt_datatable td {
@@ -85,12 +85,8 @@
                                             <th>Enlace</th>
                                             <th class="no-exportar">Acción</th>
                                             <th>Tiempo Ocupado</th>
-
-
                                         </tr>
                                     </thead>
-
-
                                 </table>
                                 <!--end: Datatable-->
                             </div>
@@ -103,7 +99,7 @@
     </div>
 @endsection
 @section('modal')
-    @include('modals.verificar_planificacion')
+    @include('cliente.inc.verificar_planificacion')
 @endsection
 @section('script')
     <script>
@@ -115,6 +111,7 @@
                 $('#kt_fecha .form-control').val(start.format('DD-MM-YYYY') + ' / ' + end.format(
                     'DD-MM-YYYY'));
             };
+            
             $('#kt_fecha').daterangepicker({
                 autoUpdateInput: false,
                 format: "DD-MM-YYYY",
@@ -170,8 +167,8 @@
                 showDropdowns: true,
 
             }, cb);
+            
             cb(start, end);
-
 
             $.ajaxSetup({
                 headers: {
@@ -276,7 +273,9 @@
                     },
                 ]
             });
+            
             table.search('').draw();
+            
             //Clic en boton buscar
             $('#kt_search').on('click', function(e) {
                 e.preventDefault();
@@ -295,6 +294,7 @@
             $('#filtrar').on('click', function(e) {
                 $("#filtro").toggle(500);
             });
+            
             $(document).on('click', '.confirm-sesion', function(e) {
                 e.preventDefault();
                 var sesionid = $(this).data('href');
@@ -302,7 +302,6 @@
                 $("#sesion-modal").modal("show");
                 temas();
             });
-
         });
     </script>
 @endsection

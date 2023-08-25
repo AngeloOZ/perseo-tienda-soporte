@@ -10,9 +10,8 @@
           
             {{-- Usuarios --}}
             <div class="topbar-item">
-                @include('frontend.partials.usuarios')
-                @include('frontend.layouts.user_panel')
-
+                @include('cliente.partials.usuarios')
+                @include('cliente.layouts.user_panel')
             </div>
         </div>
 

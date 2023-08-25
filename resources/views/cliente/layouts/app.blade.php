@@ -8,18 +8,24 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
-    <link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css') }}" rel="stylesheet"
-        type="text/css" />
-    <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/themes/layout/header/base/light.css') }}" rel="stylesheet" type="text/css" />
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/logos/logoP.png') }}">
-    @if(session('menuCliente')==0)
-    <link href="{{ asset('assets/css/themes/layout/brand/dark.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/themes/layout/aside/dark.css') }}" rel="stylesheet" type="text/css" />
+
+    <link href="{{ asset('assets/css/themes/layout/header/base/light.css') }}" rel="stylesheet" type="text/css" />
+
+    <link href="{{ asset('assets/plugins/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/wizard-4.css') }}" rel="stylesheet" type="text/css" />
+
+    <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/header/light.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/plugins/custom/datatables.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/brand/dark.css') }}" rel="stylesheet" type="text/css" />
+
+    @if (session('menuCliente') == 0)
+        <link href="{{ asset('assets/css/themes/layout/brand/dark.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/themes/layout/aside/dark.css') }}" rel="stylesheet" type="text/css" />
     @else
-    <link href="{{ asset('assets/css/themes/layout/brand/light.css') }}" rel="stylesheet" type="text/css" />
-    <link href="{{ asset('assets/css/themes/layout/aside/light.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/themes/layout/brand/light.css') }}" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/themes/layout/aside/light.css') }}" rel="stylesheet" type="text/css" />
     @endif
     <!-- Favicon -->
 
@@ -30,21 +36,21 @@
     class="header-fixed header-mobile-fixed aside-enabled aside-fixed aside-minimize-hoverable page-loading">
     {{-- NavBar Responsive --}}
     <div id="kt_header_mobile" class="header-mobile align-items-center header-mobile-fixed">
-        @include('backend.inc.navBarMobile')
+        @include('soporte.auth.include.navBarMobile')
     </div>
     <div class="d-flex flex-column flex-root">
 
         <div class="d-flex flex-row flex-column-fluid page">
             {{-- Menu Lateral --}}
-            @include('frontend.inc.menuLateral')
+            @include('cliente.inc.menuLateral')
 
             <div class="d-flex flex-column flex-row-fluid wrapper" id="kt_wrapper">
                 {{-- NavBar --}}
-                @include('frontend.inc.navBar')
+                @include('cliente.inc.navBar')
                 {{-- contenido --}}
                 @yield('contenido')
                 {{-- FOOTER --}}
-                @include('backend.inc.footer')
+                @include('soporte.auth.include.footer')
 
             </div>
 
@@ -54,6 +60,14 @@
     @yield('modal')
 
     <script>
+        function nobackbutton() {
+            window.location.hash = "no-back-button";
+            window.location.hash = "Again-No-back-button"
+            window.onhashchange = function() {
+                window.location.hash = "no-back-button";
+            }
+             window.location.hash = "no-back-button";
+        }
         var KTAppSettings = {
             "breakpoints": {
                 "sm": 576,
@@ -113,44 +127,37 @@
             "font-family": "Poppins"
         };
     </script>
-    <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
-    <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
-    <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+    <script src="{{ asset('assets/plugins/plugins.bundle.js') }}"></script>
+    <script src="{{ asset('assets/plugins/scripts.bundle.js') }}"></script>
+    <script src="{{ asset('assets/plugins/custom/datatables.bundle.js') }}"></script>
     <script src="{{ asset('assets/js/app.js') }}"></script>
-    
     <script>
         //Notificaciones
         @foreach (session('flash_notification', collect())->toArray() as $message)
-            $.notify(
-            {
-            // options
-            message: '{{ $message['message'] }}',
-            },
-            {
-            // settings
-            showProgressbar: true,
-            delay: 2500,
-            mouse_over: "pause",
-            placement: {
-            from: "top",
-            align: "right",
-            },
-            animate: {
-            enter: "animated fadeInUp",
-            exit: "animated fadeOutDown",
-            },
-            type: '{{ $message['level'] }}',
-            }
-            );
+            $.notify({
+                // options
+                message: '{{ $message['message'] }}',
+            }, {
+                // settings
+                showProgressbar: true,
+                delay: 2500,
+                mouse_over: "pause",
+                placement: {
+                    from: "top",
+                    align: "right",
+                },
+                animate: {
+                    enter: "animated fadeInUp",
+                    exit: "animated fadeOutDown",
+                },
+                type: '{{ $message['level'] }}',
+            });
         @endforeach
-        
     </script>
-
-
-@yield('scriptJS')
-@yield('script')
-@yield('scriptMenuCliente')
-@yield('scriptP')
+    @yield('scriptJS')
+    @yield('script')
+    @yield('scriptMenuCliente')
+    @yield('scriptP')
 </body>
 
 </html>

@@ -121,8 +121,6 @@
             },
             "font-family": "Poppins"
         };
-
-       
     </script>
     <script src="{{ asset('assets/plugins/plugins.bundle.js') }}"></script>
     <script src="{{ asset('assets/plugins/scripts.bundle.js') }}"></script>

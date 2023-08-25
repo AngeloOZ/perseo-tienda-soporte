@@ -2,31 +2,19 @@
 
 namespace App\Http\Controllers;
 
-// use App\Models\Categorias;
-// use App\Models\Clientes;
-// use App\Models\Implementaciones;
-
 use App\Mail\EnviarClave;
 use App\Models\Clientes;
 use App\Models\Log;
+use App\Models\Planificaciones;
+use App\Models\PlanificacionesDetalles;
+use App\Models\Productos2;
+use App\Models\Sesiones;
+use App\Models\Tecnicos;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables as DataTables;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Mail;
-// use App\Mail\EnviarClave;
-// use App\Models\Actividades;
-// use App\Models\Colaboradores;
-// use App\Models\Cotizaciones;
-// use App\Models\Log;
-// use App\Models\implementacionesDocumentos;
-// use App\Models\Planificaciones;
-// use App\Models\PlanificacionesDetalles;
-// use App\Models\Plantillas;
-// use App\Models\Productos;
-// use App\Models\Sesiones;
-// use App\Models\Tecnicos;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
 use Carbon\Carbon;
@@ -49,8 +37,6 @@ class clientesController extends Controller
                         return $query->where('clientes.estado', 0);
                     }
                 })
-                // ->where('distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
-                // ->where('subdistribuidoresid', Auth::guard('tecnico')->user()->subdistribuidoresid)
                 ->get();
 
 
@@ -204,16 +190,6 @@ class clientesController extends Controller
     {
         DB::beginTransaction();
         try {
-            // $eliminar = Implementaciones::where('clientesid', $clientes->clientesid)->get();
-            // $eliminarPlantillas = Plantillas::where('clientesid', $clientes->clientesid)->get();
-            // $eliminarColaboradores = Colaboradores::where('clientesid', $clientes->clientesid)->get();
-            // $eliminarCotizaciones = Cotizaciones::where('clientesid', $clientes->clientesid)->get();
-            // $eliminarActividades = Actividades::where('clientesid', $clientes->clientesid)->get();
-
-            // if (count($eliminar) > 0 || count($eliminarPlantillas) > 0 || count($eliminarColaboradores) > 0 || count($eliminarActividades) > 0 || count($eliminarCotizaciones) > 0) {
-            //     flash('Registro asociado, no se puede eliminar')->warning();
-            // } else {
-
             $eliminarCliente = Clientes::where('clientesid', $clientes->clientesid)->first();
 
             $historial = new Log();
@@ -227,7 +203,6 @@ class clientesController extends Controller
             $eliminarCliente->delete();
             DB::commit();
             flash('Eliminado Correctamente')->success();
-            // }
         } catch (\Exception $e) {
             DB::rollBack();
             flash('Ocurrió un error vuelva a intentarlo')->warning();
@@ -238,7 +213,6 @@ class clientesController extends Controller
     /* -------------------------------------------------------------------------- */
     /*                          Funciones para el cliente                         */
     /* -------------------------------------------------------------------------- */
-
     public function login()
     {
         return view('cliente.auth.login');
@@ -275,79 +249,18 @@ class clientesController extends Controller
 
         Auth::guard('cliente')->login($cliente, false);
         $request->session()->regenerate();
-        return redirect()->route('clientesFront.index');
-    }
-
-    /* REVIEW: Hasta aqui funciona <- */
-
-    public function indexFront(Request $request)
-    {
-        $current = Auth::guard('cliente')->user();
-        dd($current);
-        if ($request->ajax()) {
-
-            $data = Implementaciones::select('implementaciones.implementacionesid', 'implementaciones.tecnicosid', 'implementaciones.clientesid', 'implementaciones.productosid', 'tecnicos.nombres as nombres', 'clientes.razonsocial as razonsocial', 'implementaciones.fechainicio', 'productos.descripcion as productos')
-                ->join('tecnicos', 'tecnicos.tecnicosid', 'implementaciones.tecnicosid')
-                ->join('clientes', 'clientes.clientesid', 'implementaciones.clientesid')
-                ->join('productos', 'implementaciones.productosid', 'productos.productosid')
-                ->where('implementaciones.clientesid', Auth::guard()->user()->clientesid);
-
-            return DataTables::of($data)
-                ->editColumn('detalle', function ($implementacion) {
-                    $consulta = Implementaciones::select('fechainicio', 'fechafin')->where('implementacionesid', $implementacion->implementacionesid)->first();
-                    if ($consulta->fechainicio == null) {
-                        return '<a href="' . route('implementacionesClientes.ver',  array($implementacion->clientesid, $implementacion->productosid, $implementacion->implementacionesid)) . '" title="Ver"> <button class="btn btn-sm btn-primary">Iniciar Capacitación</button> </a>  <a href="' . route('implementaciones.procesos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Procesos"> <li class="fas fa-layer-group text-muted"> </li> </button> </a><a href="' . route('implementaciones.videos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Videos"> <li class="fa fa-eye text-muted"> </li> </button> </a> ';
-                    } elseif ($consulta->fechainicio != null && $consulta->fechafin == null) {
-                        return '<a href="' . route('implementacionesClientes.ver',  array($implementacion->clientesid, $implementacion->productosid, $implementacion->implementacionesid)) . '" title="Ver"> <button class="btn btn-sm btn-warning">Continuar Capacitación</button> </a> <a href="' . route('implementaciones.procesos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Procesos"> <li class="fas fa-layer-group text-muted"> </li> </button> </a> <a href="' . route('implementaciones.videos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Videos"> <li class="fa fa-eye text-muted"> </li> </button> </a>';
-                    } elseif ($consulta->fechainicio != null && $consulta->fechafin != null) {
-                        return '<a href="' . route('implementacionesClientes.ver',  array($implementacion->clientesid, $implementacion->productosid, $implementacion->implementacionesid)) . '" title="Ver"> <button class="btn btn-sm btn-success">Capacitación Finalizada</button> </a><a href="' . route('implementaciones.procesos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Procesos"> <li class="fas fa-layer-group text-muted"> </li> </button> </a><a href="' . route('implementaciones.videos.cliente',  array($implementacion->productosid, $implementacion->clientesid)) . '"> <button class="btn btn-icon" title="Videos"> <li class="fa fa-eye text-muted"> </li> </button> </a> ';
-                    }
-                })
-                ->rawColumns(['action', 'detalle'])
-                ->make(true);
-        }
-        return view('cliente.clientes.index');
+        return redirect()->route('sesiones.indexVistaCliente');
     }
 
     public function logout()
     {
-        if (Auth::guard()->check()) {
-            Auth::guard()->logout();
+        if (Auth::guard('cliente')->check()) {
+            Auth::guard('cliente')->logout();
             return  view('cliente.auth.login');
         }
     }
 
-    public function implementacionesClientes($clientes, $productosid, $implementacion)
-    {
-        $idImplementacion = Implementaciones::where('implementacionesid', $implementacion)->first();
-        if ($idImplementacion->validaciones) {
-            $implementacionProducto = Productos::select('asignadosid', 'productosid', 'tipo')->where('productosid', $productosid)->first();
-            $nombreCliente = Clientes::select('clientesid', 'razonsocial')
-                ->where('clientesid', $clientes)
-                ->first();
-
-
-            $contadorTotal = count(json_decode($idImplementacion->validaciones));
-
-            $filtrarTemas = array_filter(json_decode($idImplementacion->validaciones), function ($k) {
-                return $k->finCliente == 1;
-            });
-            $contadorTemas =  count($filtrarTemas);
-            $operacion = ($contadorTemas * 100) / $contadorTotal;
-
-
-            return view('cliente.implementacionesDetalles.index', compact('nombreCliente', 'idImplementacion', 'operacion', 'implementacionProducto', 'productosid'));
-        } else {
-            flash('El técnico debe iniciar la capacitación')->warning();
-            return back();
-        }
-    }
-
-    public function cambiarMenuCliente(Request $request)
-    {
-        Session::put('menuCliente', $request->estado);
-    }
-
+    /* actualizar clave */
     public function cambiarClaveCliente()
     {
         return view('cliente.auth.cambiarClaveCliente');
@@ -364,9 +277,10 @@ class clientesController extends Controller
                 'de_clave.confirmed' => 'La contraseña no coincide',
             ],
         );
+
         DB::beginTransaction();
         try {
-            $cliente = Clientes::findOrFail(Auth::guard()->user()->clientesid);
+            $cliente = Clientes::findOrFail(Auth::guard('cliente')->user()->clientesid);
             if ($request->de_clave != null) {
                 if ($request->de_clave == $request->de_clave_confirmation) {
 
@@ -378,45 +292,17 @@ class clientesController extends Controller
                 }
             }
             $cliente->save();
-
-            $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
-            $historial->pantalla = "Clientes";
-            $historial->operacion = "Cambiar Clave";
-            $historial->fecha = now();
-            $historial->detalle = $cliente;
-            $historial->save();
-
             DB::commit();
             flash('Contraseña Actualizada Correctamente')->success();
-            return redirect()->route('clientesFront.index');
+            return redirect()->route('sesiones.indexVistaCliente');
         } catch (\Exception $e) {
             DB::rollBack();
             flash('Ocurrió un error vuelva a intentarlo')->warning();
         }
-
         return back();
     }
 
-    public function listadoDocumentos(Request $request)
-    {
-        if ($request->ajax()) {
-
-            $data = implementacionesDocumentos::select('implementaciones_documentos.implementacionesid', 'implementaciones_documentos.implementaciones_documentosid', 'implementaciones_documentos.descripcion', 'implementaciones_documentos.extencion', 'implementaciones_documentos.documento')
-                ->join('implementaciones', 'implementaciones_documentos.implementacionesid', 'implementaciones.implementacionesid')
-                ->join('clientes', 'implementaciones.clientesid', 'clientes.clientesid')
-                ->where('clientes.clientesid', Auth::guard()->user()->clientesid);
-
-            return DataTables::of($data)
-                ->editColumn('action', function ($clientes) {
-                    return  '<a href=" ' . route('documentosClientes.descargar', $clientes->implementaciones_documentosid) . '" class="btn btn-sm btn-clean btn-icon" id="export_pdf" <span class="navi-icon"> <i class="la la-download"></i></span> </a>';
-                })
-                ->rawColumns(['action'])
-                ->make(true);
-        }
-        return view('cliente.clientes.listadodocumentos');
-    }
-
+    /* sesiones cliente */
     public function indexVista(Request $request)
     {
         return view('cliente.sesiones.index');
@@ -427,8 +313,14 @@ class clientesController extends Controller
         if ($request->ajax()) {
             $fecha = $request->fecha;
             $tipo = $request->tipo;
-            $consulta = Sesiones::select('sesiones.sesionesid', 'sesiones.suma', 'sesiones.enlace', 'sesiones.descripcion', 'sesiones.fechainicio', 'sesiones.fechafin', 'tecnicos.nombres as creador', 'clientes.razonsocial as clientesid', 'productos.descripcion as productosid', 'planificaciones.planificacionesid')->join('tecnicos', 'tecnicos.tecnicosid', 'sesiones.tecnicosid')->join('clientes', 'clientes.clientesid', 'sesiones.clientesid')->join('planificaciones', 'planificaciones.planificacionesid', 'sesiones.planificacionesid')->join('productos', 'productos.productosid', 'planificaciones.productosid');
-            $data = $consulta->where('sesiones.clientesid', Auth::guard()->user()->clientesid)->get();
+
+            $consulta = Sesiones::select('sesiones.sesionesid', 'sesiones.suma', 'sesiones.enlace', 'sesiones.descripcion', 'sesiones.fechainicio', 'sesiones.fechafin', 'tecnicos.nombres as creador', 'clientes.razonsocial as clientesid', 'productos2.descripcion as productosid', 'planificaciones.planificacionesid')
+                ->join('tecnicos', 'tecnicos.tecnicosid', 'sesiones.tecnicosid')
+                ->join('clientes', 'clientes.clientesid', 'sesiones.clientesid')
+                ->join('planificaciones', 'planificaciones.planificacionesid', 'sesiones.planificacionesid')
+                ->join('productos2', 'productos2.productosid', 'planificaciones.productosid');
+
+            $data = $consulta->where('sesiones.clientesid',  Auth::guard('cliente')->user()->clientesid)->get();
 
 
             if ($tipo != null) {
@@ -438,7 +330,7 @@ class clientesController extends Controller
                     $desde = date('Y-m-d', strtotime(explode(" / ", $fecha)[0]));
                     $hasta = date('Y-m-d', strtotime(explode(" / ", $fecha)[1]));
 
-                    $data = $consulta->where('sesiones.clientesid', Auth::guard()->user()->clientesid);
+                    $data = $consulta->where('sesiones.clientesid',  Auth::guard('cliente')->user()->clientesid);
                     $data = $data->whereBetween(DB::raw("DATE($tipo_fecha)"), [$desde, $hasta])->get();
                 }
             }
@@ -453,8 +345,6 @@ class clientesController extends Controller
                         return '<a class="btn btn-sm btn-clean btn-icon confirm-sesion" href="javascript:void(0)" data-href="' . $sesiones->sesionesid . '" title="Ver"> <i class="la la-eye"></i> </a>';
                     }
                 })
-
-
                 ->editColumn('fechainicio', function ($sesiones) {
                     if ($sesiones->fechainicio != null) {
                         return Carbon::parse($sesiones->fechainicio)->format('d-m-Y H:i:s');
@@ -469,8 +359,6 @@ class clientesController extends Controller
                         return '';
                     }
                 })
-
-
                 ->rawColumns(['action', 'fechainicio', 'fechafin'])
                 ->make(true);
         }
@@ -480,16 +368,24 @@ class clientesController extends Controller
 
     public function verificar(Request $request)
     {
-
         if ($request->ajax()) {
-
             if ($request->sesiones > 0) {
-                $recuperar = Sesiones::select('planificacionesid')->where('sesionesid', $request->sesiones)->first();
-                $detalles = PlanificacionesDetalles::select('productos.tipo', 'categorias.descripcion AS categorias', 'categorias.categoriasid', 'temas.descripcion AS temas', 'categorias.categoriasid AS identificador', 'temas.temasid', 'planificaciones_detalles.calificacioncliente', 'temas.enlace_tutorial', 'temas.enlace_tutorialWeb')->join('temas', 'temas.temasid', 'planificaciones_detalles.temasid')->join('subcategorias', 'subcategorias.subcategoriasid', 'temas.subcategoriasid')->join('categorias', 'categorias.categoriasid', 'subcategorias.categoriasid')->join('planificaciones', 'planificaciones.planificacionesid', 'planificaciones_detalles.planificacionesid')->join('productos', 'planificaciones.productosid', 'productos.productosid')->where('planificaciones_detalles.planificacionesid', $recuperar->planificacionesid)->orderBy('temas.orden')->get();
+
+                $recuperar = Sesiones::select('planificacionesid')
+                    ->where('sesionesid', $request->sesiones)
+                    ->first();
+
+                $detalles = PlanificacionesDetalles::select('productos2.tipo', 'categorias.descripcion AS categorias', 'categorias.categoriasid', 'temas.descripcion AS temas', 'categorias.categoriasid AS identificador', 'temas.temasid', 'planificaciones_detalles.calificacioncliente', 'temas.enlace_tutorial', 'temas.enlace_tutorialWeb')
+                    ->join('temas', 'temas.temasid', 'planificaciones_detalles.temasid')
+                    ->join('subcategorias', 'subcategorias.subcategoriasid', 'temas.subcategoriasid')
+                    ->join('categorias', 'categorias.categoriasid', 'subcategorias.categoriasid')
+                    ->join('planificaciones', 'planificaciones.planificacionesid', 'planificaciones_detalles.planificacionesid')->join('productos2', 'planificaciones.productosid', 'productos2.productosid')
+                    ->where('planificaciones_detalles.planificacionesid', $recuperar->planificacionesid)
+                    ->orderBy('temas.orden')
+                    ->get();
 
                 return DataTables::of($detalles)
                     ->editColumn('calificacion', function ($sesiones) {
-
                         return '<div class="checkCat-' . $sesiones->categoriasid . '""> <div class="d-flex flex-column flex-sm-row"> 
                             <div class="form-check ">' .
                             '<input class="form-check-input radio-calificacion" type="radio"  style="width: 18px; height: 18px;" name="calificacion-' . $sesiones->temasid . '" id="calificacion0-' . $sesiones->temasid . '" value="0"    ' . ($sesiones->calificacioncliente == 0 ? 'checked' : '') . '>' .
@@ -504,7 +400,6 @@ class clientesController extends Controller
                             '<label class="form-check-label ml-5" for="calificacion3">Ya sabía</label>' .
                             '</div> </div> </div>';
                     })
-
                     ->editColumn('youtube', function ($sesiones) {
                         if (($sesiones->tipo == 1 && $sesiones->enlace_tutorial != "") || ($sesiones->tipo == 2 && $sesiones->enlace_tutorialWeb != ""))
                             return '<div  class="text-center" > <a class="btn btn-sm btn-clean btn-icon" target="_blank" title="Youtube" href="' . ($sesiones->tipo == 1 ? $sesiones->enlace_tutorial : $sesiones->enlace_tutorialWeb) . '"> <i class="la la-youtube fa-2x"></i> </a>   </div> ';
@@ -513,18 +408,21 @@ class clientesController extends Controller
                     ->make(true);
             }
         }
-
-
         return view('cliente.sesiones.index');
     }
 
     public function guardarRevision(Request $request)
     {
-        $sesiones = Sesiones::select('planificacionesid')->where('sesionesid', $request->sesionesid)->first();
-        $planificaciones = Planificaciones::where('planificacionesid', $sesiones->planificacionesid)->first();
-        $planificaciones->revisioncliente = 1;
-        if ($planificaciones->save()) {
+        $sesiones = Sesiones::select('planificacionesid')
+            ->where('sesionesid', $request->sesionesid)
+            ->first();
 
+        $planificaciones = Planificaciones::where('planificacionesid', $sesiones->planificacionesid)
+            ->first();
+
+        $planificaciones->revisioncliente = 1;
+
+        if ($planificaciones->save()) {
             return 1;
         } else {
             return 0;
@@ -533,14 +431,13 @@ class clientesController extends Controller
 
     public function sesionesVer($sesionesid)
     {
-
         $sesiones = Sesiones::where('sesionesid', $sesionesid)->first();
 
         $planificaciones = Planificaciones::select('planificacionesid', 'descripcion', 'productosid', 'tecnicosid', 'revisioncliente')
             ->where('planificacionesid', $sesiones->planificacionesid)
             ->first();
 
-        $productos = Productos::select('descripcion')
+        $productos = Productos2::select('descripcion')
             ->where('productosid', $planificaciones->productosid)
             ->first();
         $tecnicos = Tecnicos::select('nombres')
@@ -552,7 +449,6 @@ class clientesController extends Controller
 
     public function guardarCalificacion(Request $request)
     {
-
         $detalles = PlanificacionesDetalles::where('planificacionesid', $request->planificaciones)->where('temasid', $request->temas)->first();
         $detalles->calificacioncliente = $request->calificacion;
         $detalles->save();

@@ -1,5 +1,4 @@
 @csrf
-
 <ul class="nav nav-tabs nav-tabs-line nav-bold">
     <li class="nav-item">
         <a class="nav-link active" data-toggle="tab" href="#datossesion">Datos Planificación</a>
@@ -152,21 +151,18 @@
                         searchable: false,
                         visible: false
                     },
-
                     {
                         data: 'temas',
                         name: 'temas.descripcion',
                         orderable: false,
                         searchable: false,
                     },
-
                     {
                         data: 'identificador',
                         name: 'categorias.categoriasid',
                         orderable: false,
                         searchable: false,
                         visible: false
-
                     },
                     {
                         data: 'calificacion',
@@ -174,8 +170,6 @@
                         orderable: false,
                         searchable: false,
                         visible: true,
-
-
                     },
                     {
                         data: 'youtube',
@@ -183,13 +177,8 @@
                         orderable: false,
                         searchable: false,
                         visible: true,
-
-
                     }
-
                 ],
-
-
             });
 
             $(document).on('change', '.radio-calificacion', function() {

@@ -19,33 +19,6 @@
         <div id="kt_aside_menu" class="aside-menu my-4" data-menu-vertical="1" data-menu-scroll="1"
             data-menu-dropdown-timeout="500">
             <ul class="menu-nav">
-
-                <li class="menu-item {{ areActiveRoutes(['clientesFront.index']) }} " aria-haspopup="true">
-                    <a href="{{ route('clientesFront.index') }}" class="menu-link">
-                        <i class="menu-icon fa fa-chalkboard-teacher">
-                            <span></span>
-                        </i>
-                        <span class="menu-text">Implementaciones</span>
-                    </a>
-                </li>
-
-                <li class="menu-item {{ areActiveRoutes(['listadoDocumentos.listado']) }}" aria-haspopup="true">
-                    <a href="{{ route('listadoDocumentos.listado') }}" class="menu-link">
-                        <i class="menu-icon fa fa-file">
-                            <span></span>
-                        </i>
-                        <span class="menu-text">Documentos</span>
-                    </a>
-                </li>
-                <li class="menu-item {{ areActiveRoutes(['soportetecnico.index']) }}" aria-haspopup="true">
-                    <a href="{{ route('soportetecnico.index') }}" class="menu-link">
-                        <i class="menu-icon far fa-sun">
-                            <span></span>
-                        </i>
-                        <span class="menu-text">Soporte Técnico</span>
-                    </a>
-                </li>
-
                 <li class="menu-item {{ areActiveRoutes(['sesiones.indexVistaCliente']) }}" aria-haspopup="true">
                     <a href="{{ route('sesiones.indexVistaCliente') }}" class="menu-link">
                         <i class="menu-icon far fa-sun">
