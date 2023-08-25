@@ -60,7 +60,7 @@
     <div class="col-12 mb-3 col-md-6 mb-md-0">
         <label>Distribuidor</label>
         
-        <select class="form-control" {{ $disabled }} name="distribuidor">
+        <select class="form-control" name="distribuidor">
             <option value="1" {{ $ticket->distribuidor == 1 ? 'selected' : '' }}>Perseo Alfa
             </option>
             <option value="2" {{ $ticket->distribuidor == 2 ? 'selected' : '' }}>Perseo
