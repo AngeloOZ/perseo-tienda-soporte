@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\NotificarPago;
 use App\Models\Cobros;
+use App\Models\RenovacionLicencias;
 use App\Models\User;
-use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -257,8 +257,12 @@ class CobrosController extends Controller
 
     public function editar_revisor(Cobros $cobro)
     {
+        $renovacion = null;
+        if ($cobro->renovacionid) {
+            $renovacion = RenovacionLicencias::where('renovacionid', $cobro->renovacionid)->first();
+        }
         $usuario = User::find($cobro->usuariosid);
-        return view('auth2.revisor_facturas.cobros.editar', ['cobro' => $cobro, 'vendedor' => $usuario]);
+        return view('auth2.revisor_facturas.cobros.editar', ['cobro' => $cobro, 'vendedor' => $usuario, 'renovacion' => $renovacion]);
     }
 
     public function actualizar_revisor(Cobros $cobro, Request $request)
@@ -288,7 +292,7 @@ class CobrosController extends Controller
     {
         try {
             $vendedor = User::firstWhere('usuariosid', $cobro->usuariosid);
-            $revisor = User::where('usuariosid', $cobro->usuariosid)->where('distribuidoresid', $vendedor->distribuidoresid)->first();
+            $revisor = User::where('rol', 2)->where('distribuidoresid', $vendedor->distribuidoresid)->first();
 
             $secuenciasAux = json_decode($cobro->secuencias);
             $secuencias = [];
@@ -297,18 +301,18 @@ class CobrosController extends Controller
                 array_push($secuencias, $item->value);
             }
 
-
-            $correoRevisor = "angello.ordonez@hotmail.com";
+            $correoRevisor = $revisor->correo;
 
             $array = [
                 'from' => "noresponder@perseo.ec",
-                'subject' => "Notificación de pago",
+                'subject' => "Nuevo cobro registrado",
                 'revisora' => $revisor->nombres,
                 'sencuencias' => $secuencias,
             ];
 
             Mail::to($correoRevisor)->queue(new NotificarPago($array));
         } catch (\Throwable $th) {
+            dd($th);
         }
     }
 }

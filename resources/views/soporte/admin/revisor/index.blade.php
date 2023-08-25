@@ -6,11 +6,11 @@
     $selected = 'pc';
 
     $currentUser = Auth::guard('tecnico')->user();
-    
+
     if ($currentUser->distribuidoresid == 2) {
-        $selected = '';
         $disabled = '';
         $isVisible = true;
+        $selected = '';
     }
 @endphp
 @section('contenido')
@@ -45,8 +45,7 @@
                                     <div class="row mb-8">
                                         <div class="col-lg-4 mb-4">
                                             <label>Distribuidores:</label>
-                                            <select class="form-control datatable-input" id="filtroDistribuidor"
-                                                {{ $disabled }}>
+                                            <select class="form-control datatable-input" id="filtroDistribuidor" {{ $disabled }}>
                                                 @if ($isVisible)
                                                     <option value="" selected>Todos</option>
                                                 @endif
@@ -251,7 +250,6 @@
                         className: "text-center"
                     },
                 ],
-
             });
 
             //Clic en boton buscar

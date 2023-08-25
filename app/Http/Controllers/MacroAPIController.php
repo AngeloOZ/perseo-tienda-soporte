@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 class MacroAPIController extends Controller
 {
     private $token = "05775d0ff4abc9f21c144907110a758cf654ecb26692c328e5dd9d9221de4c61";
+    
     public function obtener_macro_ventas(Request $request, $secuencia, $distribuidor = null)
     {
         $token = $request->header('Authorization');
@@ -20,11 +21,12 @@ class MacroAPIController extends Controller
             ], 401);
         }
 
-        $factura = Factura::select('identificacion', 'nombre', 'productos', 'concepto', 'observacion', 'fecha_actualizado', 'distribuidoresid')
+        $factura = Factura::select('facturaid', 'identificacion', 'nombre', 'productos', 'concepto', 'observacion', 'fecha_actualizado', 'distribuidoresid', 'cupones.tipo as tipo_cupon', 'cupones.descuento')
+            ->leftJoin('cupones','cupones.cuponid','=','facturas.cuponid')
             ->when($distribuidor, function ($query, $dis) {
                 return $query->where('distribuidoresid', $dis);
             })
-            ->where('secuencia_perseo', 'like', '%' . $secuencia . '%')
+            ->where('secuencia_perseo', 'like', '%' . $secuencia)
             ->first();
 
         if ($factura == null) {
@@ -38,9 +40,24 @@ class MacroAPIController extends Controller
         $productos = $productos->transform(function ($item) use ($factura) {
             $tipo = "FIRMA";
             $periodo = "ANUAL";
+            $descuento  = $factura->descuento ? $factura->descuento : 0;
+            $promocion = "";
+            
+            switch ($factura->tipo_cupon) {
+                case '1':
+                    $promocion = "Descuento $descuento%";
+                    break;
+                case '2':
+                    $promocion = "+3 Meses";
+                    break;
+            }
 
             $base = Producto::find($item->productoid);
-            $otro = ProductoHomologado::find($item->productoid_homo);
+            
+            $otro = ProductoHomologado::where([
+                ['id_producto_local', $base->productosid],
+                ['distribuidoresid', $factura->distribuidoresid],
+            ])->first();
 
             if (str_contains(strtolower($base->descripcion), 'web')) {
                 $tipo = 'WEB';
@@ -59,7 +76,15 @@ class MacroAPIController extends Controller
             } else if (str_contains(strtolower($base->descripcion), 'mensual')) {
                 $periodo = "MENSUAL";
             }
-
+            
+            
+            $descuento2 = ($otro->precio * $descuento) / 100;
+            $descuento2 = round(($descuento2 * $item->cantidad), 2);
+            
+            $precio = $otro->precio * $item->cantidad;
+            $precioDesc = $precio - $descuento2;
+            
+            $iva = ($precioDesc * $otro->iva) / 100;
 
             $item->nombre = $base->descripcion;
 
@@ -72,17 +97,20 @@ class MacroAPIController extends Controller
             $nuevo->observacion = $factura->observacion;
             $nuevo->tipo = $tipo;
             $nuevo->periodo = $periodo;
-            $nuevo->pvp = $otro->precio * $item->cantidad;
-            $nuevo->iva = ($otro->precio * $otro->iva) / 100;
-            $nuevo->iva = round($nuevo->iva, 2);
-            $nuevo->total = round($nuevo->pvp + $nuevo->iva, 2);
-            $nuevo->promo = "S/n";
-            $nuevo->origen = "TIENDA";
+            $nuevo->pvp = round($precioDesc, 2);
+            $nuevo->descuento = $descuento2;
+            $nuevo->iva = round($iva, 2);
+            $nuevo->total = round(($nuevo->pvp + $nuevo->iva), 2);
+            $nuevo->promo = $promocion;
+            $nuevo->origen = "";
             $nuevo->fecha = date('d/m/Y', strtotime($factura->fecha_actualizado));
+            $nuevo->id = $factura->facturaid;
 
             return $nuevo;
         });
 
         return $productos;
     }
+    
+    
 }

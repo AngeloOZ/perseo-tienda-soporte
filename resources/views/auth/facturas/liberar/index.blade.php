@@ -345,7 +345,7 @@
                         console.error(error);
                         const mensaje = error?.response?.data?.message ||
                             "Hubo un error al renovar la licencia, intentálo más tarde o realice la renovación directamente en el licenciador";
-                        Swal.fire({
+                        await Swal.fire({
                             title: "No se pudo renovar",
                             text: mensaje,
                             icon: "error",
