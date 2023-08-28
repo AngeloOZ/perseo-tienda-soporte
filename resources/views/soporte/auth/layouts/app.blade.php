@@ -171,6 +171,7 @@
     </script>
     @yield('scriptMenu')
     @yield('script')
+    @yield('scriptFecha')
 </body>
 
 </html>

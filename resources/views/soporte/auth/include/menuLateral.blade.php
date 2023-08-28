@@ -1,11 +1,11 @@
 @php
     use App\Constants\ConstantesTecnicos;
-
+    
     $tecnico = ConstantesTecnicos::ROL_TECNICOS;
     $desarrollo = ConstantesTecnicos::ROL_DESARROLLO;
     $admin = ConstantesTecnicos::ROL_ADMINISTRADOR;
     $revisor = ConstantesTecnicos::ROL_REVISOR;
-
+    
     $userRol = Auth::guard('tecnico')->user()->rol;
     
 @endphp
@@ -294,6 +294,50 @@
                         </a>
                     </li>
                 @endif
+
+                <li class="menu-item menu-item-submenu " aria-haspopup="true" data-menu-toggle="hover">
+                    <a href="javascript:;" class="menu-link menu-toggle">
+                        <i class="menu-icon fas fa-dollar-sign"></i>
+                        <span class="menu-text">Cotizar</span>
+                    </a>
+                    <div class="menu-submenu">
+                        <i class="menu-arrow"></i>
+                        <ul class="menu-subnav">
+                            <li class="menu-item menu-item-parent" aria-haspopup="true">
+                                <span class="menu-link">
+                                    <span class="menu-text">Cotizar</span>
+                                </span>
+                            </li>
+                            <li class="menu-item {{ areActiveRoutes(['detalles.listado']) }}" aria-haspopup="true">
+                                <a href="{{ route('detalles.listado') }}" class="menu-link">
+                                    <i class="menu-bullet menu-bullet-dot">
+                                        <span></span>
+                                    </i>
+                                    <span class="menu-text">Detalles</span>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ areActiveRoutes(['cotizarPlantilla1.listado']) }}"
+                                aria-haspopup="true">
+                                <a href="{{ route('cotizarPlantilla1.index', 0) }}" class="menu-link">
+                                    <i class="menu-bullet menu-bullet-dot">
+                                        <span></span>
+                                    </i>
+                                    <span class="menu-text">Plantilla</span>
+                                </a>
+                            </li>
+                            <li class="menu-item {{ areActiveRoutes(['listadoCotizaciones.listado']) }}"
+                                aria-haspopup="true">
+                                <a href="{{ route('listadoCotizaciones.listado') }}" class="menu-link">
+                                    <i class="menu-bullet menu-bullet-dot">
+                                        <span></span>
+                                    </i>
+                                    <span class="menu-text">Listado Cotizaciones</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+
             </ul>
         </div>
     </div>
