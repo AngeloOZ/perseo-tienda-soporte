@@ -5,7 +5,7 @@
 @php
     $bancoOrigen = ['Banco Pichincha', 'Banco del Pacifíco', 'Banco Guayaquil', 'Banco Internacional', 'Banco Bolivariano', 'Banco de Loja', 'Banco de Machala', 'Coperativa JEP', 'Coperativa 29 de Octubre', 'OTRO'];
     
-    $bancoDestino = ['Banco Pichincha', 'Banco del Pacifíco'];
+    $bancoDestino = ['Banco Pichincha', 'Banco Produbanco'];
 @endphp
 
 @section('contenido')
