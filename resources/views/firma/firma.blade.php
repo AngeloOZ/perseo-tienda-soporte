@@ -334,7 +334,7 @@
             const helperTExt = document.getElementById('mensajeCodigo2');
             inputHuella.addEventListener('blur', (e) => {
 
-                const expresion = /^((\w){1}[\d]{4}(\w){1}[\d]{4})/;
+                const expresion = /^[A-Za-z]\d{4}[A-Za-z]{2}\d{4}$/;
                 if (expresion.test(inputHuella.value)) {
                     helperTExt.classList.add('d-none');
                 } else {
@@ -389,7 +389,6 @@
 
 
         $(document).ready(function() {
-            validarHuellaDactilar();
             validarSiTieneRuc();
             validarPesoArchivos();
             $('#tipo_persona').val("");
@@ -414,7 +413,8 @@
                     $("#textDatosPer").text("Datos personales");
                     $('#vigenciaFirma').append('<option value="7">30 Días</option>');
                 } else {
-                    $("#textDireccion").html("Dirección de la Empresa <small>(especificada en el ruc)</small>");
+                    $("#textDireccion").html(
+                        "Dirección de la Empresa <small>(especificada en el ruc)</small>");
                     $("#textDatosPer").text("Datos del representante legal");
                     $('#vigenciaFirma option[value="7"]').remove();
                 }
