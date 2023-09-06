@@ -33,13 +33,10 @@
                                         <p class="text-danger d-none" id="ticketAbierto"></p>
                                     </div>
                                 </div>
-
                                 <div class="col-12 mb-3 col-md-6 mb-md-0">
                                     <label>Razón Social</label>
-                                    <input type="text"
-                                        class="form-control {{ $errors->has('razon_social') ? 'is-invalid' : '' }}"
-                                        id="razon_social" name="razon_social" value="{{ old('razon_social') }}"
-                                        placeholder="Nombre empresa" />
+                                    <input type="text" class="form-control {{ $errors->has('razon_social') ? 'is-invalid' : '' }}" id="razon_social" name="razon_social"
+                                        value="{{ old('razon_social') }}" />
                                     @error('razon_social')
                                         <span class="text-danger">{{ $errors->first('razon_social') }}</span>
                                     @enderror
@@ -117,15 +114,10 @@
 
 @section('script')
     <script>
-        // if (window.history.replaceState) {
-        //     window.history.replaceState(null, null, window.location.href)
-        // }
-    </script>
-    <script>
         $(document).ready(function() {
             const ruc = document.getElementById('ruc');
-            ruc.addEventListener('blur', validarRuc);
-
+            ruc.addEventListener('blur', comprobarTicketsAbiertos);
+            
             const formTicket = document.getElementById('formTicket');
 
             formTicket.addEventListener('submit', function(e) {
@@ -134,67 +126,8 @@
                 btnCrearTicket.disabled = true;
                 this.submit();
             });
+            
         });
-
-        function validarRuc() {
-            const ruc = this.value;
-            if (ruc == "") {
-                $('#ticketAbierto').html("");
-                $('#ticketAbierto').addClass("d-none");
-            } else if (ruc.length == 13) {
-                $('#ticketAbierto').html('');
-                $('#ticketAbierto').addClass("d-none");
-                validarProductoLicenciador();
-            } else {
-                $('#ticketAbierto').html('El RUC no tiene la longitud correcta');
-                $('#ticketAbierto').removeClass("d-none");
-            }
-        }
-
-        async function validarProductoLicenciador() {
-            const inputRuc = document.getElementById('ruc');
-            const spiner = document.getElementById('spinner');
-            spiner.classList.add('spinner', 'spinner-success', 'spinner-right');
-            $('#ticketAbierto').text("");
-
-            var myHeaders = new Headers();
-            myHeaders.append("usuario", "Perseo");
-            myHeaders.append("clave", "Perseo1232*");
-            myHeaders.append("Content-Type", "application/json");
-
-            var raw = JSON.stringify({
-                "identificacion": inputRuc.value
-            });
-
-            var requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: raw,
-                redirect: 'follow'
-            };
-            try {
-                const data = await fetch("https://perseo.app/api/consultar_licencia", requestOptions);
-                const result = await data.json();
-                if (result.licencia) {
-                    $('#ticketAbierto').addClass("d-none");
-                    res = await comprobarTicketsAbiertos();
-                    if (res)
-                        $("#razon_social").val(result.cliente);
-                } else {
-                    $('#ticketAbierto').html(
-                        `El ruc: <strong>${inputRuc.value}</strong> no tiene ninguna licencia registrada en el sistema`
-                        );
-                    $('#ticketAbierto').removeClass("d-none");
-                    inputRuc.value = '';
-                }
-            } catch (error) {
-                alert("Error al obtener los datos, intentalo más tarde");
-                inputRuc.value = "";
-                console.log(error);
-            } finally {
-                spiner.classList.remove('spinner', 'spinner-success', 'spinner-right');
-            }
-        }
 
         async function comprobarTicketsAbiertos() {
             var cad = document.getElementById('ruc');
@@ -209,11 +142,35 @@
                 $('#ticketAbierto').html(json.message);
                 $('#ticketAbierto').removeClass("d-none");
                 ruc.value = "";
-                return false;
+                return;
             } else {
                 $('#ticketAbierto').addClass("d-none");
-                return true;
+                recuperarRazonSocial();
             }
+        }
+        
+        async function recuperarRazonSocial() {
+            const inputRuc = document.getElementById('ruc');
+            const spiner = document.getElementById('spinner');
+            spiner.classList.add('spinner', 'spinner-success','spinner-right');
+            $.ajax({
+                url: "{{ route('firma.index') }}",
+                headers: {
+                    'usuario': 'perseo',
+                    'clave': 'Perseo1232*'
+                },
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    identificacion: inputRuc.value
+                },
+                success: function(data) {
+                    spiner.classList.remove('spinner', 'spinner-success','spinner-right');
+                    if (data.identificacion) {
+                        $("#razon_social").val(data.razon_social);
+                    }
+                }
+            });
         }
     </script>
 @endsection
