@@ -118,7 +118,7 @@
                     <span class="switch switch-outline switch-icon switch-primary">
                         <label>
                             <input type="checkbox" name="revisado" id="revisado" disabled
-                                @if ($sesiones->revisioncliente == 1) checked @endif />
+                                @if ($planificaciones->revisioncliente == 1) checked @endif />
                             <span></span>
                         </label>
                     </span>
