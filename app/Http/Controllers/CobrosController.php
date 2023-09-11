@@ -170,24 +170,6 @@ class CobrosController extends Controller
         }
     }
 
-
-    // public function eliminar(Request $request)
-    // {
-    //     try {
-
-    //         $cobro = Cobros::find($request->cobro);
-    //         $cobro->delete();
-
-    //         flash("Cobro eliminado correctamente")->success();
-    //         return back();
-    //     } catch (\Throwable $th) {
-
-    //         dd($th);
-    //         flash("Error al eliminar el cobro")->error();
-    //         return back();
-    //     }
-    // }
-
     public function descargar_comprobante($cobroid, $id_unique)
     {
         $comprobantes = Cobros::select('comprobante')->where('cobrosid', $cobroid)->first();
@@ -314,5 +296,39 @@ class CobrosController extends Controller
         } catch (\Throwable $th) {
             dd($th);
         }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                         Functiones para leer el CSV                        */
+    /* -------------------------------------------------------------------------- */
+    public function csv()
+    {
+        return view('index');
+    }
+
+    public function csv_post(Request $request)
+    {
+        $pagos = collect();
+        $pathCSV = $request->csv->getRealPath();
+        $file = fopen($pathCSV, 'r');
+
+        $headers = array_map(function ($item) {
+            return trim(strtolower($item));
+        }, fgetcsv($file));
+
+        while ($row = fgetcsv($file)) {
+            $data = (object) array_combine($headers, $row);
+            $documento = preg_replace('/^0+/', '', $data->documento);
+            $monto = str_replace(',', '', $data->monto);
+            $saldo = str_replace(',', '', $data->saldo);
+
+            $data->documento = $documento;
+            $data->monto = floatval($monto);
+            $data->saldo = floatval($saldo);
+            $pagos->push($data);
+        }
+        fclose($file);
+
+        return view('index', compact('pagos', 'headers'));
     }
 }

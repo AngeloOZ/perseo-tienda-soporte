@@ -92,15 +92,17 @@ class FirmaController extends Controller
 
     public function validarProceso($cedula)
     {
-
-        $cedula = substr($cedula, 0, 10);
-        $datas = Firma::select('firma.identificacion', 'firma.nombres', 'firma.estado', 'firma.estado_pago')->where(DB::raw('substr(firma.identificacion, 1, 10)'), $cedula)->get();
+        $cedula = trim($cedula);
+        $datas = Firma::select('firma.identificacion', 'firma.nombres', 'firma.estado', 'firma.estado_pago', 'usuarios.nombres as vendedor')
+            ->join('usuarios', 'usuarios.usuariosid', '=', 'firma.usuariosid')
+            ->where('firma.identificacion', $cedula)
+            ->get();
         $message = json_encode(["status" => 200, "message" => "Sin procesos activos"]);
 
         foreach ($datas as $data) {
 
             if ($data->estado < 5) {
-                $message = json_encode(["status" => 400, "message" => "La cédula $cedula ya tiene un proceso activo"]);
+                $message = json_encode(["status" => 400, "message" => "La cédula $cedula ya tiene un proceso activo con el vendedor $data->vendedor"]);
                 break;
             }
         }

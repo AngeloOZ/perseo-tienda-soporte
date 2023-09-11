@@ -13,6 +13,7 @@
         "laravel/framework": "^8.75",
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
+        "league/csv": "^8.0",
         "phpoffice/phpword": "^1.1",
         "rackbeat/laravel-ui-avatars": "^1.0",
         "yajra/laravel-datatables": "1.5"
