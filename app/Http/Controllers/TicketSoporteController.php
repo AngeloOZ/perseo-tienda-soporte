@@ -190,7 +190,7 @@ class TicketSoporteController extends Controller
             // 4 => estado cerrado
             if ($estado == 4) {
                 if ($estado != $ticket->estado) {
-                    $this->enviar_correo_calificacion($ticket);
+                    $this->enviar_correo_calificacion($ticket, $estado);
                 }
             }
 
@@ -313,8 +313,12 @@ class TicketSoporteController extends Controller
         }
     }
 
-    private function enviar_correo_calificacion($ticket)
+    private function enviar_correo_calificacion($ticket, $estado = NULL)
     {
+        if (isset($estado) && $estado != 4) {
+            return false;
+        }
+
         $sms = new WhatsappController();
         $sendMessage = $sms->enviar_personalizado([
             "numero" => $ticket->whatsapp,
