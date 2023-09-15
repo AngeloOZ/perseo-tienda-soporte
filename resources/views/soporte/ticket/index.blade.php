@@ -130,7 +130,12 @@
         });
 
         async function comprobarTicketsAbiertos() {
+            
             var cad = document.getElementById('ruc');
+
+            if (cad.value.length < 10) {
+                return;
+            }
 
             let url = '{{ route('soporte.consultar_estado', 'cad') }}';
             url = url.replace('cad', ruc.value);
