@@ -25,7 +25,8 @@ class FacturasLicenciasRenovarController extends Controller
     public static function generar_facturas_renovacion()
     {
         $instancia = new self();
-        $licencias = $instancia->obtener_licencias();
+        // COMMENT 1 => Alfa, 2 => Delta, 3 => Omega, 6 => Matriz, vacio => Todos
+        $licencias = $instancia->obtener_licencias(6);
 
         if (count($licencias) == 0) return 0;
         $facturadas = 0;
@@ -39,6 +40,7 @@ class FacturasLicenciasRenovarController extends Controller
                 $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
                 $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+                $facturadas++;
 
                 $renovacion = new RenovacionLicencias();
                 $renovacion->uuid = uniqid();
@@ -60,8 +62,6 @@ class FacturasLicenciasRenovarController extends Controller
                         "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
                     ]);
                 }
-
-                $facturadas++;
             } catch (\Throwable $th) {
                 echo $th->getMessage() . "\n";
                 continue;
@@ -71,9 +71,9 @@ class FacturasLicenciasRenovarController extends Controller
         return $facturadas;
     }
 
-    private function obtener_licencias()
+    private function obtener_licencias($das = "")
     {
-        $url = "https://perseo.app/api/proximas_caducar/1";
+        $url = "https://perseo.app/api/proximas_caducar/{$das}";
 
         $resultado = Http::withHeaders([
             'Content-Type' => 'application/json; charset=UTF-8',
@@ -89,7 +89,7 @@ class FacturasLicenciasRenovarController extends Controller
                 return (object)$item;
             })
             ->filter(function ($item) {
-                return $item->producto != 9;
+                return $item->producto != 9 && $item->producto != 10;
             })
             ->flatten()
             ->toArray();

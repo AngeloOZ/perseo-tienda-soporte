@@ -292,7 +292,7 @@ class WhatsappRenovacionesController extends Controller
             }
             return false;
         } catch (\Throwable $th) {
-            return false;
+            throw $th;
         }
     }
 }
