@@ -10,7 +10,6 @@ use App\Models\User;
 use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class FacturasLicenciasRenovarController extends Controller
@@ -29,18 +28,36 @@ class FacturasLicenciasRenovarController extends Controller
         $licencias = $instancia->obtener_licencias([1]);
 
         if (count($licencias) == 0) return 0;
-        $facturadas = 0;
+
+        $facturadasAlfa = 0;
+        $facturadasMatriz = 0;
+        $facturadasDelta = 0;
+        $facturadasOmega = 0;
 
         foreach ($licencias as $licencia) {
             try {
                 $productos = $instancia->buscar_producto($licencia);
-                $vendedor = $instancia->obtener_vendedor($licencia->vendedor, $licencia->sis_distribuidoresid);
+                $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
 
                 $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
                 $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
                 $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
                 $autorizada = $instancia->autorizar_factura($factura, $vendedor);
-                $facturadas++;
+
+                switch ($vendedor->distribuidoresid) {
+                    case '1':
+                        $facturadasAlfa++;
+                        break;
+                    case '2':
+                        $facturadasMatriz++;
+                        break;
+                    case '3':
+                        $facturadasDelta++;
+                        break;
+                    case '4':
+                        $facturadasOmega++;
+                        break;
+                }
 
                 $renovacion = new RenovacionLicencias();
                 $renovacion->uuid = uniqid();
@@ -50,6 +67,7 @@ class FacturasLicenciasRenovarController extends Controller
                     "licencia" => $licencia,
                     "factura" => $factura,
                 ]);
+                $renovacion->distribuidoresid = $vendedor->distribuidoresid;
                 $renovacion->save();
 
 
@@ -67,8 +85,14 @@ class FacturasLicenciasRenovarController extends Controller
                 continue;
             }
         }
-        echo "Total de facturas renovadas: $facturadas\n";
-        return $facturadas;
+
+        echo "Total de facturas Alfa: $facturadasAlfa\n";
+        echo "Total de facturas Matriz: $facturadasMatriz\n";
+        echo "Total de facturas Delta: $facturadasDelta\n";
+        echo "Total de facturas Omega: $facturadasOmega\n";
+        echo "Total de facturas: " . ($facturadasAlfa + $facturadasMatriz + $facturadasDelta + $facturadasOmega) . "\n";
+
+        return 1;
     }
 
     private function obtener_licencias(array $das = null)
@@ -402,6 +426,11 @@ class FacturasLicenciasRenovarController extends Controller
 
     private function obtener_vendedor(string $cedula, int $distribuidor)
     {
+        $das = $this->homologar_distribuidor($distribuidor);
+        if (in_array($das, [2, 3, 4])) {
+            return $vendedor = $this->obtener_vendedor_default($distribuidor);
+        }
+
         $vendedor = User::where('identificacion', $cedula)->first();
 
         if ($vendedor == null) {
