@@ -24,7 +24,11 @@ class FacturasLicenciasRenovarController extends Controller
     public static function generar_facturas_renovacion()
     {
         $instancia = new self();
-        // COMMENT 1 => Alfa, 2 => Delta, 3 => Omega, 6 => Matriz, vacio => Todos
+        // 1 => Alfa
+        // 2 => Delta
+        // 3 => Omega
+        // 6 => Matriz
+        // vacio => Todos
         $licencias = $instancia->obtener_licencias([1]);
 
         if (count($licencias) == 0) return 0;
