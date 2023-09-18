@@ -26,7 +26,7 @@ class FacturasLicenciasRenovarController extends Controller
     {
         $instancia = new self();
         // COMMENT 1 => Alfa, 2 => Delta, 3 => Omega, 6 => Matriz, vacio => Todos
-        $licencias = $instancia->obtener_licencias(6);
+        $licencias = $instancia->obtener_licencias([1]);
 
         if (count($licencias) == 0) return 0;
         $facturadas = 0;
@@ -71,9 +71,9 @@ class FacturasLicenciasRenovarController extends Controller
         return $facturadas;
     }
 
-    private function obtener_licencias($das = "")
+    private function obtener_licencias(array $das = null)
     {
-        $url = "https://perseo.app/api/proximas_caducar/{$das}";
+        $url = "https://perseo.app/api/proximas_caducar/";
 
         $resultado = Http::withHeaders([
             'Content-Type' => 'application/json; charset=UTF-8',
@@ -90,6 +90,11 @@ class FacturasLicenciasRenovarController extends Controller
             })
             ->filter(function ($item) {
                 return $item->producto != 9 && $item->producto != 10;
+            })
+            ->filter(function ($item) use ($das) {
+                if ($das == null) return true;
+
+                if (in_array($item->sis_distribuidoresid, $das)) return true;
             })
             ->flatten()
             ->toArray();
