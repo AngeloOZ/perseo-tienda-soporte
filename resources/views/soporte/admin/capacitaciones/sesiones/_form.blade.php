@@ -112,17 +112,18 @@
                     @endif
                 </div>
 
-
-                <div class="col-lg-6">
-                    <label for="">Aceptado por el cliente</label>
-                    <span class="switch switch-outline switch-icon switch-primary">
-                        <label>
-                            <input type="checkbox" name="revisado" id="revisado" disabled
-                                @if ($planificaciones->revisioncliente == 1) checked @endif />
-                            <span></span>
-                        </label>
-                    </span>
-                </div>
+                @if (isset($planificaciones))
+                    <div class="col-lg-6">
+                        <label for="">Aceptado por el cliente</label>
+                        <span class="switch switch-outline switch-icon switch-primary">
+                            <label>
+                                <input type="checkbox" name="revisado" id="revisado" disabled
+                                    @if ($planificaciones->revisioncliente == 1) checked @endif />
+                                <span></span>
+                            </label>
+                        </span>
+                    </div>
+                @endif
             </div>
 
             <div class="row">

@@ -145,7 +145,7 @@ class sesionesController extends Controller
     public function editar(Sesiones $sesiones)
     {
         $planificaciones = Planificaciones::where('planificacionesid', $sesiones->planificacionesid)->first();
-        return view('soporte.admin.capacitaciones.sesiones.editar', compact('sesiones','planificaciones'));
+        return view('soporte.admin.capacitaciones.sesiones.editar', compact('sesiones', 'planificaciones'));
     }
 
     public function actualizar(Request $request, $sesiones)
