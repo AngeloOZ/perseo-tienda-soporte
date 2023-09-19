@@ -156,18 +156,18 @@ class WhatsappRenovacionesController extends Controller
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
                 $this->pathToken = 'ws/whatsapp.config.renovacionesalfa2.json';
                 break;
-                // case 2:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporte";
-                //     $this->pathToken = 'ws/whatsapp.config.das2.json';
-                //     break;
-                // case 3:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soportedelta";
-                //     $this->pathToken = 'ws/whatsapp.config.das3.json';
-                //     break;
-                // case 4:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporteomega";
-                //     $this->pathToken = 'ws/whatsapp.config.das4.json';
-                //     break;
+            case 2:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesmatriz";
+                $this->pathToken = 'ws/whatsapp.config.renovacionesmatriz.json';
+                break;
+            case 3:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesdelta";
+                $this->pathToken = 'ws/whatsapp.config.renovacionesdelta.json';
+                break;
+            case 4:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesomega";
+                $this->pathToken = 'ws/whatsapp.config.renovacionesomega.json';
+                break;
             default:
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
                 $this->pathToken = 'ws/whatsapp.config.renovacionesalfa2.json';
@@ -198,21 +198,23 @@ class WhatsappRenovacionesController extends Controller
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
                 $this->pathToken = 'public/ws/whatsapp.config.renovacionesalfa2.json';
                 break;
-                // case 2:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporte";
-                //     $this->pathToken = '';
-                //     break;
-                // case 3:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soportedelta";
-                //     $this->pathToken = '';
-                //     break;
-                // case 4:
-                //     $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/soporteomega";
-                //     $this->pathToken = '';
-                //     break;
+            case 2:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesmatriz";
+                $this->pathToken = 'public/ws/whatsapp.config.renovacionesmatriz.json';
+                break;
+            case 3:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesdelta";
+                $this->pathToken = 'public/ws/whatsapp.config.renovacionesdelta.json';
+                break;
+            case 4:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesomega";
+                $this->pathToken = 'public/ws/whatsapp.config.renovacionesomega.json';
+                break;
+            default:
+                $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
+                $this->pathToken = 'public/ws/whatsapp.config.renovacionesalfa2.json';
+                break;
         }
-
-        
     }
 
     public static function enviar_mensaje($data)
@@ -243,7 +245,7 @@ class WhatsappRenovacionesController extends Controller
                 ])
                 ->post($instancia->APIWhatsapp . "/send-message", $solicitud)
                 ->json();
-                
+
             if (isset($res['status']) && $res['status'] == 'success') {
                 return true;
             }
@@ -290,7 +292,7 @@ class WhatsappRenovacionesController extends Controller
             }
             return false;
         } catch (\Throwable $th) {
-            return false;
+            throw $th;
         }
     }
 }

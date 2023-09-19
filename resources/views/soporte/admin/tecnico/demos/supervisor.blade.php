@@ -126,6 +126,7 @@
                                             <th>Whatsapp</th>
                                             <th>Estado</th>
                                             <th>Fecha de asesoría</th>
+                                            <th>Técnico</th>
                                             <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
@@ -241,6 +242,10 @@
                     {
                         data: 'fecha_iniciado',
                         name: 'fecha_iniciado',
+                    },
+                    {
+                        data: 'tecnico',
+                        name: 'tecnico',
                     },
                     {
                         data: 'acciones',

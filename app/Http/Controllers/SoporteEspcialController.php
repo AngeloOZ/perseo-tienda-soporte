@@ -430,7 +430,7 @@ class SoporteEspcialController extends Controller
             'soportes_especiales.tipo',
             'soportes_especiales.plan',
             'soportes_especiales.tecnicoid',
-            'tecnicos.nombres',
+            'tecnicos.nombres as tecnico',
             'tecnicos.distribuidoresid',
         )
             ->join('tecnicos', 'tecnicos.tecnicosid', 'soportes_especiales.tecnicoid')

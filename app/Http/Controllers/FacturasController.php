@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Yajra\DataTables\DataTables;
 use App\Models\Log;
+use App\Models\Tecnicos;
 use Illuminate\Support\Facades\Mail;
 
 class FacturasController extends Controller
@@ -474,7 +475,7 @@ class FacturasController extends Controller
             $capacitacion = SoporteEspecial::find($factura->capacitacionid);
 
             if ($capacitacion) {
-                $tecnico = User::find($capacitacion->tecnicoid);
+                $tecnico = Tecnicos::find($capacitacion->tecnicoid);
 
                 $estado = "";
                 switch ($capacitacion->estado) {

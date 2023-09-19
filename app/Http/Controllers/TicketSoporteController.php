@@ -45,24 +45,25 @@ class TicketSoporteController extends Controller
             return $message;
         }
 
-        $tickets = Ticket::select('ticketid', 'numero_ticket', 'ruc', 'estado', 'fecha_creado', 'calificado')->where('ruc', $ruc)->get();
+        $tickets = Ticket::select('ticketid', 'numero_ticket', 'ruc', 'estado', 'fecha_creado', 'calificado')
+            ->where('ruc', $ruc)
+            ->where('calificado', 0)
+            ->get();
 
-        $message = json_encode(["status" => 200, "message" => "Sin tickets abiertos"]);
+        if (count($tickets) == 0) {
+            $message = json_encode(["status" => 200, "message" => "Sin tickets abiertos"]);
+            return $message;
+        }
 
         foreach ($tickets as $ticket) {
-
             if ($ticket->estado <= 2) {
-                $message = json_encode(["status" => 400, "message" => "El ruc $ticket->ruc tiene un ticket abierto, creado el $ticket->fecha_creado"]);
-                break;
+                return $message = json_encode(["status" => 400, "message" => "El ruc $ticket->ruc tiene un ticket abierto, creado el $ticket->fecha_creado"]);
             }
 
             if ($ticket->calificado == 0) {
-                $message = json_encode(["status" => 400, "message" => "El ruc $ticket->ruc tiene ticket pendiente de calificar: <a href='" . route('soporte.calificar_ticket', $ticket->ticketid) . "' target='_blank' ><strong>calificar aquí</strong></a>"]);
-                break;
+                return $message = json_encode(["status" => 400, "message" => "El ruc $ticket->ruc tiene ticket pendiente de calificar: <a href='" . route('soporte.calificar_ticket', $ticket->ticketid) . "' target='_blank' ><strong>calificar aquí</strong></a>"]);
             }
         }
-
-        return $message;
     }
 
     public function crear_ticket(Request $request)
@@ -85,6 +86,21 @@ class TicketSoporteController extends Controller
             'motivo.required' => 'Debe ingresar el motivo',
             'motivo.min' => 'El motivo debe tener como mínimo 50 caracteres',
         ]);
+
+        $tickets = Ticket::select('ticketid', 'numero_ticket', 'ruc', 'estado', 'fecha_creado', 'calificado')
+            ->where('ruc', $request->ruc)
+            ->where('calificado', 0)
+            ->get();
+
+        if ($tickets->count() > 0) {
+            if ($tickets->where('estado', '<=', 2)->count() > 0) {
+                flash("El ruc {$request->ruc} tiene un ticket abierto, creado el {$tickets->where('estado', '<=', 2)->first()->fecha_creado}")->warning();
+                return back();
+            } else {
+                flash("El ruc {$request->ruc} tiene un ticket pendiente de calificar")->warning();
+                return redirect()->route('soporte.calificar_ticket', $tickets->first()->ticketid);
+            }
+        }
 
         try {
             $ticket = new Ticket();
@@ -191,13 +207,13 @@ class TicketSoporteController extends Controller
             // 4 => estado cerrado
             if ($estado == 4) {
                 if ($estado != $ticket->estado) {
-                    $this->enviar_correo_calificacion($ticket);
+                    $this->enviar_correo_calificacion($ticket, $estado);
                 }
             }
 
             // 5 => estado sin respuesta
             // 6 => estado problema general
-            if ($estado >= 5) {
+            if (in_array($estado, [3, 5, 6])) {
                 $ticket->calificado = 1;
             }
 
@@ -314,8 +330,12 @@ class TicketSoporteController extends Controller
         }
     }
 
-    private function enviar_correo_calificacion($ticket)
+    private function enviar_correo_calificacion($ticket, $estado = NULL)
     {
+        if (isset($estado) && $estado != 4) {
+            return false;
+        }
+
         $sms = new WhatsappController();
         $sendMessage = $sms->enviar_personalizado([
             "numero" => $ticket->whatsapp,

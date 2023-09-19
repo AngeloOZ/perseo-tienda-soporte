@@ -38,12 +38,34 @@
                             <strong>Número de Cuenta:</strong> 2100272341 <br>
                         </p>
                     @break
+                    
+                    @case(4)
+                        <p class="font-size-h6">
+                            <strong>Nombre:</strong> PERSEOOMEGA S.A.S 🪪<br>
+                            <strong>RUC:</strong> 0195099251001 🪪<br>
+                            <strong>Correo:</strong> diego.andrade@perseo.ec 📧<br>
+                            <strong>Correo:</strong> 0995158033 📱<br>
+                        </p>
+                        <h3 class="font-size-h4 font-weight-bolder">BANCO DEL PACIFICO 🏦</h3>
+                        <p class="font-size-h6">
+                            <strong>Tipo cuenta:</strong> Corriente <br>
+                            <strong>Número de Cuenta:</strong> 8181179 <br>
+                        </p>
+                        
+                        
+                        <h3 class="font-size-h4 font-weight-bolder">BANCO DEL PICHINCHA 🏦</h3>
+                        <p class="font-size-h6">
+                            <strong>Tipo cuenta:</strong> Corriente <br>
+                            <strong>Número de Cuenta:</strong> 2100291103 <br>
+                        </p>
+                    @break
 
                     @default
                         <p class="font-size-h6">
                             No se ha configurado la información bancaria de la empresa.
                         </p>
                 @endswitch
+
                 <div class="text-center">
                     <button type="button" class="btn btn-primary mt-2" data-dismiss="modal">OK</button>
                 </div>
