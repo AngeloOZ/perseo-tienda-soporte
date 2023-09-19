@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PlantillaDescarga extends Model
 {
     use HasFactory;
-    protected $table = 'plantillasDescarga';
+    protected $table = 'plantillasdescarga';
     protected $primaryKey = 'plantillasDescargaid';
     public $timestamps = false;
     protected $guarded = [];
