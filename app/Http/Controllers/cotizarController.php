@@ -303,8 +303,8 @@ class cotizarController extends Controller
     {
         if ($request->ajax()) {
 
-            $info = Cotizaciones::select('cotizaciones.cotizacionesid', 'cotizaciones.fecha', 'plantillasDescarga.detalle as plantilla', 'cotizaciones.detalle_pago', 'cotizaciones.nombre_cliente as prospectosnombres', 'cotizaciones.subtotal', 'cotizaciones.iva', 'cotizaciones.total', 'cotizaciones.usuariocreacion')
-                ->join('plantillasDescarga', 'plantillasDescarga.plantillaDescargaid', 'cotizaciones.plantillasid')
+            $info = Cotizaciones::select('cotizaciones.cotizacionesid', 'cotizaciones.fecha', 'plantillasdescarga.detalle as plantilla', 'cotizaciones.detalle_pago', 'cotizaciones.nombre_cliente as prospectosnombres', 'cotizaciones.subtotal', 'cotizaciones.iva', 'cotizaciones.total', 'cotizaciones.usuariocreacion')
+                ->join('plantillasdescarga', 'plantillasdescarga.plantillaDescargaid', 'cotizaciones.plantillasid')
                 // ->join('prospectos', 'prospectos.prospectosid', 'cotizaciones.prospectosid')
                 // ->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
                 // ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)

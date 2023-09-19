@@ -93,7 +93,7 @@
                     },
                     {
                         data: 'plantilla',
-                        name: 'plantillasDescarga.detalle'
+                        name: 'plantillasdescarga.detalle'
                     },
                     {
                         data: 'detalle_pago',
