@@ -1,6 +1,6 @@
     @php
         $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
-        $plantilla = App\Models\plantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
+        $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
     @endphp
     @extends('soporte.auth.layouts.app')
     @section('contenido')
