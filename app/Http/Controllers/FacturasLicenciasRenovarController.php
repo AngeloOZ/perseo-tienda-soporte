@@ -23,81 +23,86 @@ class FacturasLicenciasRenovarController extends Controller
 
     public static function generar_facturas_renovacion()
     {
-        $instancia = new self();
-        // 1 => Alfa
-        // 2 => Delta
-        // 3 => Omega
-        // 6 => Matriz
-        // vacio => Todos
-        $licencias = $instancia->obtener_licencias([1, 2, 3, 6]);
-        return $licencias;
+        try {
+            $instancia = new self();
+            // 1 => Alfa
+            // 2 => Delta
+            // 3 => Omega
+            // 6 => Matriz
+            // vacio => Todos
+            $licencias = $instancia->obtener_licencias([1, 2, 3, 6]);
 
-        if (count($licencias) == 0) return 0;
+            if (count($licencias) == 0) return 0;
 
-        $facturadasAlfa = 0;
-        $facturadasMatriz = 0;
-        $facturadasDelta = 0;
-        $facturadasOmega = 0;
+            $facturadasAlfa = 0;
+            $facturadasMatriz = 0;
+            $facturadasDelta = 0;
+            $facturadasOmega = 0;
 
-        foreach ($licencias as $licencia) {
-            try {
-                $productos = $instancia->buscar_producto($licencia);
-                $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
+            foreach ($licencias as $licencia) {
+                try {
+                    $productos = $instancia->buscar_producto($licencia);
+                    $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
 
-                $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
-                $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
-                $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
-                $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+                    $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
+                    $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
+                    $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
+                    $autorizada = $instancia->autorizar_factura($factura, $vendedor);
 
-                switch ($vendedor->distribuidoresid) {
-                    case '1':
-                        $facturadasAlfa++;
-                        break;
-                    case '2':
-                        $facturadasMatriz++;
-                        break;
-                    case '3':
-                        $facturadasDelta++;
-                        break;
-                    case '4':
-                        $facturadasOmega++;
-                        break;
-                }
+                    switch ($vendedor->distribuidoresid) {
+                        case '1':
+                            $facturadasAlfa++;
+                            break;
+                        case '2':
+                            $facturadasMatriz++;
+                            break;
+                        case '3':
+                            $facturadasDelta++;
+                            break;
+                        case '4':
+                            $facturadasOmega++;
+                            break;
+                    }
 
-                $renovacion = new RenovacionLicencias();
-                $renovacion->uuid = uniqid();
-                $renovacion->secuencia = $factura->secuencia;
-                $renovacion->datos = json_encode([
-                    "datos_cliente" => $datos_cliente,
-                    "licencia" => $licencia,
-                    "factura" => $factura,
-                ]);
-                $renovacion->distribuidoresid = $vendedor->distribuidoresid;
-                $renovacion->save();
-
-
-                if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
-                    WhatsappRenovacionesController::enviar_archivo_mensaje([
-                        "phone" => $datos_cliente->telefono2,
-                        "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
-                        "filename" => "factura_{$factura->secuencia}.pdf",
-                        "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
-                        "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                    $renovacion = new RenovacionLicencias();
+                    $renovacion->uuid = uniqid();
+                    $renovacion->secuencia = $factura->secuencia;
+                    $renovacion->datos = json_encode([
+                        "datos_cliente" => $datos_cliente,
+                        "licencia" => $licencia,
+                        "factura" => $factura,
                     ]);
+                    $renovacion->distribuidoresid = $vendedor->distribuidoresid;
+                    $renovacion->save();
+
+
+                    if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
+                        WhatsappRenovacionesController::enviar_archivo_mensaje([
+                            "phone" => $datos_cliente->telefono2,
+                            "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
+                            "filename" => "factura_{$factura->secuencia}.pdf",
+                            "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
+                            "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                        ]);
+                    }
+                } catch (\Throwable $th) {
+                    echo $th->getMessage() . "\n";
+                    continue;
                 }
-            } catch (\Throwable $th) {
-                echo $th->getMessage() . "\n";
-                continue;
             }
+
+            echo "Total de facturas Alfa: $facturadasAlfa\n";
+            echo "Total de facturas Matriz: $facturadasMatriz\n";
+            echo "Total de facturas Delta: $facturadasDelta\n";
+            echo "Total de facturas Omega: $facturadasOmega\n";
+            echo "Total de facturas: " . ($facturadasAlfa + $facturadasMatriz + $facturadasDelta + $facturadasOmega) . "\n";
+            return 1;
+        } catch (\Throwable $th) {
+            echo "\n";
+            echo $th->getMessage() . "\n";
+            echo "\n";
+            return 0;
         }
-
-        echo "Total de facturas Alfa: $facturadasAlfa\n";
-        echo "Total de facturas Matriz: $facturadasMatriz\n";
-        echo "Total de facturas Delta: $facturadasDelta\n";
-        echo "Total de facturas Omega: $facturadasOmega\n";
-        echo "Total de facturas: " . ($facturadasAlfa + $facturadasMatriz + $facturadasDelta + $facturadasOmega) . "\n";
-
-        return 1;
     }
 
     private function obtener_licencias(array $das = null)
