@@ -41,6 +41,7 @@
                                             <label>Distribuidor:</label>
                                             <select class="form-control datatable-input" id="filtroDistribuidor"
                                                 {{ $disabled }}>
+                                                <option value="">Todos</option>
                                                 <option value="1"
                                                     {{ $currentUser->distribuidoresid == 1 ? 'selected' : '' }}>Perseo Alfa
                                                 </option>
@@ -262,6 +263,7 @@
                 $("#filtroAsignados").val('');
                 $("#filtroFecha").val('');
                 $("#filtroDistribuidor").val('{{ $currentUser->distribuidoresid }}');
+                $("#filtroTecnicos").trigger('change');
                 table.draw();
             });
 
