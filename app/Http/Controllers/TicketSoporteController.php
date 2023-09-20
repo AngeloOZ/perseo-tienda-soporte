@@ -1452,7 +1452,7 @@ class TicketSoporteController extends Controller
 
             if (!($current >= $entrada && $current <= $salida)) return;
 
-            $tickets = Ticket::whereNull('tecnicosid')->get();
+            $tickets = Ticket::whereNull('tecnicosid')->where('estado', 1)->get();
 
             foreach ($tickets as $ticket) {
 
