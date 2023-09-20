@@ -282,7 +282,7 @@
                                     </div>
                                     <div class="form-group m-0 mb-3">
                                         <label>Número de comprobante<span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control form-control-sm" placeholder="XXXXXXXXXX"
+                                        <input type="text" class="form-control form-control-sm" placeholder="XXXXXXXXXX"
                                             value="{{ $renovacion->numero_comprobante }}" name="numero_comprobante"
                                             id="numero_comprobante" />
                                     </div>
@@ -406,9 +406,9 @@
             })
 
             btnUpload.addEventListener('click', async (e) => {
-                if (comprobante.value == '') {
-                    showAlert("Número de comprobante requerido",
-                        `Por favor ingresa el número de comprobante`
+                if (comprobante.value.length <= 4) {
+                    showAlert("Comprobante inválido",
+                        `El comprobante debe tener al menos 5 dígitos`
                     );
                     return;
                 }
@@ -447,6 +447,10 @@
                     );
                 }
             })
+
+            comprobante.addEventListener('input', e => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, "");
+            });
 
             function showSelectedFiles(file) {
                 const uploadedHTML = `<li class="file-row" data-uuid-file="${file.uuid}">

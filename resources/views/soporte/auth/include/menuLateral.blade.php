@@ -225,7 +225,7 @@
                         aria-haspopup="true" data-menu-toggle="hover">
                         <a href="javascript:;" class="menu-link menu-toggle">
                             <i class="menu-icon fas fa-font"></i>
-                            <span class="menu-text">Asignación</span>
+                            <span class="menu-text">Planes</span>
                             <i class="menu-arrow"></i>
                         </a>
                         <div class="menu-submenu">
@@ -295,7 +295,7 @@
                     </li>
                 @endif
 
-                <li class="menu-item menu-item-submenu " aria-haspopup="true" data-menu-toggle="hover">
+                <li class="menu-item menu-item-submenu {{ areActiveRoutesMenu(['detalles.listado', 'listadoCotizaciones.listado', 'cotizarPlantilla1.index', 'temas.index']) }}" aria-haspopup="true" data-menu-toggle="hover">
                     <a href="javascript:;" class="menu-link menu-toggle">
                         <i class="menu-icon fas fa-dollar-sign"></i>
                         <span class="menu-text">Cotizar</span>
@@ -316,7 +316,7 @@
                                     <span class="menu-text">Detalles</span>
                                 </a>
                             </li>
-                            <li class="menu-item {{ areActiveRoutes(['cotizarPlantilla1.listado']) }}"
+                            <li class="menu-item {{ areActiveRoutes(['cotizarPlantilla1.index']) }}"
                                 aria-haspopup="true">
                                 <a href="{{ route('cotizarPlantilla1.index', 0) }}" class="menu-link">
                                     <i class="menu-bullet menu-bullet-dot">

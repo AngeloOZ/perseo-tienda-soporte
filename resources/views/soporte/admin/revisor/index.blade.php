@@ -267,6 +267,7 @@
                 $("#filtroFecha").val('');
                 $("#filtroDistribuidor").val('{{ $currentUser->distribuidoresid }}');
                 $("#filtroProducto").val('{{ $selected }}');
+                $('#filtroTecnicos').trigger('change');
                 table.draw();
             });
 

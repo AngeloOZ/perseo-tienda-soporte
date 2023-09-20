@@ -18,7 +18,6 @@
         ->get();
 @endphp
 @csrf
-
 <style>
     #temas td {
         padding: 3px;
@@ -49,11 +48,11 @@
                     <span class="text-danger">{{ $errors->first('descripcion') }}</span>
                 @endif
             </div>
+            
             <div class="col-lg-6">
                 <label>Técnicos:</label>
                 <select class="form-control select2" id="tecnicosid" name="tecnicosid">
                     @if (count($listadoTecnicos) > 0)
-
                         @foreach ($listadoTecnicos as $tecnicosL)
                             @if ($tecnicosL->tecnicosid != 0)
                                 <option value="{{ $tecnicosL->tecnicosid }}"
@@ -75,7 +74,6 @@
                     <span class="text-danger">{{ $errors->first('tecnicosid') }}</span>
                 @endif
             </div>
-
         </div>
 
         <div class="form-group row">
@@ -94,7 +92,7 @@
                         @endforeach
                     @else
                         <option value="">
-                            No existe ningún cliente
+                            No hay clientes registrados
                         </option>
                     @endif
 
@@ -126,9 +124,7 @@
                     <span class="text-danger">{{ $errors->first('productosid') }}</span>
                 @endif
             </div>
-
         </div>
-
     </div>
 
     <div class="tab-pane fade" role="tabpanel" id="temasplanificacion">
@@ -139,7 +135,6 @@
                     <th>Temas</th>
                     <th>accion</th>
                     <th>identificador</th>
-
                 </tr>
             </thead>
         </table>
@@ -155,11 +150,11 @@
                 var productosid = $(this).val();
                 llenarTemas(productosid);
             });
+
             if (valoresT == 1) {
                 var productosid = $("#productosid").val();
                 llenarTemas(productosid);
             }
-
 
             $(document).on('change', '[name="categoriaCheck"]', function() {
                 const idCheckboxSeleccionado = $(this).attr('id');
@@ -189,8 +184,6 @@
                 });
             });
         });
-
-
 
         function llenarTemas(planificaciones) {
             if (planificaciones != "") {

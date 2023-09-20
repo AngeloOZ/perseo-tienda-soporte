@@ -27,8 +27,6 @@
 
                                                 <a href="{{ route('planificaciones.crear') }}" class="btn btn-warning btn-icon"
                                                     data-toggle="tooltip" title="Nuevo"><i class="la la-user-plus"></i></a>
-
-                                               
                                             </div>
                                         </div>
                                     </div>
