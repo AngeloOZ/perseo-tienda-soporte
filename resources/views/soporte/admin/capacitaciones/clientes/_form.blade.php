@@ -87,7 +87,6 @@
     <div class="col-lg-6">
         <label>Estado:</label>
         <select class="form-control select2" id="estado" name="estado">
-            <option value="" disabled selected>Escoja un estado</option>
             <option value="1" {{ old('estado', $clientes->estado) == '1' ? 'Selected' : '' }}>Activo</option>
             <option value="0" {{ old('estado', $clientes->estado) == '0' ? 'Selected' : '' }}>Inactivo</option>
         </select>

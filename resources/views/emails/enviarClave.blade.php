@@ -234,11 +234,11 @@
                                             <td align="left"
                                                 style="font-size:0px;padding:0px 50px 0px 0px;padding-top:0px;padding-right:0;padding-bottom:0px;padding-left:0px;word-break:break-word;">
                                                 <div
-                                                    style="font-family:Arial, sans-serif;font-size:14px;letter-spacing:normal;line-height:1;text-align:left;color:#000000;">
+                                                    style="font-family:Arial, sans-serif;font-size:14px;letter-spacing:normal;text-align:left;color:#000000;">
                                                     <p class="text-build-content" data-testid="avjJDuQerw3B"
                                                         style="margin: 10px 0; margin-top: 10px; margin-bottom: 10px;">
-                                                        &nbsp;La contraseña &nbsp;para ingresar al sistema es la
-                                                        sigu<span style="font-size:14px;">i</span>ente:</p>
+                                                        ¡Hola <strong>{{ $array['cliente'] }}</strong>! 🌟 Esperamos que estés teniendo un excelente día. A continuación, encontrarás las credenciales para ingresar al sistema. 🔐✨<br><br>
+                                                        ¡Gracias por ser parte de nuestro equipo! 😊🎉
                                                 </div>
                                             </td>
                                         </tr>
@@ -281,9 +281,11 @@
                                                                 <div
                                                                     style="font-family:Arial, sans-serif;font-size:16px;letter-spacing:normal;line-height:1;text-align:left;color:#000000;">
                                                                     <p class="text-build-content"
-                                                                        style="text-align: center; margin: 10px 0; margin-top: 10px; margin-bottom: 10px;"
-                                                                        data-testid="oiR1cPkdb"><span
-                                                                            style="color:#1d6ea9;font-family:Arial;font-size:16px;letter-spacing:2px;">{{ $array['clave'] }}</span>
+                                                                        style="margin: 10px 0; margin-top: 10px; margin-bottom: 10px;"
+                                                                        data-testid="oiR1cPkdb">
+                                                                        <strong>Usuario:</strong> {{ $array['identificacion'] }}<br><br>
+                                                                        <strong>Contraseña:</strong> {{ $array['clave'] }}<br><br>
+                                                                        <strong>Link:</strong> <a href="{{ route('clientes.login') }}">{{ route('clientes.login') }}</a><br>
                                                                     </p>
                                                                 </div>
                                                             </td>

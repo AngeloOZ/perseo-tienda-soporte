@@ -113,6 +113,9 @@ class clientesController extends Controller
             $array['from'] = env('MAIL_FROM_ADDRESS');
             $array['subject'] = 'Capacitación clave';
             $array['clave'] = $request->clave;
+            $array['cliente'] = $request->razonsocial;
+            $array['identificacion'] = $request->identificacion;
+
             $emailsEnviar = $request->correo;
             Mail::to($emailsEnviar)->queue(new EnviarClave($array));
 
@@ -159,8 +162,13 @@ class clientesController extends Controller
         );
         DB::beginTransaction();
         try {
+            $sendMailPassword = false;
+            $tempPassword = "";
+
             if ($request->clave != null) {
+                $tempPassword = $request->clave;
                 $request['clave'] = encrypt_openssl($request->clave, 'Perseo1232*');
+                $sendMailPassword = true;
             } else {
                 $request['clave'] = $clientes->clave;
             }
@@ -168,6 +176,18 @@ class clientesController extends Controller
             $request['fechamodificacion'] =  now();
             $request['usuariomodificacion'] = Auth::guard('tecnico')->user()->nombres;
             $clientes->update($request->all());
+
+            if ($sendMailPassword) {
+                $array['view'] = 'cliente.emails.enviarClave';
+                $array['from'] = env('MAIL_FROM_ADDRESS');
+                $array['subject'] = 'Actualización clave';
+                $array['clave'] = $tempPassword;
+                $array['cliente'] = $request->razonsocial;
+                $array['identificacion'] = $request->identificacion;
+                $emailsEnviar = $request->correo;
+                Mail::to($emailsEnviar)->queue(new EnviarClave($array));
+            }
+
 
             //Asignacion masiva
             $historial = new Log();
