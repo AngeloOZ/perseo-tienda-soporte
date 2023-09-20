@@ -93,6 +93,7 @@ class planificacionesController extends Controller
                 'clientesid'    => 'required',
                 'tecnicosid'    => 'required',
                 'temasA'        => 'required',
+                'colaboradores' => 'required',
             ],
             [
                 'descripcion.required' => 'Ingrese una descripcion',
@@ -100,6 +101,7 @@ class planificacionesController extends Controller
                 'clientesid.required' => 'Escoja un cliente',
                 'tecnicosid.required' => 'Escoja un técnico',
                 'temasA.required'       => 'Selecciones temas',
+                'colaboradores.required' => 'Ingrese colaboradores al menos un colaborador',
             ],
         );
 
@@ -119,6 +121,7 @@ class planificacionesController extends Controller
         $planificaciones->revisioncliente = 0;
         $planificaciones->fechacreacion = now();
         $planificaciones->usuariocreacion = Auth::guard('tecnico')->user()->nombres;
+        $planificaciones->colaboradores = $request->colaboradores;
         $planificaciones->save();
 
         foreach ($temasid as $tema) {
@@ -155,6 +158,7 @@ class planificacionesController extends Controller
                 'productosid'   => 'required',
                 'clientesid'    => 'required',
                 'tecnicosid'    => 'required',
+                'colaboradores' => 'required',
             ],
             [
                 'descripcion.required' => 'Ingrese una descripcion',
@@ -162,6 +166,7 @@ class planificacionesController extends Controller
                 'clientesid.required' => 'Escoja un cliente',
                 'tecnicosid.required' => 'Escoja un técnico',
                 'temasA.required'       => 'Selecciones temas',
+                'colaboradores.required' => 'Ingrese colaboradores al menos un colaborador',
             ],
         );
 
@@ -171,6 +176,7 @@ class planificacionesController extends Controller
             $actualizar->productosid = $request->productosid;
             $actualizar->clientesid = $request->clientesid;
             $actualizar->tecnicosid = $request->tecnicosid;
+            $actualizar->colaboradores = $request->colaboradores;
             $actualizar->fechamodificacion = now();
             $actualizar->usuariomodificacion = Auth::guard('tecnico')->user()->nombres;
 
