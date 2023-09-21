@@ -28,9 +28,9 @@ class FacturasLicenciasRenovarController extends Controller
             "from" => "Sistema de renovación",
             "subject" => "Renovación del sistema contable Perseo",
             "pdfBase64" => $factura->pdf,
-            "cliente" => "Angello",
-            "comprobante" => "as2134jj89cc",
-            "secuencia" => "123456",
+            "cliente" => "CELLERI PESANTEZ RAUL OSVALDO",
+            "comprobante" => "e12q42e59th8",
+            "secuencia" => "000013423",
         ]);
 
         $decodedPdf = base64_decode($factura->pdf);
