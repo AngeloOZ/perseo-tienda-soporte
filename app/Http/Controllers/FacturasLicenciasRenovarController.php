@@ -96,9 +96,7 @@ class FacturasLicenciasRenovarController extends Controller
                     $renovacion->save();
 
                     $instancia->notificar_renovacion_correo([
-                        // "to" => $datos_cliente->correos,
-                        // TODO: Borrar la linea y descomentar la anterior
-                        "to" => "angello.ordonez@hotmail.com",
+                        "to" => $datos_cliente->correos,
                         "from" => "Sistema de renovación",
                         "subject" => "Renovación del sistema contable Perseo",
                         "pdfBase64" => $autorizada->pdf,
