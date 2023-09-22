@@ -458,7 +458,7 @@ class FacturasLicenciasRenovarController extends Controller
             ->json();
 
         if (isset($resultado["fault"])) {
-            throw new Error("No se autorizo la factura: " . $resultado["fault"]["faultstring"]);
+            throw new Error("No se autorizo la factura: {$factura->facturaid} =>" . $resultado["fault"]["faultstring"]);
         }
 
         return (object)$resultado;
