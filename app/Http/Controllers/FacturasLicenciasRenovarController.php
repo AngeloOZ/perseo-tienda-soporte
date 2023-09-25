@@ -433,7 +433,8 @@ class FacturasLicenciasRenovarController extends Controller
         $response = (object)[
             "facturaid" => $resultado["facturas"][0]["facturasid_nuevo"],
             "secuencia" => $resultado["facturas"][0]["facturas_secuencia"],
-            "total_facturado" => round($valoresFactura["totalneto"], 2)
+            "total_facturado" => round($valoresFactura["totalneto"], 2),
+            "distribuidor" => $vendedor->distribuidoresid,
         ];
 
         return $response;
@@ -455,7 +456,7 @@ class FacturasLicenciasRenovarController extends Controller
             ->json();
 
         if (isset($resultado["fault"])) {
-            throw new Error("No se autorizo la factura: {$factura->facturaid} =>" . $resultado["fault"]["faultstring"]);
+            throw new Error("No se autorizo la factura: {$factura->facturaid} distribuidor: {$factura->distribuidor} =>" . $resultado["fault"]["faultstring"]);
         }
 
         return (object)$resultado;
