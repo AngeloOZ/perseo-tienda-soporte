@@ -7,10 +7,12 @@ use App\Models\Producto;
 use App\Models\ProductoHomologado;
 use App\Models\ProductosLicenciadorRenovacion;
 use App\Models\RenovacionLicencias;
+use App\Models\Tecnicos;
 use App\Models\User;
 use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -19,26 +21,21 @@ class FacturasLicenciasRenovarController extends Controller
 
     public static function index(Request $request)
     {
-        $instancia = new self();
-        $vendedor = $instancia->obtener_vendedor_default(1);
-        $factura = $instancia->autorizar_factura((object)["facturaid" => 14060], $vendedor);
+        $tecnicoLibre = Tecnicos::where('rol', 5)
+            ->where('estado', 1)
+            ->where('activo', 1)
+            ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
+            ->where('distribuidoresid', 2)
+            // ->where('productos', 'like', '%pc%')
+            ->orderBy('tickets_activos')
+            ->first();
 
-        $instancia->notificar_renovacion_correo([
-            "to" => "angello.ordonez@hotmail.com",
-            "from" => "Sistema de renovación",
-            "subject" => "Renovación del sistema contable Perseo",
-            "pdfBase64" => $factura->pdf,
-            "cliente" => "CELLERI PESANTEZ RAUL OSVALDO",
-            "comprobante" => "e12q42e59th8",
-            "secuencia" => "000013423",
-        ]);
-
-        $decodedPdf = base64_decode($factura->pdf);
-
-        return response($decodedPdf, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="filename.pdf"',
-        ]);
+        if ($tecnicoLibre == null) {
+            echo "No hay técnicos disponibles";
+        }
+        else{
+            return $tecnicoLibre;
+        }
     }
 
     public static function generar_facturas_renovacion()
