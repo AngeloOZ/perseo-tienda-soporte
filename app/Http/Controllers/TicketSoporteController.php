@@ -1473,6 +1473,7 @@ class TicketSoporteController extends Controller
                 $tecnicoLibre = $this->buscar_tecnico_libre($ticket->producto, $ticket->distribuidor);
 
                 if ($tecnicoLibre == null) continue;
+                if ($tecnicoLibre->activo == 0) continue;
 
                 $ticket->tecnicosid = $tecnicoLibre->tecnicosid;
                 $ticket->fecha_asignacion = now();
@@ -1482,10 +1483,17 @@ class TicketSoporteController extends Controller
                     $tecnicoLibre->tickets_activos = $ticketsActivos;
                     $tecnicoLibre->save();
                     $this->notificar_asignacion_ticket($tecnicoLibre->tecnicosid, $ticket);
+
+                    $log = new Log();
+                    $log->usuario = "Sistema";
+                    $log->pantalla = "Soporte";
+                    $log->operacion = "Asignacion de ticket";
+                    $log->fecha = now();
+                    $log->detalle = $ticket;
+                    $log->save();
                 }
             }
         } catch (\Throwable $th) {
-            // dd($th);
         }
     }
 
@@ -1558,7 +1566,7 @@ class TicketSoporteController extends Controller
 
             return $sendMessage = $sms->enviar_personalizado([
                 "numero" => $ticket->whatsapp,
-                "mensaje" =>  "¡Hola! 👋 Solo quería informarte que hemos recibido tu solicitud de soporte para el Sistema Contable Perseo. Tu ticket No: *{$ticket->numero_ticket}* ha sido asignado a nuestro técnico *{$tecnico->nombres}*. Pronto recibirás atención de primera. ¡Gracias por tu paciencia! 🛠️🔧",
+                "mensaje" =>  "¡Hola! 👋 Solo queríamos informarte que hemos recibido tu solicitud de soporte para el Sistema Contable Perseo. Tu ticket No: *{$ticket->numero_ticket}* ha sido asignado a nuestro técnico *{$tecnico->nombres}*. Pronto recibirás atención de primera. ¡Gracias por tu paciencia! 🛠️🔧",
             ]);
         } catch (\Throwable $th) {
             //throw $th;
