@@ -3,15 +3,10 @@
     $provincias = App\Models\Provincias::get();
     $verificacion = isset($verificacion) ? $verificacion : '';
     $id_firma = isset($id_firma) ? $id_firma : '';
-    
-    $fechaactual = date('Y-m-d');
-    $nuevafecha = strtotime('-18 year', strtotime($fechaactual)); //Se resta un año menos
-    $nuevafecha = date('Y-m-d', $nuevafecha);
 @endphp
-
 @section('titulo', 'Firmas')
 @section('descripcion', 'Datos para la Firma Electrónica')
-@section('imagen', asset('assets/media/firmas.jpg'))
+@section('imagen', asset('assets/media/carga.jpg'))
 
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid w-75 mx-auto" id="kt_content">
@@ -129,7 +124,7 @@
                                                                                     class="far fa-check-circle text-success icon-7x ">
 
                                                                                 </li>
-                                                                                <div class="container mt-8">
+                                                                                <div class="container mt-5">
                                                                                     @if ($id_firma != '')
                                                                                         <a href="{{ route('firma.estadosolicitud', $id_firma) }}"
                                                                                             class="btn btn-primary">Ver
@@ -210,7 +205,7 @@
             if (!extensionesValidas.includes(extension)) {
                 Swal.fire({
                     title: "Tipo de archivo no válido",
-                    html: `Solo se permite imagenes de tipo <strong>${extensionesValidas.join(', ')}</strong>`,
+                    html: `Solo se permite archivos de tipo <strong>${extensionesValidas.join(', ')}</strong>`,
                     icon: "warning",
                     confirmButtonText: "OK",
                 })
@@ -224,6 +219,7 @@
             if (file) {
                 if (file.size <= maxSize) {
                     return validarExtensionArchivo(file, types);
+                    // return true;
                 }
                 return false;
             }
@@ -237,8 +233,6 @@
             const constitucion = document.getElementById('constitucion');
             const nombramiento = document.getElementById('nombramiento');
             const aceptacion = document.getElementById('aceptacion');
-
-
             inputFoto.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target);
                 const mensaje = document.getElementById('mensajeFoto2');
@@ -251,7 +245,6 @@
                     e.target.value = "";
                 }
             });
-
             inputCedulaFront.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target);
                 const mensaje = document.getElementById('mensajeAnverso2');
@@ -264,7 +257,6 @@
                     e.target.value = "";
                 }
             });
-
             inputCedulaReverso.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target);
                 const mensaje = document.getElementById('mensajeReverso2');
@@ -277,7 +269,6 @@
                     e.target.value = "";
                 }
             });
-
             documento.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target, 2097152, ['pdf']);
                 const mensaje = document.getElementById('mensajeArchivoRuc2');
@@ -290,7 +281,6 @@
                     e.target.value = "";
                 }
             });
-
             constitucion.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target, 4194304, ['pdf']);
                 const mensaje = document.getElementById('mensajeArchivoConstitucion2');
@@ -303,7 +293,6 @@
                     e.target.value = "";
                 }
             });
-
             nombramiento.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target, 2097152, ['pdf']);
                 const mensaje = document.getElementById('mensajeArchivoNombramiento2');
@@ -316,7 +305,6 @@
                     e.target.value = "";
                 }
             });
-
             aceptacion.addEventListener('change', e => {
                 const result = verificarPesoMenor2MB(e.target, 2097152, ['pdf']);
                 const mensaje = document.getElementById('mensajeArchivoAceptacion');
@@ -329,12 +317,13 @@
             });
         }
 
+
         function validarHuellaDactilar() {
             const inputHuella = document.getElementById('codigo_cedula');
             const helperTExt = document.getElementById('mensajeCodigo2');
             inputHuella.addEventListener('blur', (e) => {
 
-                const expresion = /^[A-Za-z]\d{4}[A-Za-z]{2}\d{4}$/;
+                const expresion = /^((\w){1}[\d]{4}(\w){1}[\d]{4})/;
                 if (expresion.test(inputHuella.value)) {
                     helperTExt.classList.add('d-none');
                 } else {
@@ -360,7 +349,6 @@
                 var conRuc = document.querySelector('input[name="conruc"]:checked').value;
                 if (conRuc == 1 && inputFileRuc.value != "") {
                     const ruc = convertCedulaToRuc($("#identificacion").val());
-                    console.log(ruc);
                     $("#ruc_hidden").val(ruc);
                 }
             })
@@ -378,7 +366,6 @@
         $('#ruc1').change(function() {
             if ($(this).is(':checked')) {
                 $('.verificarRuc').removeClass('invisible');
-                $("#textDireccion").text("Dirección Domicilio");
             }
         });
         $('#ruc2').change(function() {
@@ -389,6 +376,7 @@
 
 
         $(document).ready(function() {
+            //validarHuellaDactilar();
             validarSiTieneRuc();
             validarPesoArchivos();
             $('#tipo_persona').val("");
@@ -402,11 +390,10 @@
                 templates: {
                     leftArrow: '<i class="la la-angle-left"></i>',
                     rightArrow: '<i class="la la-angle-right"></i>'
-                },
+                }
             }).datepicker("setDate", new Date());
 
             kizzard.init();
-
             $('#tipo_persona').change(function() {
                 if ($('#tipo_persona').val() == "1") {
                     $("#textDireccion").text("Dirección Domicilio");
@@ -418,28 +405,27 @@
                     $("#textDatosPer").text("Datos del representante legal");
                     $('#vigenciaFirma option[value="7"]').remove();
                 }
+
+
+
+                $('#hombre').attr("checked", "checked");
+
+                $('.hombre').css('background-color', '#babcc3');
+                $('.mujer').css('background-color', '#f8f8ff');
+                $('#hombre').change(function() {
+                    if ($(this).is(':checked')) {
+                        $('.hombre').css('background-color', '#babcc3');
+                        $('.mujer').css('background-color', '#f8f8ff');
+                    }
+                });
+                $('#mujer').change(function() {
+                    if ($(this).is(':checked')) {
+                        $('.hombre').css('background-color', '#f8f8ff');
+                        $('.mujer').css('background-color', '#babcc3');
+                    }
+                });
+
             });
-
-
-
-
-            $('#hombre').attr("checked", "checked");
-
-            $('.hombre').css('background-color', '#babcc3');
-            $('.mujer').css('background-color', '#f8f8ff');
-            $('#hombre').change(function() {
-                if ($(this).is(':checked')) {
-                    $('.hombre').css('background-color', '#babcc3');
-                    $('.mujer').css('background-color', '#f8f8ff');
-                }
-            });
-            $('#mujer').change(function() {
-                if ($(this).is(':checked')) {
-                    $('.hombre').css('background-color', '#f8f8ff');
-                    $('.mujer').css('background-color', '#babcc3');
-                }
-            });
-
         });
 
         function cambiarCiudad(id) {
@@ -485,6 +471,7 @@
             var cedula = $("#identificacion").val();
             var nombres = $("#nombres").val();
             var apellidoPaterno = $("#apellidoPaterno").val();
+            var apellidoMaterno = $("#apellidoMaterno").val();
             var codigo_cedula = $("#codigo_cedula").val();
             var correo = $("#correo").val();
             var celular = $("#celular").val();
@@ -546,7 +533,7 @@
             }
 
             if (apellidoPaterno.trim().length < 1) {
-                $('#nombres').focus();
+                $('#apellidoPaterno').focus();
                 $('#mensajeApellidoPaterno').removeClass("d-none");
 
             } else {
@@ -586,7 +573,7 @@
                 $('#mensajeTelefonoContacto').addClass("d-none");
             }
 
-            if (fechanacimiento.trim().length < 1 || ((anioActual - obteneranio) < 18)) {
+            if (fechanacimiento.trim().length < 1 || (anioActual - obteneranio) < 17) {
                 $('#mensajeFecha').removeClass("d-none");
                 $('#fechanacimiento').focus();
 
@@ -648,11 +635,14 @@
 
 
             if (vigenciaFirma.trim().length < 1 || cedula.trim().length < 1 || nombres.trim().length < 1 ||
-                apellidoPaterno.trim().length < 1 ||
-                codigo_cedula.trim().length < 1 || correo.trim().length < 1 || celular.trim().length < 1 || celular2
-                .trim().length < 1 || fechanacimiento.trim().length < 1 || provincias.trim().length < 1 || ciudadesid
-                .trim().length < 1 || direccion.trim().length < 1 || valor1 == 0 ||
-                valor2 == 0 || valor3 == 0 || (anioActual - obteneranio) < 19) {
+                apellidoPaterno.trim().length <
+                1 || codigo_cedula.trim().length < 1 || correo
+                .trim().length < 1 || celular.trim().length < 1 || celular2.trim().length < 1 || fechanacimiento.trim()
+                .length < 1 ||
+                provincias
+                .trim().length < 1 || ciudadesid.trim().length < 1 || direccion.trim().length < 1 ||
+                valor1 == 0 ||
+                valor2 == 0 || valor3 == 0 || (anioActual - obteneranio) < 17) {
 
                 return 0;
             } else {
@@ -703,6 +693,7 @@
             var conRuc = document.querySelector('input[name="conruc"]:checked').value;
             var documento = $("#documento").val();
 
+
             if (tipopersona == 1) {
                 if (documento == "" && conRuc == 1) {
                     $('#mensajeArchivoRuc').removeClass("d-none");
@@ -718,7 +709,6 @@
                 var documento = $("#constitucion").val();
                 var constitucion = $("#constitucion").val();
                 var nombramiento = $("#nombramiento").val();
-
 
 
                 if (documento == "") {
@@ -749,6 +739,7 @@
                 return 1;
             }
         }
+
 
         var kizzard = function() {
 
@@ -804,7 +795,6 @@
                     }
 
                     if (actual == 3) {
-                        console.log("Entree...");
                         var validacion3 = await validarPantalla3();
                         if (validacion3 != 0) {
                             _wizardObj.goNext();

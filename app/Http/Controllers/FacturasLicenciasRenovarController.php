@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NotaficacionRenovacion;
 use App\Models\Producto;
 use App\Models\ProductoHomologado;
 use App\Models\ProductosLicenciadorRenovacion;
@@ -11,14 +12,33 @@ use Error;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 
 class FacturasLicenciasRenovarController extends Controller
 {
 
-    public function index(Request $request)
+    public static function index(Request $request)
     {
-        dd($request);
-        return $request;
+        $instancia = new self();
+        $vendedor = $instancia->obtener_vendedor_default(1);
+        $factura = $instancia->autorizar_factura((object)["facturaid" => 14060], $vendedor);
+
+        $instancia->notificar_renovacion_correo([
+            "to" => "angello.ordonez@hotmail.com",
+            "from" => "Sistema de renovación",
+            "subject" => "Renovación del sistema contable Perseo",
+            "pdfBase64" => $factura->pdf,
+            "cliente" => "CELLERI PESANTEZ RAUL OSVALDO",
+            "comprobante" => "e12q42e59th8",
+            "secuencia" => "000013423",
+        ]);
+
+        $decodedPdf = base64_decode($factura->pdf);
+
+        return response($decodedPdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="filename.pdf"',
+        ]);
     }
 
     public static function generar_facturas_renovacion()
@@ -74,6 +94,16 @@ class FacturasLicenciasRenovarController extends Controller
                     ]);
                     $renovacion->distribuidoresid = $vendedor->distribuidoresid;
                     $renovacion->save();
+
+                    $instancia->notificar_renovacion_correo([
+                        "to" => $datos_cliente->correos,
+                        "from" => "Sistema de renovación",
+                        "subject" => "Renovación del sistema contable Perseo",
+                        "pdfBase64" => $autorizada->pdf,
+                        "cliente" => $datos_cliente->nombres,
+                        "comprobante" => $renovacion->uuid,
+                        "secuencia" => $factura->secuencia,
+                    ]);
 
 
                     if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
@@ -428,7 +458,7 @@ class FacturasLicenciasRenovarController extends Controller
             ->json();
 
         if (isset($resultado["fault"])) {
-            throw new Error("No se autorizo la factura: " . $resultado["fault"]["faultstring"]);
+            throw new Error("No se autorizo la factura: {$factura->facturaid} =>" . $resultado["fault"]["faultstring"]);
         }
 
         return (object)$resultado;
@@ -452,5 +482,22 @@ class FacturasLicenciasRenovarController extends Controller
         }
 
         return $vendedor;
+    }
+
+    private function notificar_renovacion_correo($correo)
+    {
+        $temporaryFilePath = sys_get_temp_dir() . '/' . $correo['secuencia'];
+        try {
+            $fileContent = base64_decode($correo['pdfBase64']);
+            file_put_contents($temporaryFilePath, $fileContent);
+
+            $correo["tempFilePath"] = $temporaryFilePath;
+
+            Mail::to($correo["to"])->queue(new NotaficacionRenovacion($correo));
+        } catch (\Throwable $th) {
+            dd($th->getMessage());
+        } finally {
+            unlink($temporaryFilePath);
+        }
     }
 }
