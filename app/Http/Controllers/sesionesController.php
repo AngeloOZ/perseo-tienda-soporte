@@ -287,11 +287,11 @@ class sesionesController extends Controller
             $html = str_replace('${tabla}', $tablaHtml, $html);
             $pdf = PDF::loadHTML($html);
 
-            $pdf->save(public_path('generados/Sesion-' . $horas->sesionesid . '.pdf'));
+            $pdf->save(public_path('generados/sesion-' . $horas->sesionesid . '.pdf'));
 
             try {
                 Mail::to($emails)->queue(new MailSesiones($array));
-                unlink(public_path() . '/generados/Sesion-' . $array['tema'] . '.pdf');
+                unlink(public_path() . '/generados/sesion-' . $array['tema'] . '.pdf');
             } catch (\Exception $e) {
                 dd($e);
                 flash('Error enviando email')->error();
