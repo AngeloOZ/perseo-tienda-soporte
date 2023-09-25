@@ -6,6 +6,12 @@
     $bancoOrigen = ['Banco Pichincha', 'Banco del Pacifíco', 'Banco Guayaquil', 'Banco Internacional', 'Banco Bolivariano', 'Banco de Loja', 'Banco de Machala', 'Coperativa JEP', 'Coperativa 29 de Octubre', 'OTRO'];
     
     $bancoDestino = ['Banco Pichincha', 'Banco Produbanco'];
+    $bancoDestino = [
+        '1' => ['Banco Pichincha', 'Banco Produbanco'],
+        '2' => ['Banco Pichincha', 'OTRO'],
+        '3' => ['Banco Pichincha', 'OTRO'],
+        '4' => ['Banco Pichincha', 'Banco Produbanco', 'Banco del Pacifico'],
+    ];
 @endphp
 
 @section('contenido')
@@ -298,7 +304,7 @@
                                         <label>Banco de Destino<span class="text-danger">*</span></label>
                                         <select class="form-control form-control-sm" name="banco_destino"
                                             id="banco_destino">
-                                            @foreach ($bancoDestino as $banco)
+                                            @foreach ($bancoDestino[$renovacion->distribuidoresid] as $banco)
                                                 <option>{{ $banco }}</option>
                                             @endforeach
                                         </select>
