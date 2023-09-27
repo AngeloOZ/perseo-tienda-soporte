@@ -13,6 +13,8 @@
         ->where('distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
         ->where('estado', 1)
         ->get();
+    
+    $disabled = Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_TECNICOS ? 'disabled' : '';
 @endphp
 @csrf
 
@@ -76,7 +78,7 @@
                 <div class="col-lg-6">
                     <label>Técnicos:</label>
                     <select class="form-control select2" id="tecnicosid" name="tecnicosid"
-                        @if ((isset($sesiones->fechainicio) && $sesiones->fechainicio != null) || $sesiones->fechafin != null) disabled @endif>
+                        @if ((isset($sesiones->fechainicio) && $sesiones->fechainicio != null) || $sesiones->fechafin != null) disabled @endif {{ $disabled }}>
                         @if (count($listadoTecnicos) > 0)
 
                             @foreach ($listadoTecnicos as $tecnicosL)

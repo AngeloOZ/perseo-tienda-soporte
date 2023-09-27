@@ -558,10 +558,10 @@ class FacturasController extends Controller
                 'concepto_abv' => 'required',
             ],
             [
-                'identificacion.required' => 'Ingrese la identificaci贸n',
+                'identificacion.required' => 'Ingrese la identificación',
                 'nombre.required' => 'Ingrese el nombre',
-                'direccion.required' => 'Ingrese la direcci贸n',
-                'telefono.required' => 'Ingrese el tel茅fono',
+                'direccion.required' => 'Ingrese la dirección',
+                'telefono.required' => 'Ingrese el teléfono',
                 'correo.required' => 'Ingrese el correo',
                 'productos.required' => 'La factura debe tener productos',
                 'concepto.required' => 'Ingrese un complemento del concepto',
