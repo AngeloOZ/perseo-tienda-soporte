@@ -1,10 +1,9 @@
 @php
     $concepto = $factura->concepto;
-    $nomenclaturaRenovaciones = ['CTR', 'FTR', 'RNW', 'RRP', 'FRM'];
+    $nomenclaturaNuevos = ['FT', 'NPC', 'PNW', 'P_PNW', 'P_NPC', 'P_FT'];
     $concepto = explode(' ', $concepto)[0];
     $concepto = strtoupper($concepto);
-
-    $esNuevo = !in_array($concepto, $nomenclaturaRenovaciones);
+    $esNuevo = in_array($concepto, $nomenclaturaNuevos);
 @endphp
 <div class="card-toolbar">
     <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="">
