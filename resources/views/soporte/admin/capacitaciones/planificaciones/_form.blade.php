@@ -16,6 +16,9 @@
     $temasCheck = App\Models\PlanificacionesDetalles::select('temasid')
         ->where('planificacionesid', $planificaciones->planificacionesid)
         ->get();
+
+    $disabled = Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_TECNICOS ? 'disabled' : '';
+
 @endphp
 @csrf
 <link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
@@ -75,7 +78,7 @@
 
             <div class="col-lg-6">
                 <label>Técnicos:</label>
-                <select class="form-control select2" id="tecnicosid" name="tecnicosid">
+                <select class="form-control select2" id="tecnicosid" name="tecnicosid" {{ $disabled }}>
                     @if (count($listadoTecnicos) > 0)
                         @foreach ($listadoTecnicos as $tecnicosL)
                             @if ($tecnicosL->tecnicosid != 0)
