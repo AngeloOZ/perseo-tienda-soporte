@@ -112,6 +112,8 @@ Route::prefix('soporte')->group(function () {
             Route::put('/actualizar/{soporte}', [SoporteEspcialController::class, 'actualizar_soporte_especial'])->name('sop.actualizar_soporte_especial');
             Route::post('/registrar-actividad/{soporte}', [SoporteEspcialController::class, 'registrar_actividad_soporte'])->name('sop.registrar_actividad_soporte');
 
+            Route::delete('/eliminar/{soporte}', [SoporteEspcialController::class, 'eliminar_soporte_especial'])->name('sop.eliminar');
+
             /* supervisor */
             Route::get('/listado-supervisor', [SoporteEspcialController::class, 'supervisor_listar_soporte'])->name('especiales.listado_supervisor');
             Route::post('/filtrado-supervisor', [SoporteEspcialController::class, 'filtrado_supervisor_soporte'])->name('especiales.filtrado_supervidor');

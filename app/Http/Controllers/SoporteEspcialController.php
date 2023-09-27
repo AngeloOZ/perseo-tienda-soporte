@@ -399,10 +399,26 @@ class SoporteEspcialController extends Controller
                 })
                 ->editColumn('acciones', function ($soporte) {
                     $botones = '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('sop.editar_soporte_especial', $soporte->soporteid) . '"  title="Editar"> <i class="la la-edit"></i> </a>';
+
+                    if ($soporte->estado == 1) {
+                        $botones .= '<a class="btn btn-sm btn-light btn-icon btn-hover-danger confirm-delete" href="javascript:void(0)" data-href="' . route('sop.eliminar', $soporte->soporteid) . '" title="Eliminar"> <i class="la la-trash"></i> </a>';
+                    }
                     return $botones;
                 })
                 ->rawColumns(['acciones', 'estado', 'distribuidor'])
                 ->make(true);
+        }
+    }
+
+    public function eliminar_soporte_especial(SoporteEspecial $soporte)
+    {
+        try {
+            $soporte->delete();
+            flash("Soporte eliminado correctamente")->success();
+            return back();
+        } catch (\Throwable $th) {
+            flash("No se pudo eliminar el soporte: " . $th->getMessage())->error();
+            return back();
         }
     }
 
