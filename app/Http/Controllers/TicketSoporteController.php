@@ -1444,7 +1444,7 @@ class TicketSoporteController extends Controller
     {
         try {
             $horaEntrada = env('HORA_ENTRADA') ?? "08:10";
-            $horaSalida = env('HORA_SALIDA') ?? "16:55";
+            $horaSalida = env('HORA_SALIDA2') ?? "17:55";
 
             $current = date('G:i');
             $current = strtotime($current);
