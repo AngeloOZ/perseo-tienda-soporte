@@ -43,6 +43,10 @@ class PagosController extends Controller
             $cobro->estado = 1;
             $cobro->obs_vendedor = "Renovacion automatica: {$licencia->concepto}";
 
+            if($licencia->esContador == true){
+                $cobro->obs_vendedor = "Renovacion automatica: {$licencia->concepto}\nContador: {$licencia->contador_identificacion} - {$licencia->contador_nombres}";
+            }
+
             $temp = [];
             if (isset($request->comprobantes)) {
                 foreach ($request->comprobantes as $file) {
