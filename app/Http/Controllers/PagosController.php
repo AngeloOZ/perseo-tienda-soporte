@@ -41,10 +41,10 @@ class PagosController extends Controller
             $cobro = new Cobros();
             $cobro->secuencias = json_encode([["value" => $factura->secuencia]]);
             $cobro->estado = 1;
-            $cobro->obs_vendedor = "Renovacion automatica: {$licencia->concepto}";
+            $cobro->obs_vendedor = "Renovacion automatica: {$licencia->identificacion} - {$licencia->nombres}";
             
             if (isset($licencia->esContador) && $licencia->esContador == true) {
-                $cobro->obs_vendedor = "Renovacion automatica: {$licencia->concepto}\nContador: {$licencia->contador_identificacion} - {$licencia->contador_nombres}";
+                $cobro->obs_vendedor = "Renovacion automatica: {$licencia->identificacion} - {$licencia->nombres}\nContador: {$licencia->contador_identificacion} - {$licencia->contador_nombres}";
             }
 
             $temp = [];
