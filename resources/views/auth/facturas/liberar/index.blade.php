@@ -75,7 +75,8 @@
                             </div>
                             <div class="card-body">
                                 @include('auth.facturas.liberar.inc.alertas')
-                                @if ($factura->liberado == 0)
+                                {{-- TODO: solo renovaciones los admin rol 2 --}}
+                                @if ($factura->liberado == 0 && Auth::user()->rol === 2)
                                     <form id="formRenovacion" method="GET">
                                         @csrf
                                         <div class="form-group row">
