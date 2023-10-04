@@ -34,13 +34,17 @@ class CobrosController extends Controller
 
             return DataTables::of($cobros)
                 ->editColumn('secuencias', function ($cobro) {
-                    $secuencias = json_decode($cobro->secuencias);
-                    $string = '';
-                    foreach ($secuencias as $item) {
-                        $string .= $item->value . ', ';
+                    try {
+                        $secuencias = json_decode($cobro->secuencias);
+                        $string = '';
+                        foreach ($secuencias as $item) {
+                            $string .= $item->value . ', ';
+                        }
+                        $string = rtrim($string, ', ');
+                        return $string;
+                    } catch (\Throwable $th) {
+                        return $cobro->secuencias;
                     }
-                    $string = rtrim($string, ', ');
-                    return $string;
                 })
                 ->editColumn('estado', function ($cobro) {
                     if ($cobro->estado == 1) {
