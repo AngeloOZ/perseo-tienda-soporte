@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NotificacionCapacitacion;
 use App\Mail\NotificacionEstadoCapacitacion;
+use App\Mail\NotificacionVendedores;
 use App\Models\Log;
 use App\Models\Factura;
 use App\Models\Producto;
@@ -103,6 +104,18 @@ class SoporteEspcialController extends Controller
         ];
 
         $request->validate($validate1, $validate2);
+
+
+        $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)
+            ->when($request->tipo, function ($query, $tipo) {
+            })
+            ->first();
+
+        if ($soporteAnterior) {
+            $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
+            flash($mensaje)->warning();
+            return back();
+        }
 
         try {
             $soporte = new SoporteEspecial();
@@ -274,6 +287,33 @@ class SoporteEspcialController extends Controller
             ],
         );
 
+        $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
+            ->where('vededorid', Auth::user()->usuariosid)
+            ->where('tipo', 2)
+            ->first();
+
+        $soporteAnteriorGb = SoporteEspecial::where('ruc', $factura->identificacion)
+            ->where('vededorid', '<>', Auth::user()->usuariosid)
+            ->first();
+
+        if ($soporteAnteriorPro || $soporteAnteriorGb) {
+            $mensaje = "Ya existe una capacitación registrada para este cliente";
+
+            if ($soporteAnteriorGb) {
+                $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);
+            }
+
+            flash($mensaje)->warning();
+            return back();
+        }
+
+        $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
+            ->where('vededorid', Auth::user()->usuariosid)
+            ->where(function ($query) {
+                $query->where('tipo', 1)
+                    ->orWhere('tipo', 3);
+            })
+            ->first();
 
         $productos = json_decode($factura->productos);
 
@@ -284,7 +324,9 @@ class SoporteEspcialController extends Controller
         $soporte->whatsapp = $request->whatsapp;
         $soporte->estado = 1;
         $soporte->tipo = 2;
+        $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid ?? null;
         $soporte->fecha_creacion = now();
+        $soporte->vededorid = Auth::user()->usuariosid;
 
         $contenido = "<h3>Capacitación registrada desde la tienda</h3><br/>";
         $contenido .= "<p><strong>Observación: </strong> {$factura->observacion}</p>";
@@ -323,6 +365,189 @@ class SoporteEspcialController extends Controller
             return back();
         }
     }
+
+    public function listado_demos_lites()
+    {
+        return view('auth.demos.index');
+    }
+
+    public function filtrado_listado_demos_lites(Request $request)
+    {
+        if ($request->ajax()) {
+
+            $data = SoporteEspecial::select(
+                'soportes_especiales.soporteid',
+                'soportes_especiales.ruc',
+                'soportes_especiales.razon_social',
+                'soportes_especiales.correo',
+                'soportes_especiales.estado',
+                'soportes_especiales.whatsapp',
+                'soportes_especiales.tipo',
+                'soportes_especiales.plan',
+                'soportes_especiales.tecnicoid',
+                'soportes_especiales.vededorid',
+            )
+                ->where('vededorid', Auth::user()->usuariosid)
+                // ->join('tecnicos', 'tecnicos.tecnicosid', 'soportes_especiales.tecnicoid')
+                ->when($request->tipo, function ($query, $tipo) {
+                    return $query->where('soportes_especiales.tipo', $tipo);
+                })
+                ->when($request->fecha, function ($query, $fecha) {
+                    if ($fecha != "") {
+                        $date1 = explode(" / ", $fecha)[0];
+                        $date1 = strtotime($date1);
+                        $desde = date('Y-m-d H:i:s', $date1);
+
+                        $date2 = explode(" / ", $fecha)[1];
+                        $date2 = strtotime($date2);
+                        $date2 = strtotime('+1 days', $date2);
+                        $date2 = strtotime('-1 second', $date2);
+                        $hasta = date('Y-m-d H:i:s', $date2);
+
+                        return $query->whereBetween("fecha_creacion", [$desde, $hasta]);
+                    }
+                })
+                ->get();
+
+
+            return DataTables::of($data)
+                ->editColumn('estado', function ($soporte) {
+                    return $this->obtener_estado_soporte($soporte->estado);
+                })
+                ->editColumn('tipo', function ($soporte) {
+                    return $this->obtener_tipo_soporte($soporte->tipo);
+                })
+                ->editColumn('plan', function ($soporte) {
+                    return $this->obtener_plan_soporte($soporte->plan);
+                })
+                ->editColumn('acciones', function ($soporte) {
+                    $botones = '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('demos.ver', $soporte->soporteid) . '"  title="Ver"> <i class="la la-eye"></i> </a>';
+                    return $botones;
+                })
+                ->rawColumns(['acciones', 'estado'])
+                ->make(true);
+        }
+    }
+
+    public function crear_demo_lite()
+    {
+        $soporte = new SoporteEspecial();
+        return view('auth.demos.crear', compact('soporte'));
+    }
+
+    public function guardar_demo_lite(Request $request)
+    {
+        $validate1 = [
+            'plan' => 'required',
+            'tipo' => 'required',
+            'ruc' => 'required|min:13|max:13',
+            'razon_social' => 'required',
+            'correo' => ['required', new ValidarCorreo],
+            'whatsapp' => ['required', new ValidarCelular],
+            'actividad_empresa' => 'required|min:10',
+        ];
+        $validate2 = [
+            'plan.required' => 'Seleccione un plan',
+            'tipo.required' => 'Seleccione un tipo de soporte',
+            'ruc.required' => 'Ingrese el RUC',
+            'ruc.min' => 'El RUC debe tener 13 dígitos',
+            'razon_social.required' => 'Ingrese la razón social',
+            'correo.required' => 'Ingrese un correo electrónico',
+            'whatsapp.required' => 'Ingrese un número celular',
+            'actividad_empresa.required' => 'Ingrese una actividad de la empresa',
+            'actividad_empresa.min' => 'La actividad de la empresa debe tener al menos 10 caracteres',
+        ];
+
+        $request->validate($validate1, $validate2);
+
+        $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)->first();
+
+        if ($soporteAnterior) {
+            $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
+            flash($mensaje)->warning();
+            return back();
+        }
+
+        try {
+            $soporte = new SoporteEspecial();
+            $soporte->ruc = $request->ruc;
+            $soporte->razon_social = $request->razon_social;
+            $soporte->correo = $request->correo;
+            $soporte->whatsapp = $request->whatsapp;
+            $soporte->estado = 1;
+            $soporte->tipo = $request->tipo;
+            $soporte->fecha_creacion = now();
+            $soporte->plan = $request->plan;
+            $soporte->actividad_empresa = $request->actividad_empresa;
+            $soporte->vededorid = Auth::user()->usuariosid;
+
+            $soporte->save();
+
+            flash("Nuevo registro creado")->success();
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Soporte Especial";
+            $log->operacion = "Agregar";
+            $log->fecha = now();
+            $log->detalle = $soporte;
+            $log->save();
+
+            return redirect()->route('demos.ver', $soporte->soporteid);
+        } catch (\Throwable $th) {
+            flash("Hubo un error al registrar: " . $th->getMessage())->error();
+            return back();
+        }
+    }
+
+    public function ver_demo_lite(SoporteEspecial $soporte)
+    {
+        $readOnly = true;
+
+        $lite = SoporteEspecial::where('ruc', $soporte->ruc)
+            ->where('tipo', 3)
+            ->count();
+        $isRegisterLite = $lite > 0 ? true : false;
+
+        return view('auth.demos.ver', compact('soporte', 'readOnly', 'isRegisterLite'));
+    }
+
+    public function convertir_lite(SoporteEspecial $soporte)
+    {
+        try {
+            $lite = new SoporteEspecial();
+
+            $lite->ruc = $soporte->ruc;
+            $lite->razon_social = $soporte->razon_social;
+            $lite->correo = $soporte->correo;
+            $lite->whatsapp = $soporte->whatsapp;
+            $lite->estado = 1;
+            $lite->tipo = 3;
+            $lite->fecha_creacion = now();
+            $lite->plan = $soporte->plan;
+            $lite->actividad_empresa = $soporte->actividad_empresa;
+            $lite->vededorid = $soporte->vededorid;
+            $lite->tecnicoid = $soporte->tecnicoid;
+
+            $lite->save();
+
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Soporte Especial";
+            $log->operacion = "Agregar";
+            $log->fecha = now();
+            $log->detalle = $soporte;
+            $log->save();
+
+            flash("Lite creada correctamente")->success();
+            return redirect()->route('demos.ver', $lite->soporteid);
+        } catch (\Throwable $th) {
+            flash("Hubo un error al registrar: " . $th->getMessage())->error();
+            return back();
+        }
+    }
+
 
     /* -------------------------------------------------------------------------- */
     /*                       Funciones para rol de revisor                        */
@@ -674,6 +899,62 @@ class SoporteEspcialController extends Controller
                 return "PC";
             case 3:
                 return 'FACTURITO';
+        }
+    }
+
+    public function validar_soportes_anteriores(SoporteEspecial $soporte)
+    {
+        $vendedor = null;
+        $mensaje = "Este cliente ya tiene una ficha creada, para mas informacion comuniquese con el vendedor asignado";
+
+        if ($soporte->vededorid) {
+            $vendedor = User::where('usuariosid', $soporte->vededorid)->first();
+        } else {
+            $vendedor = Factura::where('capacitacionid', $soporte->soporteid)
+                ->join('usuarios', 'usuarios.usuariosid', 'facturas.usuariosid')
+                ->select('facturas.facturaid', 'usuarios.nombres', 'usuarios.correo', 'usuarios.usuariosid')
+                ->first();
+        }
+
+        if ($vendedor) {
+            if ($vendedor->usuariosid == Auth::user()->usuariosid) {
+                $mensaje = "Este cliente ya tiene una ficha creada por usted";
+            } else {
+                $mensaje = "Este cliente ya tiene una ficha creada, el vendedor asignado es: {$vendedor->nombres}";
+                $this->notificacion_de_cruce($soporte->ruc, $vendedor);
+            }
+        }
+        return $mensaje;
+    }
+
+    public function notificacion_de_cruce($cliente, $vendedor)
+    {
+        try {
+
+            $incorrecto = [
+                'tipo' => 'incorrecto',
+                'vendedor' => Auth::user()->nombres,
+                'cliente' => $cliente,
+                'from' => "noresponder@perseo.ec",
+                'fromName' => "Perseo Tienda",
+                'subject' => "Notificación de cruce de fichas",
+            ];
+
+            $correcto = [
+                'tipo' => 'correcto',
+                'vendedor1' => $vendedor->nombres,
+                'vendedor2' => Auth::user()->nombres,
+                'cliente' => $cliente,
+                'from' => "noresponder@perseo.ec",
+                'fromName' => "Perseo Tienda",
+                'subject' => "Notificación de cruce de fichas",
+            ];
+
+            Mail::to(Auth::user()->correo)->queue(new NotificacionVendedores($incorrecto));
+
+            Mail::to($vendedor->correo)->queue(new NotificacionVendedores($correcto));
+        } catch (\Throwable $th) {
+            dd($th);
         }
     }
 }
