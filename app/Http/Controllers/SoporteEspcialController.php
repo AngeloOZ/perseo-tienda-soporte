@@ -15,6 +15,7 @@ use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -502,7 +503,7 @@ class SoporteEspcialController extends Controller
     public function ver_demo_lite(SoporteEspecial $soporte)
     {
         $readOnly = true;
-
+        $vendedorSIS = null;
         $lite = SoporteEspecial::where('ruc', $soporte->ruc)
             ->where('tipo', 3)
             ->count();
@@ -510,10 +511,21 @@ class SoporteEspcialController extends Controller
         $isRegisterLite = $lite > 0 ? true : false;
 
         $tecnico = Tecnicos::find($soporte->tecnicoid, ["nombres"]);
-
         $soporte->nombreTecnico = $tecnico->nombres ?? null;
 
-        return view('auth.demos.ver', compact('soporte', 'readOnly', 'isRegisterLite'));
+        if ($soporte->lite_liberado == 0) {
+            $url = "https://perseo.app/api/vendedores_consulta";
+
+            $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
+                ->withOptions(["verify" => false])
+                ->post($url, ['identificacion' => substr(Auth::user()->identificacion, 0, 10)])
+                ->json();
+
+
+            $vendedorSIS = $resultado["vendedor"][0];
+            $vendedorSIS = ($vendedorSIS != null) ? json_decode(json_encode($vendedorSIS)) : null;
+        }
+        return view('auth.demos.ver', compact('soporte', 'readOnly', 'isRegisterLite', 'vendedorSIS'));
     }
 
     public function convertir_lite(SoporteEspecial $soporte)
@@ -549,6 +561,52 @@ class SoporteEspcialController extends Controller
         } catch (\Throwable $th) {
             flash("Hubo un error al registrar: " . $th->getMessage())->error();
             return back();
+        }
+    }
+
+    public function liberar_lite(SoporteEspecial $soporte, Request $request)
+    {
+        try {
+            $sisVendedor = $request->licenciador['cliente']['sis_vendedoresid'];
+            if (!$sisVendedor) {
+                return response(["status" => 400, "message" => "No cuentas con permisos necesarios en el ADMIN"], 400)->header('Content-Type', 'application/json');
+            }
+
+            // dd($request->licenciador);
+
+            $url = "https://perseo.app/api/registrar_licencia";
+            $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
+                ->withOptions(["verify" => false])
+                ->post($url, $request->licenciador)
+                ->json();
+
+            if (!isset($resultado["licencia"])) {
+                return response(["status" => 400, "message" => "No se pudo liberar las licencias"], 400)->header('Content-Type', 'application/json');
+            }
+
+            if ($resultado["licencia"][0] == "Creado correctamente") {
+                try {
+                    $soporte->lite_liberado = 1;
+                    $soporte->save();
+
+                    $log = new Log();
+                    $log->usuario = Auth::user()->nombres;
+                    $log->pantalla = "Demos";
+                    $log->operacion = "Liberar Lite";
+                    $log->fecha = now();
+                    $log->detalle =  $soporte;
+                    $log->save();
+
+                    return response(["status" => 200, "message" => "Licencias liberadas correctamente", "sms" => $resultado["licencia"][0]], 200)->header('Content-Type', 'application/json');
+                } catch (\Throwable $th) {
+
+                    return response(["status" => 201, "message" => "Licencias liberadas con errores: " . $th->getMessage(), "sms" => $resultado["licencia"][0]], 201)->header('Content-Type', 'application/json');
+                }
+            }
+
+            return response(["status" => 400, "message" => $resultado["licencia"][0], "sms" => $resultado["licencia"][0]], 400)->header('Content-Type', 'application/json');
+        } catch (\Throwable $th) {
+            return response(["status" => 500, "message" => $th->getMessage()], 500)->header('Content-Type', 'application/json');
         }
     }
 
