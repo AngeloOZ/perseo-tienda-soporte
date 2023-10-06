@@ -307,16 +307,20 @@ class SoporteEspcialController extends Controller
             ],
         );
 
-        $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
+        $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
+            ->where('ruc', $factura->identificacion)
             ->where('vededorid', Auth::user()->usuariosid)
             ->where('tipo', 2)
             ->orderBy('soporteid', 'desc')
             ->first();
 
-        $soporteAnteriorGb = SoporteEspecial::where('ruc', $factura->identificacion)
+
+        $soporteAnteriorGb = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
+            ->where('ruc', $factura->identificacion)
             ->where('vededorid', '<>', Auth::user()->usuariosid)
             ->orderBy('soporteid', 'desc')
             ->first();
+
 
         if ($soporteAnteriorPro || $soporteAnteriorGb) {
             $mensaje = "Ya existe una capacitación registrada para este cliente";
@@ -329,7 +333,8 @@ class SoporteEspcialController extends Controller
             return back();
         }
 
-        $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
+        $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
+            ->where('ruc', $factura->identificacion)
             ->where('vededorid', Auth::user()->usuariosid)
             ->whereIn('tipo', [1, 3])
             ->orderBy('soporteid', 'desc')
@@ -366,13 +371,14 @@ class SoporteEspcialController extends Controller
             if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;
                 $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
+            } else {
+                $this->notificar_nuevo_registro($soporte, $factura);
             }
 
             $soporte->save();
             $factura->capacitacionid = $soporte->soporteid;
             $factura->save();
 
-            $this->notificar_nuevo_registro($soporte, $factura);
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
 
             $log = new Log();
