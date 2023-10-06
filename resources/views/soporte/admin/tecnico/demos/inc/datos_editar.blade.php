@@ -1,23 +1,44 @@
 @php
     $disabled = 'disabled';
+    $disabledTecnico = 'disabled';
     $readOnly = 'readonly';
     
-    if (Auth::guard('tecnico')->user()->rol === 7) {
+    if (in_array(Auth::guard('tecnico')->user()->rol, [7, 8])) {
         $disabled = '';
         $readOnly = '';
+        $disabledTecnico = '';
+    }
+    
+    if (isset($bloquearTecnico) && $bloquearTecnico) {
+        $disabledTecnico = 'disabled';
     }
     
     $estados = [(object) ['id' => 1, 'nombre' => 'Asignado', 'permisos' => [7]], (object) ['id' => 3, 'nombre' => 'Contactado', 'permisos' => [5, 7]], (object) ['id' => 2, 'nombre' => 'Agendado', 'permisos' => [5, 7]], (object) ['id' => 4, 'nombre' => 'Implementacion', 'permisos' => [5, 7]], (object) ['id' => 5, 'nombre' => 'Revisado 1', 'permisos' => [7, 8, 9]], (object) ['id' => 6, 'nombre' => 'Finalizado', 'permisos' => [5, 7]], (object) ['id' => 7, 'nombre' => 'Reagendado', 'permisos' => [7, 8, 9]], (object) ['id' => 8, 'nombre' => 'Revisado 2', 'permisos' => [7, 8, 9]], (object) ['id' => 9, 'nombre' => 'Aprobado', 'permisos' => [7, 8, 9]], (object) ['id' => 10, 'nombre' => 'Rechazado', 'permisos' => [7, 8, 9]], (object) ['id' => 11, 'nombre' => 'Sin Respuesta', 'permisos' => [5, 7]], (object) ['id' => 12, 'nombre' => 'Autoimplementado', 'permisos' => [5, 7, 8, 9]]];
+    
+    // Buscar vendedor
+    $vendedor = 'Desconocido';
+    if ($soporte->vededorid) {
+        $vendedor = App\Models\User::find($soporte->vededorid, ['nombres']);
+        $vendedor = $vendedor->nombres ?? 'Desconocido';
+    }
+    
 @endphp
 
+<div class="form-group row">
+    <div class="col-12 mb-4 mb-md-0">
+        <label>Vendedor</label>
+        <input type="text" class="form-control" disabled value="{{ $vendedor }}" />
+    </div>
+</div>
 <div class="form-group row">
     <div class="col-12 mb-4 col-md-6 mb-md-0">
         <label>Técnico asignado <span class="text-danger">*</span>
         </label>
-        <select class="form-control select2 @error('tecnico') is-invalid @enderror" name="tecnico" {{ $disabled }}>
+        <select class="form-control select2 @error('tecnico') is-invalid @enderror" name="tecnico" {{ $disabledTecnico }}>
             <option value="" disabled selected>Seleccionar técnico</option>
             @foreach ($tecnicos as $item)
-                <option value="{{ $item->tecnicosid }}" {{ $soporte->tecnicoid == $item->tecnicosid ? 'selected' : '' }}>
+                <option value="{{ $item->tecnicosid }}"
+                    {{ $soporte->tecnicoid == $item->tecnicosid ? 'selected' : '' }}>
                     {{ $item->nombres }}</option>
             @endforeach
         </select>
