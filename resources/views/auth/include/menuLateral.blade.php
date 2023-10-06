@@ -51,6 +51,16 @@
                     </li>
                 @endif
                 @if (in_array(Auth::user()->rol, [1]))
+                    @if (Auth::user()->usuariosid === 12 || Auth::user()->usuariosid === 13)
+                        <li class="menu-item {{ areActiveRoutes(['demos.listado']) }} " aria-haspopup="true">
+                            <a href="{{ route('demos.listado') }}" class="menu-link">
+                                <i class="menu-icon fa fa-key"></i>
+                                <span class="menu-text">Demos y lite</span>
+                            </a>
+                        </li>
+                    @endif
+                @endif
+                @if (in_array(Auth::user()->rol, [1]))
                     @if (Auth::user()->usuariosid === 12)
                         <li class="menu-item {{ areActiveRoutes(['comisiones.listado_tecnicos']) }} "
                             aria-haspopup="true">

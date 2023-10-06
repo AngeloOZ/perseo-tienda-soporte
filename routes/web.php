@@ -196,4 +196,17 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/clave', [usuariosController::class, 'cambiar_clave'])->name('usuarios.clave');
         Route::post('/guardarclave', [usuariosController::class, 'clave'])->name('usuarios.guardarclave');
     });
+
+    /* Rutas para demos y lite */
+    Route::prefix('demos')->group(function(){
+
+        Route::get('/listado', [SoporteEspcialController::class, 'listado_demos_lites'])->name('demos.listado');
+        Route::post('/filtrado-listado', [SoporteEspcialController::class, 'filtrado_listado_demos_lites'])->name('demos.filtrado.listado');
+
+        Route::get('/crear', [SoporteEspcialController::class, 'crear_demo_lite'])->name('demos.crear');
+        Route::post('/guardar', [SoporteEspcialController::class, 'guardar_demo_lite'])->name('demos.guardar');
+
+        Route::get('/ver/{soporte}', [SoporteEspcialController::class, 'ver_demo_lite'])->name('demos.ver');
+        Route::get('convertir/lite/{soporte}', [SoporteEspcialController::class, 'convertir_lite'])->name('demos.convertir.lite');
+    });
 });

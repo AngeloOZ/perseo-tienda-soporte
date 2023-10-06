@@ -150,7 +150,7 @@ class FacturasLicenciasRenovarController extends Controller
                 return (object)$item;
             })
             ->filter(function ($item) {
-                return $item->producto != 9 && $item->producto != 10;
+                return $item->producto != 9 && $item->producto != 10 && $item->producto != 12;
             })
             ->filter(function ($item) use ($das) {
                 if ($das == null) return true;
@@ -213,11 +213,11 @@ class FacturasLicenciasRenovarController extends Controller
 
         $descripcion = strtolower($productoHomologado->descripcion);
         if (str_contains($descripcion, "facturito")) {
-            $licencia->concepto = "FTR - {$licencia->identificacion} {$licencia->nombres}";
+            $licencia->concepto = "FTR - {$licencia->nombres}";
         } else if (str_contains($descripcion, "web")) {
-            $licencia->concepto = "RNW - {$licencia->identificacion} {$licencia->nombres}";
+            $licencia->concepto = "RNW - {$licencia->nombres}";
         } else if (str_contains($descripcion, "pc")) {
-            $licencia->concepto = "RRP - {$licencia->identificacion} {$licencia->nombres}";
+            $licencia->concepto = "RRP - {$licencia->nombres}";
         }
 
         // COMMENT 5 y 8 son los id de los productos SoyContador en el admin
