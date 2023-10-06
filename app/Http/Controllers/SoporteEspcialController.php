@@ -133,7 +133,7 @@ class SoporteEspcialController extends Controller
             $soporte->save();
             flash("Soporte registrado")->success();
 
-            $this->notificar_asignacion($soporte->tecnicoid);
+            $this->notificar_asignacion($soporte->tecnicoid, $soporte->tipo);
 
             $log = new Log();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
@@ -158,11 +158,30 @@ class SoporteEspcialController extends Controller
         $tecnicos = $this->obtener_tecnicos_distribuidor();
         $controller = new TicketSoporteController();
 
+        $soporteAnteriores = SoporteEspecial::where('ruc', $soporte->ruc)
+            ->where('soporteid', '<>', $soporte->soporteid)
+            ->when($soporte->tipo, function ($query, $tipo) {
+                if ($tipo == 1) {
+                    // demo
+                    return $query->whereIn('tipo', [2, 3]);
+                } else if ($tipo == 2) {
+                    // Capacitacion
+                    return $query->whereIn('tipo', [1, 3]);
+                } else {
+                    // lite
+                    return $query->whereIn('tipo', [1, 2]);
+                }
+            })
+            ->count();
+
+        $bloquearTecnico = ($soporteAnteriores > 0 && Auth::guard('tecnico')->user()->rol == 7) ? true : false;
+
         $bindings = [
             'soporte' => $soporte,
             'tecnicos' => $tecnicos,
             "historialTickets" => $controller->obtener_historial_tickets($soporte->ruc),
             "historialCapacitaciones" => $controller->obtener_historial_implementaciones($soporte->ruc, $soporte->soporteid),
+            "bloquearTecnico" => $bloquearTecnico,
         ];
 
         return view('soporte.admin.tecnico.demos.editar', $bindings);
@@ -226,7 +245,7 @@ class SoporteEspcialController extends Controller
         }
 
         if ($request->tecnico != $soporte->tecnicoid) {
-            $this->notificar_asignacion($request->tecnico);
+            $this->notificar_asignacion($request->tecnico, $soporte->tipo);
         }
 
         try {
@@ -309,10 +328,8 @@ class SoporteEspcialController extends Controller
 
         $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
             ->where('vededorid', Auth::user()->usuariosid)
-            ->where(function ($query) {
-                $query->where('tipo', 1)
-                    ->orWhere('tipo', 3);
-            })
+            ->whereIn('tipo', [1, 3])
+            ->orderBy('soporteid', 'desc')
             ->first();
 
         $productos = json_decode($factura->productos);
@@ -324,7 +341,6 @@ class SoporteEspcialController extends Controller
         $soporte->whatsapp = $request->whatsapp;
         $soporte->estado = 1;
         $soporte->tipo = 2;
-        $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid ?? null;
         $soporte->fecha_creacion = now();
         $soporte->vededorid = Auth::user()->usuariosid;
 
@@ -343,6 +359,12 @@ class SoporteEspcialController extends Controller
         $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $contenido]]);
 
         try {
+
+            if($soporteAnteriorPro){
+                $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;
+                $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
+            }
+
             $soporte->save();
             $factura->capacitacionid = $soporte->soporteid;
             $factura->save();
@@ -547,6 +569,8 @@ class SoporteEspcialController extends Controller
 
             $lite->save();
 
+            $this->notificar_asignacion($lite->tecnicoid, $lite->tipo);
+
 
             $log = new Log();
             $log->usuario = Auth::user()->nombres;
@@ -571,8 +595,6 @@ class SoporteEspcialController extends Controller
             if (!$sisVendedor) {
                 return response(["status" => 400, "message" => "No cuentas con permisos necesarios en el ADMIN"], 400)->header('Content-Type', 'application/json');
             }
-
-            // dd($request->licenciador);
 
             $url = "https://perseo.app/api/registrar_licencia";
             $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
@@ -780,7 +802,7 @@ class SoporteEspcialController extends Controller
     /* -------------------------------------------------------------------------- */
     /*                     Funciones de mensaje de asignacion                     */
     /* -------------------------------------------------------------------------- */
-    private function notificar_asignacion($idTecnico)
+    private function notificar_asignacion($idTecnico, $tipo = 0)
     {
         try {
             if (!$idTecnico) return false;
@@ -789,10 +811,17 @@ class SoporteEspcialController extends Controller
 
             if (!$tecnico) return false;
 
+            $tipos = [
+                0 => "",
+                1 => "DEMO",
+                2 => "de CAPACITACIÓN",
+                3 => "de LITE",
+            ];
+
             $sms = new WhatsappController();
             return $sendMessage = $sms->enviar_personalizado([
                 "numero" => $tecnico->telefono,
-                "mensaje" =>  "Buen día {$tecnico->nombres} usted tiene una nueva asignación, para más detalles revise la plataforma en la sección de soportes especiales."
+                "mensaje" =>  "Buen día {$tecnico->nombres} usted tiene una nueva asignación {$tipos[$tipo]}, para más detalles revise la plataforma en la sección de soportes especiales."
             ]);
         } catch (\Throwable $th) {
             //throw $th;
@@ -800,7 +829,7 @@ class SoporteEspcialController extends Controller
         }
     }
 
-    private function notificar_nuevo_registro($soporte, $factura)
+    private function notificar_nuevo_registro($soporte, $factura, $subject = "Notificación de nueva implementacion")
     {
         try {
             $productos = json_decode($factura->productos);
@@ -815,11 +844,10 @@ class SoporteEspcialController extends Controller
 
             $nombreRevisor = "Katherine Sarabia";
             $mailRevisor = "katherine.sarabia@perseo.ec";
-            // $mailRevisor = "desarrollo@perseo.ec";
 
             $array = [
                 'from' => "noresponder@perseo.ec",
-                'subject' => "Notificación de nueva implementacion",
+                'subject' => $subject,
                 'revisora' => $nombreRevisor,
                 'asesor' => $vendedor->nombres,
                 'ruc' => $soporte->ruc,
