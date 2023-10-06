@@ -32,9 +32,6 @@
             @if ($soporte->plan == 3)
                 <option value="3" selected>FACTURITO</option>
             @endif
-            @if ($soporte->plan == null)
-                <option value="4" selected>Sin asignar</option>
-            @endif
         </select>
         @error('plan')
             <span class="text-danger">{{ $errors->first('plan') }}</span>

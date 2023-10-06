@@ -12,6 +12,7 @@ use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
 use App\Http\Controllers\WhatsappRenovacionesController;
+use App\Models\SoporteEspecial;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -208,5 +209,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::get('/ver/{soporte}', [SoporteEspcialController::class, 'ver_demo_lite'])->name('demos.ver');
         Route::get('convertir/lite/{soporte}', [SoporteEspcialController::class, 'convertir_lite'])->name('demos.convertir.lite');
+
+        Route::post('/liberar-lite/{soporte}', [SoporteEspcialController::class, 'liberar_lite'])->name('demos.liberar.lite');
     });
 });
