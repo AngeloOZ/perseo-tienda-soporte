@@ -310,10 +310,12 @@ class SoporteEspcialController extends Controller
         $soporteAnteriorPro = SoporteEspecial::where('ruc', $factura->identificacion)
             ->where('vededorid', Auth::user()->usuariosid)
             ->where('tipo', 2)
+            ->orderBy('soporteid', 'desc')
             ->first();
 
         $soporteAnteriorGb = SoporteEspecial::where('ruc', $factura->identificacion)
             ->where('vededorid', '<>', Auth::user()->usuariosid)
+            ->orderBy('soporteid', 'desc')
             ->first();
 
         if ($soporteAnteriorPro || $soporteAnteriorGb) {
@@ -361,7 +363,7 @@ class SoporteEspcialController extends Controller
 
         try {
 
-            if($soporteAnteriorPro){
+            if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;
                 $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
             }
@@ -483,7 +485,9 @@ class SoporteEspcialController extends Controller
 
         $request->validate($validate1, $validate2);
 
-        $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)->first();
+        $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)
+            ->orderBy('soporteid', 'desc')
+            ->first();
 
         if ($soporteAnterior) {
             $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
@@ -1019,6 +1023,7 @@ class SoporteEspcialController extends Controller
             $vendedor = Factura::where('capacitacionid', $soporte->soporteid)
                 ->join('usuarios', 'usuarios.usuariosid', 'facturas.usuariosid')
                 ->select('facturas.facturaid', 'usuarios.nombres', 'usuarios.correo', 'usuarios.usuariosid')
+                ->orderBy('facturas.facturaid', 'desc')
                 ->first();
         }
 
