@@ -107,15 +107,14 @@ class SoporteEspcialController extends Controller
 
 
         $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)
-            ->when($request->tipo, function ($query, $tipo) {
-            })
+            ->where('tipo', $request->tipo)
             ->first();
 
         if ($soporteAnterior) {
-            $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
-            flash($mensaje)->warning();
+            flash("Ya existe un soporte registrado para este cliente")->warning();
             return back();
         }
+
 
         try {
             $soporte = new SoporteEspecial();
@@ -443,7 +442,7 @@ class SoporteEspcialController extends Controller
             'razon_social' => 'required',
             'correo' => ['required', new ValidarCorreo],
             'whatsapp' => ['required', new ValidarCelular],
-            'actividad_empresa' => 'required|min:10',
+            'actividad_empresa' => 'required|min:10|max:255',
         ];
         $validate2 = [
             'plan.required' => 'Seleccione un plan',
@@ -455,6 +454,7 @@ class SoporteEspcialController extends Controller
             'whatsapp.required' => 'Ingrese un número celular',
             'actividad_empresa.required' => 'Ingrese una actividad de la empresa',
             'actividad_empresa.min' => 'La actividad de la empresa debe tener al menos 10 caracteres',
+            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',
         ];
 
         $request->validate($validate1, $validate2);
@@ -551,7 +551,6 @@ class SoporteEspcialController extends Controller
             return back();
         }
     }
-
 
     /* -------------------------------------------------------------------------- */
     /*                       Funciones para rol de revisor                        */
