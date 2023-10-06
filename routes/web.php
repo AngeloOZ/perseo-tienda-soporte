@@ -200,8 +200,6 @@ Route::group(['middleware' => 'auth'], function () {
     /* Rutas para demos y lite */
     Route::prefix('demos')->group(function(){
 
-        // Route::get
-
         Route::get('/listado', [SoporteEspcialController::class, 'listado_demos_lites'])->name('demos.listado');
         Route::post('/filtrado-listado', [SoporteEspcialController::class, 'filtrado_listado_demos_lites'])->name('demos.filtrado.listado');
 

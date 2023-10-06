@@ -388,7 +388,6 @@ class SoporteEspcialController extends Controller
                 'soportes_especiales.vededorid',
             )
                 ->where('vededorid', Auth::user()->usuariosid)
-                // ->join('tecnicos', 'tecnicos.tecnicosid', 'soportes_especiales.tecnicoid')
                 ->when($request->tipo, function ($query, $tipo) {
                     return $query->where('soportes_especiales.tipo', $tipo);
                 })
@@ -507,7 +506,12 @@ class SoporteEspcialController extends Controller
         $lite = SoporteEspecial::where('ruc', $soporte->ruc)
             ->where('tipo', 3)
             ->count();
+
         $isRegisterLite = $lite > 0 ? true : false;
+
+        $tecnico = Tecnicos::find($soporte->tecnicoid, ["nombres"]);
+
+        $soporte->nombreTecnico = $tecnico->nombres ?? null;
 
         return view('auth.demos.ver', compact('soporte', 'readOnly', 'isRegisterLite'));
     }

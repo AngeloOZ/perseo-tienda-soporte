@@ -27,6 +27,7 @@
                                         <select class="form-control datatable-input" id="filtroTipo">
                                             <option value="" selected>Todos</option>
                                             <option value="1">Demos</option>
+                                            <option value="2">Capacitaciones</option>
                                             <option value="3">Lite</option>
                                         </select>
                                     </div>
