@@ -2,26 +2,26 @@
     $disabled = 'disabled';
     $disabledTecnico = 'disabled';
     $readOnly = 'readonly';
-    
+
     if (in_array(Auth::guard('tecnico')->user()->rol, [7, 8])) {
         $disabled = '';
         $readOnly = '';
         $disabledTecnico = '';
     }
-    
+
     if (isset($bloquearTecnico) && $bloquearTecnico) {
         $disabledTecnico = 'disabled';
     }
-    
+
     $estados = [(object) ['id' => 1, 'nombre' => 'Asignado', 'permisos' => [7]], (object) ['id' => 3, 'nombre' => 'Contactado', 'permisos' => [5, 7]], (object) ['id' => 2, 'nombre' => 'Agendado', 'permisos' => [5, 7]], (object) ['id' => 4, 'nombre' => 'Implementacion', 'permisos' => [5, 7]], (object) ['id' => 5, 'nombre' => 'Revisado 1', 'permisos' => [7, 8, 9]], (object) ['id' => 6, 'nombre' => 'Finalizado', 'permisos' => [5, 7]], (object) ['id' => 7, 'nombre' => 'Reagendado', 'permisos' => [7, 8, 9]], (object) ['id' => 8, 'nombre' => 'Revisado 2', 'permisos' => [7, 8, 9]], (object) ['id' => 9, 'nombre' => 'Aprobado', 'permisos' => [7, 8, 9]], (object) ['id' => 10, 'nombre' => 'Rechazado', 'permisos' => [7, 8, 9]], (object) ['id' => 11, 'nombre' => 'Sin Respuesta', 'permisos' => [5, 7]], (object) ['id' => 12, 'nombre' => 'Autoimplementado', 'permisos' => [5, 7, 8, 9]]];
-    
+
     // Buscar vendedor
     $vendedor = 'Desconocido';
     if ($soporte->vededorid) {
         $vendedor = App\Models\User::find($soporte->vededorid, ['nombres']);
         $vendedor = $vendedor->nombres ?? 'Desconocido';
     }
-    
+
 @endphp
 
 <div class="form-group row">
@@ -155,6 +155,15 @@
         <input type="text" class="form-control" disabled value="{{ $soporte->veces_reagendado }}" />
     </div>
 </div>
+
+@if ($soporte->actividad_empresa)
+    <div class="form-group row">
+        <div class="col-12 mb-4 col-md-12 mb-md-0">
+            <label>Actividad de la empresa</label>
+            <textarea class="form-control resize-none" disabled>{{ $soporte->actividad_empresa }}</textarea>
+        </div>
+    </div>
+@endif
 
 <div class="form-group row">
     <div class="col-12 mb-4 col-md-6 mb-md-0">

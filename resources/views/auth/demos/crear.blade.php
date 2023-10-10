@@ -43,3 +43,97 @@
         </div>
     </div>
 @endsection
+
+@section('script')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Separar la validación de RUC y Cédula
+        function esRUCValido(text) {
+            return text.length === 13 && text.substr(10, 3) === "001";
+        }
+
+        function esCedulaValida(cad) {
+            let total = 0;
+            const longitud = cad.length;
+            const longcheck = longitud - 1;
+            const digitos = cad.split('').map(Number);
+            const codigo_provincia = digitos[0] * 10 + digitos[1];
+
+            if (cad !== "" && longitud === 10 && cad !== '2222222222' &&
+                (codigo_provincia >= 1 && codigo_provincia <= 24 || codigo_provincia == 30)) {
+                for (let i = 0; i < longcheck; i++) {
+                    if (i % 2 === 0) {
+                        let aux = cad.charAt(i) * 2;
+                        if (aux > 9) aux -= 9;
+                        total += aux;
+                    } else {
+                        total += parseInt(cad.charAt(i));
+                    }
+                }
+                total = total % 10 ? 10 - total % 10 : 0;
+
+                return cad.charAt(longitud - 1) == total;
+            }
+            return false;
+        }
+
+        // Actualizar el mensaje de ayuda
+        function actualizarHelperText(message) {
+            const helperText = document.getElementById('helperTextRuc');
+            helperText.textContent = message;
+            helperText.classList.remove("d-none");
+        }
+
+        // Función principal
+        async function recuperarInformacion() {
+            const inputEmpresa = document.getElementById('ruc');
+            const spiner = document.getElementById('spinner');
+            const helperText = document.getElementById('helperTextRuc');
+
+            let campos = {
+                ruc: false
+            };
+
+            inputEmpresa.addEventListener('blur', async function() {
+                const text = this.value;
+
+                if (!text) return;
+
+                if (!esRUCValido(text)) {
+                    this.value = "";
+                    actualizarHelperText("La cédula o RUC ingresado no es válido");
+                    return;
+                }
+
+                helperText.classList.add("d-none");
+                spiner.classList.add('spinner', 'spinner-success', 'spinner-right');
+                try {
+                    const {
+                        data
+                    } = await axios.post("{{ route('firma.index') }}", {
+                        identificacion: text
+                    }, {
+                        headers: {
+                            'usuario': 'perseo',
+                            'clave': 'Perseo1232*',
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    });
+
+                    if (data.identificacion) {
+                        document.getElementById("razon_social").value = data.razon_social;
+                        document.getElementById("correo").value = data.correo.split('\r\n')[0];
+                        document.getElementById("whatsapp").value = data.telefono2;
+                    }
+                } catch (error) {
+                    console.error("Error al obtener la información:", error);
+                } finally {
+                    spiner.classList.remove('spinner', 'spinner-success', 'spinner-right');
+                }
+
+            });
+        }
+
+        recuperarInformacion();
+    </script>
+@endsection

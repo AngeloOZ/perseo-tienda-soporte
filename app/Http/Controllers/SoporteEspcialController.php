@@ -110,6 +110,7 @@ class SoporteEspcialController extends Controller
 
         $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)
             ->where('tipo', $request->tipo)
+            ->where('plan', $request->plan)
             ->first();
 
         if ($soporteAnterior) {
@@ -175,7 +176,8 @@ class SoporteEspcialController extends Controller
             })
             ->count();
 
-        $bloquearTecnico = ($soporteAnteriores > 0 && Auth::guard('tecnico')->user()->rol == 7) ? true : false;
+        // $bloquearTecnico = ($soporteAnteriores > 0 && Auth::guard('tecnico')->user()->rol == 7) ? true : false;
+        $bloquearTecnico = false;
 
         $bindings = [
             'soporte' => $soporte,
@@ -497,8 +499,11 @@ class SoporteEspcialController extends Controller
 
         if ($soporteAnterior) {
             $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
-            flash($mensaje)->warning();
-            return back();
+
+            if($mensaje != null){
+                flash($mensaje)->warning();
+                return back();
+            }
         }
 
         try {
@@ -1018,7 +1023,7 @@ class SoporteEspcialController extends Controller
         }
     }
 
-    public function validar_soportes_anteriores(SoporteEspecial $soporte)
+    public function validar_soportes_anteriores(SoporteEspecial $soporte, Request $request = null)
     {
         $vendedor = null;
         $mensaje = "Este cliente ya tiene una ficha creada, para mas informacion comuniquese con el vendedor asignado";
@@ -1033,14 +1038,19 @@ class SoporteEspcialController extends Controller
                 ->first();
         }
 
-        if ($vendedor) {
-            if ($vendedor->usuariosid == Auth::user()->usuariosid) {
-                $mensaje = "Este cliente ya tiene una ficha creada por usted";
-            } else {
-                $mensaje = "Este cliente ya tiene una ficha creada, el vendedor asignado es: {$vendedor->nombres}";
-                $this->notificacion_de_cruce($soporte->ruc, $vendedor);
-            }
+        if (!$vendedor) return $mensaje;
+
+        if ($vendedor->usuariosid == Auth::user()->usuariosid) {
+            $planActual = $request->plan ?? null;
+
+            if ($soporte->plan != $planActual) return null;
+
+            $mensaje = "Este cliente ya tiene una ficha creada por usted";
+        } else {
+            $mensaje = "Este cliente ya tiene una ficha creada, el vendedor asignado es: {$vendedor->nombres}";
+            $this->notificacion_de_cruce($soporte->ruc, $vendedor);
         }
+
         return $mensaje;
     }
 

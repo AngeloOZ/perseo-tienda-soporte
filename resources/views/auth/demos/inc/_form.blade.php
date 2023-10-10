@@ -57,23 +57,23 @@
 
 <div class="form-group row">
     <div class="col-12 mb-4 col-md-6 mb-md-0">
-        <label>RUC <span class="text-danger">*</span>
-        </label>
-        <input type="text" {{ $readOnly }} class="form-control {{ $errors->has('ruc') ? 'is-invalid' : '' }}"
-            name="ruc" id="ruc" value="{{ old('ruc', $soporte->ruc) }}"
-            oninput="if(this.value.length > 13) this.value = this.value.slice(0, 13)" />
-        <span class="text-danger d-none" id="mensajeCedula">Identificación no
-            válida</span>
+        <label>RUC <span class="text-danger">*</span></label>
+        <div id="spinner">
+            <input type="text" {{ $readOnly }} class="form-control {{ $errors->has('ruc') ? 'is-invalid' : '' }}" name="ruc" id="ruc"
+                oninput="if(this.value.length > 13) this.value = this.value.slice(0, 13);" autocomplete="off"
+                placeholder="23XXXXXXXX001" value="{{ old('ruc', $soporte->ruc) }}">
+            <span class="form-text text-danger d-none" id="helperTextRuc"></span>
+        </div>
         @error('ruc')
             <span class="text-danger">{{ $errors->first('ruc') }}</span>
         @enderror
     </div>
     <div class="col-12 mb-4 col-md-6 mb-md-0">
-        <label>Razón Social <span class="text-danger">*</span>
+        <label for="razon_social">Razón Social <span class="text-danger">*</span>
         </label>
         <input type="text" {{ $readOnly }}
-            class="form-control {{ $errors->has('razon_social') ? 'is-invalid' : '' }}" name="razon_social"
-            value="{{ old('razon_social', $soporte->razon_social) }}" />
+            class="form-control {{ $errors->has('razon_social') ? 'is-invalid' : '' }}" id="razon_social" name="razon_social"
+            value="{{ old('razon_social', $soporte->razon_social) }}" placeholder="PerseoSoft" />
         @error('razon_social')
             <span class="text-danger">{{ $errors->first('razon_social') }}</span>
         @enderror
@@ -82,22 +82,22 @@
 
 <div class="form-group row">
     <div class="col-12 mb-4 col-md-6 mb-md-0">
-        <label>Whatsapp <span class="text-danger">*</span>
+        <label for="whatsapp">Whatsapp <span class="text-danger">*</span>
         </label>
         <input type="text" {{ $readOnly }}
-            class="form-control {{ $errors->has('whatsapp') ? 'is-invalid' : '' }}" name="whatsapp"
-            value="{{ old('whatsapp', $soporte->whatsapp) }}" />
+            class="form-control {{ $errors->has('whatsapp') ? 'is-invalid' : '' }}" id="whatsapp" name="whatsapp"
+            value="{{ old('whatsapp', $soporte->whatsapp) }}" placeholder="0987654321" />
         @error('whatsapp')
             <span class="text-danger">{{ $errors->first('whatsapp') }}</span>
         @enderror
     </div>
 
     <div class="col-12 mb-4 col-md-6 mb-md-0">
-        <label>Correo <span class="text-danger">*</span>
+        <label for="correo">Correo <span class="text-danger">*</span>
         </label>
         <input type="text" {{ $readOnly }}
-            class="form-control {{ $errors->has('correo') ? 'is-invalid' : '' }}" name="correo"
-            value="{{ old('correo', $soporte->correo) }}" />
+            class="form-control {{ $errors->has('correo') ? 'is-invalid' : '' }}" id="correo" name="correo"
+            value="{{ old('correo', $soporte->correo) }}" placeholder="correo@dominio.com" />
         @error('correo')
             <span class="text-danger">{{ $errors->first('correo') }}</span>
         @enderror
