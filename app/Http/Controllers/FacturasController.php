@@ -81,12 +81,12 @@ class FacturasController extends Controller
             }
         }
 
-        $facturito = ProductoHomologado::all()->where('categoria', 1)->where('distribuidoresid', $vendedor->distribuidoresid);
-        $firmas = ProductoHomologado::all()->where('categoria', 2)->where('distribuidoresid', $vendedor->distribuidoresid);
-        $perseoPC = ProductoHomologado::all()->where('categoria', 3)->where('distribuidoresid', $vendedor->distribuidoresid);
-        $contafacil = ProductoHomologado::all()->where('categoria', 4)->where('distribuidoresid', $vendedor->distribuidoresid);
-        $perseoWEB = ProductoHomologado::all()->where('categoria', 5)->where('distribuidoresid', $vendedor->distribuidoresid);
-        $whapi = ProductoHomologado::all()->where('categoria', 6)->where('distribuidoresid', $vendedor->distribuidoresid);
+        $facturito = ProductoHomologado::all()->where('categoria', 1)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
+        $firmas = ProductoHomologado::all()->where('categoria', 2)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
+        $perseoPC = ProductoHomologado::all()->where('categoria', 3)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
+        $contafacil = ProductoHomologado::all()->where('categoria', 4)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
+        $perseoWEB = ProductoHomologado::all()->where('categoria', 5)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
+        $whapi = ProductoHomologado::all()->where('categoria', 6)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
 
         $productosList = [
             "contafacil" => $this->listarProductos2([...$contafacil]),
@@ -929,7 +929,8 @@ class FacturasController extends Controller
         }
     }
 
-    public function reactivar_liberacion(Factura $factura){
+    public function reactivar_liberacion(Factura $factura)
+    {
         try {
             $productos = json_decode($factura->productos);
             foreach ($productos as $producto) {
@@ -941,7 +942,7 @@ class FacturasController extends Controller
             $factura->productos = json_encode($productos);
             $factura->liberado = 0;
             $factura->save();
-                        
+
             $log = new Log();
             $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Facturas";
