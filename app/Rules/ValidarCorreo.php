@@ -26,6 +26,8 @@ class ValidarCorreo implements Rule
      */
     public function passes($attribute, $value)
     {
+        if (strlen($value) < 4) return false;
+
         $url = 'https://emailvalidation.abstractapi.com/v1/?api_key=fae435e4569b4c93ac34e0701100778c&email=' . $value;
         $correo = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false,])
             ->withOptions(["verify" => false])

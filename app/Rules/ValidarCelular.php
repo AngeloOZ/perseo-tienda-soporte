@@ -26,6 +26,9 @@ class ValidarCelular implements Rule
      */
     public function passes($attribute, $value)
     {
+
+        if (strlen($value) < 10) return false;
+
         //consultar api1
         $url = 'https://phonevalidation.abstractapi.com/v1/?api_key=7678748c57244785bc99109520e35d5f&phone=+593' . $value;
         $celular = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false,])

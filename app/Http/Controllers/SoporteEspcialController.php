@@ -77,7 +77,15 @@ class SoporteEspcialController extends Controller
     public function agregar_soporte_especial()
     {
         $tecnicos = $this->obtener_tecnicos_distribuidor();
-        return view('soporte.admin.tecnico.demos.agregar', compact('tecnicos'));
+
+        $vendedores = User::where('rol', 1)
+            ->where('estado', 1)
+            ->where('nombres', '<>', 'PREDETERMINADO')
+            ->select('usuariosid', 'nombres')
+            ->orderBy('distribuidoresid', 'asc')
+            ->get();
+
+        return view('soporte.admin.tecnico.demos.agregar', compact('tecnicos', 'vendedores'));
     }
 
     public function registrar_soporte_especial(Request $request)
@@ -92,6 +100,8 @@ class SoporteEspcialController extends Controller
             'fecha_agendado' => 'required',
             'plan' => 'required',
             'tecnico' => 'required',
+            'vededorid' => 'required',
+            'actividad_empresa' => 'required|min:10|max:255',
         ];
         $validate2 = [
             'tipo.required' => 'Seleccione un tipo de soporte',
@@ -103,6 +113,10 @@ class SoporteEspcialController extends Controller
             'fecha_agendado.required' => 'Debe seleccionar una fecha',
             'plan.required' => 'Seleccione un plan',
             'tecnico.required' => 'Seleccione un técnico',
+            'vededorid.required' => 'Seleccione un vendedor',
+            'actividad_empresa.required' => 'Ingrese una actividad de la empresa',
+            'actividad_empresa.min' => 'La actividad de la empresa debe tener al menos 10 caracteres',
+            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',
         ];
 
         $request->validate($validate1, $validate2);
@@ -131,6 +145,8 @@ class SoporteEspcialController extends Controller
             $soporte->fecha_agendado = $request->fecha_agendado;
             $soporte->plan = $request->plan;
             $soporte->tecnicoid = $request->tecnico;
+            $soporte->vededorid = $request->vededorid;
+            $soporte->actividad_empresa = $request->actividad_empresa;
 
             $soporte->save();
             flash("Soporte registrado")->success();
@@ -500,7 +516,7 @@ class SoporteEspcialController extends Controller
         if ($soporteAnterior) {
             $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
 
-            if($mensaje != null){
+            if ($mensaje != null) {
                 flash($mensaje)->warning();
                 return back();
             }
