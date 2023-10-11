@@ -21,7 +21,7 @@
     <meta property="og:description" content="=Solicitud de Firmas Electrónicas" />
     <meta property="og:image" content="" />
     <style>
-        .disabled-anchor{
+        .disabled-anchor {
             opacity: 0.7 !important;
             pointer-events: none !important;
         }
@@ -117,6 +117,23 @@
     <script>
         //Notificaciones
         @foreach (session('flash_notification', collect())->toArray() as $message)
+            @if ($message['level'] == 'info')
+                Swal.fire({
+                    title: "WhatsApp Desconectado",
+                    text: "Parace que el servicio de WhatsApp está desconfigurado",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Configurar ahora",
+                    cancelButtonText: "Despues",
+                    reverseButtons: true,
+                }).then(function(result) {
+                    if (result.value) {
+                        location.href = "{{ route('facturas.whatsapp.config') }}"
+                    }
+                });
+                @php continue; @endphp
+            @endif
+
             $.notify({
                 // options
                 message: '{{ $message['message'] }}',
@@ -136,15 +153,16 @@
                 type: '{{ $message['level'] }}',
             });
         @endforeach
-      
     </script>
     <script>
         bloquearBotones();
-        function disabledButton(event){
+
+        function disabledButton(event) {
             this.classList.add('disabled-anchor');
             this.setAttribute('disabled', 'true');
         }
-        function bloquearBotones(){
+
+        function bloquearBotones() {
             const btnAutorizar = document.getElementById("btnAutorizar");
             const btnLiberar = document.getElementById("btnLiberar");
 

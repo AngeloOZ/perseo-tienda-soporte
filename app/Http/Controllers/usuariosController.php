@@ -56,6 +56,10 @@ class usuariosController extends Controller
                         return redirect()->route('firma.listado');
                         break;
                     case 2:
+                        $estadoWhatsapp = new WhatsappRenovacionesController();
+                        if (!$estadoWhatsapp->obtener_estado()) {
+                            flash("El servicio de WhatsAapp está desconectado")->important();
+                        }
                         return redirect()->route('facturas.revisor');
                         break;
                     case 3:

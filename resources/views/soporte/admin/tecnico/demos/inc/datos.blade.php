@@ -1,12 +1,33 @@
+@php
+
+@endphp
+
+<div class="form-group row">
+    <div class="col-12 mb-4 col-md-12 mb-md-0">
+        <label>Vendedores <span class="text-danger">*</span>
+        </label>
+        <select class="form-control select2 {{ $errors->has('vededorid') ? 'is-invalid' : '' }}" name="vededorid">
+            <option value="" disabled selected>Seleccionar vendedor</option>
+            @foreach ($vendedores as $item)
+                <option value="{{ $item->usuariosid }}" {{ old('vededorid') == $item->usuariosid ? 'selected' : '' }}>
+                    {{ $item->nombres }}</option>
+            @endforeach
+        </select>
+        @error('vededorid')
+            <span class="text-danger">{{ $errors->first('vededorid') }}</span>
+        @enderror
+    </div>
+</div>
+
 <div class="form-group row">
     <div class="col-12 mb-4 col-md-6 mb-md-0">
         <label>Técnico <span class="text-danger">*</span>
         </label>
-        <select class="form-control select2 {{ $errors->has('tecnico') ? 'is-invalid' : '' }}"
-            name="tecnico">
+        <select class="form-control select2 {{ $errors->has('tecnico') ? 'is-invalid' : '' }}" name="tecnico">
             <option value="" disabled selected>Seleccionar tecnico</option>
             @foreach ($tecnicos as $item)
-                <option value="{{ $item->tecnicosid }}">{{ $item->nombres }}</option>
+                <option value="{{ $item->tecnicosid }}" {{ old('tecnico') == $item->tecnicosid ? 'selected' : '' }}>
+                    {{ $item->nombres }}</option>
             @endforeach
         </select>
         @error('tecnico')
@@ -110,6 +131,15 @@
             name="fecha_agendado" value="{{ old('fecha_agendado') }}" min="{{ date('Y-m-d\TH:i') }}" />
         @error('fecha_agendado')
             <span class="text-danger">{{ $errors->first('fecha_agendado') }}</span>
+        @enderror
+    </div>
+
+
+    <div class="col-12 mb-4 col-md-6 mb-md-0">
+        <label for="">Actividad principal de la empresa <span class="text-danger">*</span></label>
+        <textarea name="actividad_empresa" class="form-control {{ $errors->has('fecha_agendado') ? 'is-invalid' : '' }}" cols="30" rows="2">{{ old('actividad_empresa') }}</textarea>
+        @error('actividad_empresa')
+            <span class="text-danger">{{ $errors->first('actividad_empresa') }}</span>
         @enderror
     </div>
 </div>
