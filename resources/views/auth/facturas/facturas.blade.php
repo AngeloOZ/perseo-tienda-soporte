@@ -82,6 +82,7 @@
                                             <th>Pago</th>
                                             <th>Estado del producto</th>
                                             <th>Estado</th>
+                                            <th>Total venta</th>
                                             <th class="no-exportar">Acciones</th>
                                         </tr>
                                     </thead>
@@ -190,6 +191,13 @@
                     {
                         data: 'estado',
                         name: 'estado',
+                    },
+                    {
+                        data: 'total_factura',
+                        name: 'total_factura',
+                        orderable: false,
+                        searchable: false,
+                        className: "text-center"
                     },
                     {
                         data: 'action',

@@ -327,7 +327,7 @@ class FacturasController extends Controller
     public function filtrado_listado(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion',  'facturas.nombre', 'facturas.estado_pago', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.liberado')
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion',  'facturas.nombre', 'facturas.estado_pago', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.liberado', 'facturas.productos')
                 ->where('usuariosid', Auth::user()->usuariosid)
                 ->when($request->facturado, function ($query, $facturado) {
                     switch ($facturado) {
@@ -359,6 +359,43 @@ class FacturasController extends Controller
                 ->get();
 
             return DataTables::of($data)
+                ->editColumn('total_factura', function ($factura) {
+                    if ($factura->facturado != 1) return '';
+
+                    // return $factura->productos;
+
+                    $productos = json_decode($factura->productos);
+                    $cupon = null;
+
+                    if ($factura->cuponid != null) {
+                        $cupon = Cupones::find($factura->cuponid);
+                    }
+
+                    $valorDescuento = $cupon->descuento ?? 0;
+                    $subTotal = 0;
+                    $iva = 0;
+                    $total = 0;
+                    $descuento = 0;
+
+                    foreach ($productos as $item) {
+                        $precioBase = $item->precio ?? 0;
+
+                        $descuentoFor = ($precioBase * $valorDescuento) / 100;
+                        $descuentoFor = floatval(number_format($descuentoFor, 2));
+                        $precioBaseConDescuento = $precioBase - $descuentoFor;
+
+                        $ivaFor = ($precioBaseConDescuento * 12) / 100;
+                        $ivaFor = floatval(number_format($ivaFor, 3));
+                        $precioConIVA = $precioBaseConDescuento + $ivaFor;
+
+                        $subTotal += $item->cantidad * $precioBase;
+                        $descuento += $item->cantidad * $descuentoFor;
+                        $iva += $item->cantidad * $ivaFor;
+                        $total += $item->cantidad * $precioConIVA;
+                    }
+
+                    return '$' . number_format($total, 2);
+                })
                 ->editColumn('fecha_creacion', function ($fecha) {
                     $date = new DateTime($fecha->fecha_creacion);
                     return $date->format('d-m-Y');
@@ -406,7 +443,6 @@ class FacturasController extends Controller
 
                     return $botones;
                 })
-
                 ->rawColumns(['action', 'estado', 'fecha_creacion', 'estado_pago', 'liberado'])
                 ->make(true);
         }
@@ -1098,6 +1134,8 @@ class FacturasController extends Controller
             }
 
             $cliente = $this->crear_cliente($vendedor, $factura);
+            // dd($cliente);
+
             $resp = $this->crear_factura($factura, $cliente["cliente"], $cliente["vendedor"]);
 
             if ($resp["estado"] == "ok") {
@@ -1176,9 +1214,7 @@ class FacturasController extends Controller
 
             $cliente = $resultado["clientes"][0];
 
-
             if (isset($cliente["vendedoresid"])) {
-
                 if ($cliente["vendedoresid"] != $vendedor->vendedoresid) {
                     $vendedorAux = User::where('vendedoresid', $cliente["vendedoresid"])->where('distribuidoresid', $vendedor->distribuidoresid)->first();
                     if ($vendedorAux != null) {
@@ -1312,11 +1348,12 @@ class FacturasController extends Controller
                 [
                     "forma_pago_empresaid" => 4,
                     "cajasid" => $vendedor->cajasid,
-                    // "importe" => -0.72,
                     "bancotarjetaid" => $tarjetaHomologado->id_tarjeta_perseo,
                     "fechamovimiento" => $fecha,
                     "fechavence" => $fecha,
                     "numerochequevoucher" => $tarjetaPago->voucher,
+                    "importe" => round($valoresFactura["total"], 2),
+                    "beneficiario" => $factura->nombre
                 ],
             ];
         }
