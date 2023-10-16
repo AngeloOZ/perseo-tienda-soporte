@@ -113,7 +113,7 @@
         {{--  TODO: Temporal Solo ALFA --}}
         <div class="col-12 mt-2 col-lg-6 mt-lg-0">
             <label>Origen</label>
-            <select class="form-control select2 {{ $errors->has('origen') ? 'is-invalid' : '' }}" name="origen">
+            <select class="form-control select2 {{ $errors->has('origen') ? 'is-invalid' : '' }}" {{ $factura->facturado == 0 ? '' : 'disabled' }} name="origen">
                 <option value="" selected disabled>Seleccionar uno</option>
                 @foreach ($origenes as $origen)
                     <option value="{{ $origen }}"
