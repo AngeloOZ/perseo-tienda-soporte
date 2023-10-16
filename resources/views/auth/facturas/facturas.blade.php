@@ -83,6 +83,10 @@
                                             <th>Estado del producto</th>
                                             <th>Estado</th>
                                             <th>Total venta</th>
+                                            @if (Auth::user()->distribuidoresid == 1)
+                                                {{-- TODO: Temporal Solo ALFA --}}
+                                                <th>Origen</th>
+                                            @endif
                                             <th class="no-exportar">Acciones</th>
                                         </tr>
                                     </thead>
@@ -199,7 +203,16 @@
                         searchable: false,
                         className: "text-center"
                     },
-                    {
+                    @if (Auth::user()->distribuidoresid == 1)
+                        // TODO: Temporal Solo ALFA
+                        {
+                            data: 'origen',
+                            name: 'origen',
+                            orderable: false,
+                            searchable: false,
+                            className: "text-center"
+                        },
+                    @endif {
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -342,10 +355,10 @@
             /* -------------------------------------------------------------------------- */
             /*       Funciones para guardar el estado del filtro en el localStorage       */
             /* -------------------------------------------------------------------------- */
-            
+
             // Se ejecuta al hacer click en el boton buscar
             function guardarEstadoFiltro() {
-                const path = 'estado_filtro_az_'+location.pathname.slice(1);
+                const path = 'estado_filtro_az_' + location.pathname.slice(1);
                 const filtro = {
                     facturado: $("#filtroEstadoFacturado").val(),
                     liberado: $("#filtroEstadoLiberado").val(),
@@ -356,7 +369,7 @@
 
             // Se ejecuta al cargar la pagina 
             function cargarEstadoFiltro() {
-                const path = 'estado_filtro_az_'+location.pathname.slice(1);
+                const path = 'estado_filtro_az_' + location.pathname.slice(1);
                 const filtro = JSON.parse(localStorage.getItem(path));
                 if (filtro) {
                     $("#filtroEstadoFacturado").val(filtro.facturado);
@@ -366,8 +379,8 @@
             }
 
             // Se ejecuta al hacer click en el boton reiniciar
-            function resetearEstadoFiltro(){
-                const path = 'estado_filtro_az_'+location.pathname.slice(1);
+            function resetearEstadoFiltro() {
+                const path = 'estado_filtro_az_' + location.pathname.slice(1);
                 localStorage.removeItem(path);
             }
         });
