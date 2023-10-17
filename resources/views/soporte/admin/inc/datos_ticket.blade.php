@@ -1,15 +1,4 @@
-@php
-    $currentUser = Auth::guard('tecnico')->user();
-    $disabled = 'disabled';
-    $disabled2 = 'disabled';
-    if ($currentUser->rol == 7 && $currentUser->distribuidoresid == 2) {
-        $disabled = '';
-    }
-    
-    if ($currentUser->rol == 7) {
-        $disabled2 = '';
-    }
-@endphp
+
 <h3 class="font-size-h6 font-weight-bold">Datos del ticket</h3>
 <div class="form-group row ">
     <div class="col-12 mb-3 col-md-6 mb-md-0">
@@ -55,7 +44,7 @@
 <div class="form-group row">
     <div class="col-12 mb-3 col-md-6 mb-md-0">
         <label>Tipo de producto</label>
-        <select class="form-control" {{ $disabled }} name="producto">
+        <select class="form-control" name="producto">
             <option value="" selected disabled>OTRO</option>
             <option value="facturito" {{ $ticket->producto == 'facturito' ? 'selected' : '' }}>FACTURITO</option>
             <option value="web" {{ $ticket->producto == 'web' ? 'selected' : '' }}>WEB</option>
@@ -65,7 +54,7 @@
     </div>
     <div class="col-12 mb-3 col-md-6 mb-md-0">
         <label>Distribuidor</label>
-        <select class="form-control" name="distribuidor" {{ $disabled2 }}>
+        <select class="form-control" name="distribuidor">
             <option value="1" {{ $ticket->distribuidor == 1 ? 'selected' : '' }}>Perseo Alfa
             </option>
             <option value="2" {{ $ticket->distribuidor == 2 ? 'selected' : '' }}>Perseo

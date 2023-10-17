@@ -327,7 +327,7 @@ class FacturasController extends Controller
     public function filtrado_listado(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion',  'facturas.nombre', 'facturas.estado_pago', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.liberado', 'facturas.productos')
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion',  'facturas.nombre', 'facturas.estado_pago', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.liberado', 'facturas.productos', 'facturas.origen')
                 ->where('usuariosid', Auth::user()->usuariosid)
                 ->when($request->facturado, function ($query, $facturado) {
                     switch ($facturado) {
@@ -581,7 +581,8 @@ class FacturasController extends Controller
 
     public function actualizar(Factura $factura, Request $request)
     {
-
+        // TODO: required origen
+        // origen => 'required'
         $request->validate(
             [
                 'identificacion' => 'required',

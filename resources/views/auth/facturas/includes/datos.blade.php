@@ -1,12 +1,15 @@
 @php
     $abreviaturas = App\Models\ConceptosFactura::all();
-    
+
     $concepto = $factura->concepto;
-    $concepto = explode(' ', $concepto)[0] . " - ";
-    
+    $concepto = explode(' ', $concepto)[0] . ' - ';
+
     if (old('concepto_abv')) {
         $concepto = old('concepto_abv');
     }
+
+    $origenes = ['Facebook Contafacil', 'Registros Web Lite Alfa', 'Referidos Personales', 'Referido Clientes', 'Contadores (Ya son Clientes)'];
+
 @endphp
 <div class="form-group row">
     <div class="col-12 mt-2 col-lg-6 mt-lg-0">
@@ -76,15 +79,6 @@
 </div>
 
 <div class="form-group row">
-    {{-- <div class="col-12 mt-2 col-lg-6 mt-lg-0">
-        <label>Concepto de la factura:</label>
-        <input type="text" class="form-control {{ $errors->has('concepto') ? 'is-invalid' : '' }}" name="concepto" autocomplete="off"
-            {{ $factura->facturado == 0 ? '' : 'readonly' }} value="{{ $factura->concepto }}"
-            oninput="if(this.value.length > 75) this.value = this.value.slice(0, 75);" />
-        @if ($errors->has('concepto'))
-            <span class="text-danger">{{ $errors->first('concepto') }}</span>
-        @endif
-    </div> --}}
 
     <div class="col-12 mt-2 col-lg-6 mt-lg-0">
         <label>Concepto de la factura:</label>
@@ -92,12 +86,10 @@
             @if ($factura->facturado == 0)
                 <select class="form-control select2 {{ $errors->has('concepto_abv') ? 'is-invalid' : '' }}"
                     name="concepto_abv">
-                    <option value="" >Seleccionar uno</option>
+                    <option value="">Seleccionar uno</option>
                     @foreach ($abreviaturas as $abv)
-                        <option 
-                            value="{{ $abv->id ."@".$abv->abreviatura }}"
-                            {{ $factura->id_concepto == $abv->id ? 'selected' : '' }}
-                        >
+                        <option value="{{ $abv->id . '@' . $abv->abreviatura }}"
+                            {{ $factura->id_concepto == $abv->id ? 'selected' : '' }}>
                             {{ $abv->producto }}
                         </option>
                     @endforeach
@@ -117,6 +109,29 @@
         @endif
     </div>
 
+    @if (Auth::user()->distribuidoresid == 1)
+        {{--  TODO: Temporal Solo ALFA --}}
+        <div class="col-12 mt-2 col-lg-6 mt-lg-0">
+            <label>Origen</label>
+            <select class="form-control select2 {{ $errors->has('origen') ? 'is-invalid' : '' }}" {{ $factura->facturado == 0 ? '' : 'disabled' }} name="origen">
+                <option value="" selected disabled>Seleccionar uno</option>
+                @foreach ($origenes as $origen)
+                    <option value="{{ $origen }}"
+                        {{ old('origen', $factura->origen) == $origen ? 'selected' : '' }}>
+                        {{ $origen }}
+                    </option>
+                @endforeach
+            </select>
+
+            @error('origen')
+                <span class="text-danger">{{ $errors->first('origen') }}</span>
+            @enderror
+        </div>
+    @endif
+
+</div>
+
+<div class="form-group row">
     @if ($factura->secuencia_perseo)
         <div class="col-12 mt-2 col-lg-6 mt-lg-0">
             <label>Secuencia de factura</label>
@@ -131,5 +146,4 @@
                 {{ $factura->facturado == 0 ? '' : 'readonly' }} value="{{ $factura->secuencia_nota_credito }}" />
         </div>
     @endif
-
 </div>
