@@ -1,3 +1,9 @@
+@php
+    $productos = collect(json_decode($factura->productos))->pluck('productoid');
+    $soyContadoresIds = [62, 63, 64, 65];
+    $interseccion = $productos->intersect($soyContadoresIds);
+    $esWebContador = !$interseccion->isEmpty();
+@endphp
 <div id="implementacion-modal" class="modal fade">
     <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
@@ -9,6 +15,16 @@
                 </div>
                 <div class="modal-body">
                     <h3 class="h6 mb-3">Datos de quien recibe la capacitación</h3>
+                    @if ($esWebContador)
+                        <div class="form-group">
+                            <label for="identificacion2">Identificacion</label>
+                            <input type="text" class="form-control" id="identificacion2" name="identificacion2"
+                                value="{{ $factura->identificacion }}">
+                            @if ($errors->has('identificacion2'))
+                                <span class="text-danger">{{ $errors->first('identificacion2') }}</span>
+                            @endif
+                        </div>
+                    @endif
                     <div class="form-group">
                         <label for="nombre2">Nombre y Apellido</label>
                         <input type="tel" class="form-control" id="nombre2" name="nombre2"

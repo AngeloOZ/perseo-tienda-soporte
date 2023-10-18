@@ -325,8 +325,10 @@ class SoporteEspcialController extends Controller
             ],
         );
 
+        $identificacionActual = $request->identificacion2 ?? $factura->identificacion;
+
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
-            ->where('ruc', $factura->identificacion)
+            ->where('ruc', $identificacionActual)
             ->where('vededorid', Auth::user()->usuariosid)
             ->where('tipo', 2)
             ->orderBy('soporteid', 'desc')
@@ -334,7 +336,7 @@ class SoporteEspcialController extends Controller
 
 
         $soporteAnteriorGb = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
-            ->where('ruc', $factura->identificacion)
+            ->where('ruc', $identificacionActual)
             ->where('vededorid', '<>', Auth::user()->usuariosid)
             ->orderBy('soporteid', 'desc')
             ->first();
@@ -352,7 +354,7 @@ class SoporteEspcialController extends Controller
         }
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
-            ->where('ruc', $factura->identificacion)
+            ->where('ruc', $identificacionActual)
             ->where('vededorid', Auth::user()->usuariosid)
             ->whereIn('tipo', [1, 3])
             ->orderBy('soporteid', 'desc')
@@ -361,7 +363,7 @@ class SoporteEspcialController extends Controller
         $productos = json_decode($factura->productos);
 
         $soporte = new SoporteEspecial();
-        $soporte->ruc = $factura->identificacion;
+        $soporte->ruc = $identificacionActual;
         $soporte->razon_social = $request->nombre2 ?? $factura->nombre;
         $soporte->correo = $request->correo2 ?? $factura->correo;
         $soporte->whatsapp = $request->whatsapp;
