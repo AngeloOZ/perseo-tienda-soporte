@@ -14,10 +14,9 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                 </div>
                 <div class="modal-body">
-                    <h3 class="h6 mb-3">Datos de quien recibe la capacitación</h3>
                     @if ($esWebContador)
                         <div class="form-group">
-                            <label for="identificacion2">Identificacion</label>
+                            <label for="identificacion2">RUC DEL PLAN CONTRATADO</label>
                             <input type="text" class="form-control" id="identificacion2" name="identificacion2"
                                 value="{{ $factura->identificacion }}">
                             @if ($errors->has('identificacion2'))
@@ -25,6 +24,7 @@
                             @endif
                         </div>
                     @endif
+                    <h3 class="h6 mb-3">Datos de quien recibe la capacitación</h3>
                     <div class="form-group">
                         <label for="nombre2">Nombre y Apellido</label>
                         <input type="tel" class="form-control" id="nombre2" name="nombre2"
