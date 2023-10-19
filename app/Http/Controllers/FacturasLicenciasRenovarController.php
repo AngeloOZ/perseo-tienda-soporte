@@ -121,6 +121,7 @@ class FacturasLicenciasRenovarController extends Controller
                 }
             }
 
+            echo "\n";
             echo "Total de facturas Alfa: $facturadasAlfa\n";
             echo "Total de facturas Matriz: $facturadasMatriz\n";
             echo "Total de facturas Delta: $facturadasDelta\n";
@@ -496,7 +497,7 @@ class FacturasLicenciasRenovarController extends Controller
 
             Mail::to($correo["to"])->queue(new NotaficacionRenovacion($correo));
         } catch (\Throwable $th) {
-            dd($th->getMessage());
+            echo "Error enviar corre: ".$th->getMessage() . "\n";
         } finally {
             unlink($temporaryFilePath);
         }
