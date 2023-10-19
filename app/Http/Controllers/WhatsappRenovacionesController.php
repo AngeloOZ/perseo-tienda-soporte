@@ -290,9 +290,13 @@ class WhatsappRenovacionesController extends Controller
             if (isset($res['status']) && $res['status'] == 'success') {
                 return true;
             }
+            
+            $errorMessage = isset($res['message']) ? $res['message'] : '';
+            echo "Error enviar whatsapp: {$phone} - {$data->filename}: response API {$errorMessage}";
             return false;
         } catch (\Throwable $th) {
-            throw $th;
+            echo "Error enviar whatsapp: {$phone} - {$data->filename}: {$th->getMessage()}";
+            return false;
         }
     }
 }
