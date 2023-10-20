@@ -292,10 +292,10 @@ class WhatsappRenovacionesController extends Controller
             }
             
             $errorMessage = isset($res['message']) ? $res['message'] : '';
-            echo "Error enviar whatsapp: {$phone} - {$data->filename}: response API {$errorMessage}\n";
+            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
-            echo "Error enviar whatsapp: {$phone} - {$data->filename}: {$th->getMessage()}\n";
+            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";
             return false;
         }
     }
