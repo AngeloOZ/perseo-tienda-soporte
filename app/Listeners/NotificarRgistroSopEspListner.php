@@ -48,11 +48,11 @@ class NotificarRgistroSopEspListner
 
         $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
 
-        // $nombreRevisor = "Katherine Sarabia";
-        // $mailRevisor = "katherine.sarabia@perseo.ec";
+        $nombreRevisor = "Katherine Sarabia";
+        $mailRevisor = "katherine.sarabia@perseo.ec";
 
-        $nombreRevisor = "Test Notification";
-        $mailRevisor = "desarrollo@perseo.ec";
+        // $nombreRevisor = "Test Notification";
+        // $mailRevisor = "desarrollo@perseo.ec";
 
         $array = [
             'from' => "noresponder@perseo.ec",
