@@ -69,3 +69,10 @@
         </div>
     @endif
 </div>
+
+<div class="form-group row">
+    <div class="col-12 mt-2 col-lg-6 mt-lg-0">
+        <label>Origen</label>
+        <input type="text" class="form-control" value="{{ $factura->origen }}" readonly />
+    </div>
+</div>
