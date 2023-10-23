@@ -758,7 +758,11 @@ class TicketSoporteController extends Controller
     {
         $this->asignacion_tickets();
         if ($request->ajax()) {
-            $data = Ticket::select('ticketid', 'numero_ticket', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'fecha_creado', 'fecha_asignacion', 'fecha_cierre', 'tiempo_activo', 'producto', 'distribuidor', 'tecnicosid')
+
+            $searchValue = $request->search['value'] ?? "";
+
+
+            $data = collect(Ticket::select('ticketid', 'numero_ticket', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'fecha_creado', 'fecha_asignacion', 'fecha_cierre', 'tiempo_activo', 'producto', 'distribuidor', 'tecnicosid')
                 ->when($request->asignados, function ($query, $asignados) {
                     if ($asignados == "si") {
                         return $query->whereNotNull('tecnicosid');
@@ -789,7 +793,20 @@ class TicketSoporteController extends Controller
                 ->when($request->producto, function ($query, $producto) {
                     return $query->where('producto', $producto);
                 })
-                ->get();
+                // REVIEW: Experimental
+                ->when(!empty($searchValue), function ($query) use ($searchValue) {
+                    $searchValue = '%' . $searchValue . '%';  // Preparar el valor para la búsqueda con LIKE
+                    return $query->where(function ($query) use ($searchValue) {
+                        $query->where('numero_ticket', 'like', $searchValue)
+                            ->orWhere('ruc', 'like', $searchValue)
+                            ->orWhere('razon_social', 'like', $searchValue)
+                            ->orWhere('whatsapp', 'like', $searchValue)
+                            ->orWhere('correo', 'like', $searchValue)
+                            ->orWhere('estado', 'like', $searchValue)
+                            ->orWhere('ticketid', 'like', $searchValue);
+                    });
+                })
+                ->cursor());
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {

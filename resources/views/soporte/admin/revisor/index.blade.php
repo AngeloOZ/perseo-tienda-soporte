@@ -180,7 +180,7 @@
                 pageLength: 15,
                 //Orden inicial
                 order: [
-                    [0, 'asc']
+                    [0, 'desc']
                 ],
                 //Guardar pagina, busqueda, etc
                 stateSave: true,
@@ -206,7 +206,7 @@
                 columns: [{
                         data: 'ticketid',
                         name: 'ticketid',
-                        searchable: false,
+                        searchable: true,
                         visible: true
                     },
                     {
@@ -231,11 +231,13 @@
                     {
                         data: 'estado',
                         name: 'estado',
+                        searchable: false,
                     },
                     {
                         data: 'fecha_creado',
                         name: 'fecha_creado',
                         type: "date",
+                        searchable: false,
                     },
                     {
                         data: 'tiempo_activo',
