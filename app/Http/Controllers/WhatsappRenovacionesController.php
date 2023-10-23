@@ -227,7 +227,7 @@ class WhatsappRenovacionesController extends Controller
         try {
             $data = (object)$data;
 
-            $phone = $data->phone;
+            $phone = str_replace(" ", "", $data->phone);
             if (str_starts_with($data->phone, "0")) {
                 $phone = "593" . substr($data->phone, 1);
             }
@@ -263,7 +263,7 @@ class WhatsappRenovacionesController extends Controller
         $instancia->validar_existe_token();
 
         try {
-            $phone = $data->phone;
+            $phone = str_replace(" ", "", $data->phone);
             if (str_starts_with($data->phone, "0")) {
                 $phone = "593" . substr($data->phone, 1);
             }
@@ -292,10 +292,10 @@ class WhatsappRenovacionesController extends Controller
             }
             
             $errorMessage = isset($res['message']) ? $res['message'] : '';
-            echo "Error enviar whatsapp: {$phone} - {$data->filename}: response API {$errorMessage}";
+            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
-            echo "Error enviar whatsapp: {$phone} - {$data->filename}: {$th->getMessage()}";
+            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";
             return false;
         }
     }

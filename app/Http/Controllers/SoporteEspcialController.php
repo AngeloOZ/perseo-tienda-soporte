@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Constants\ConstantesTecnicos;
+use App\Events\NuevoRegistroSopEsp;
 use App\Mail\NotificacionCapacitacion;
 use App\Mail\NotificacionEstadoCapacitacion;
 use App\Mail\NotificacionVendedores;
@@ -334,13 +335,11 @@ class SoporteEspcialController extends Controller
             ->orderBy('soporteid', 'desc')
             ->first();
 
-
         $soporteAnteriorGb = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
             ->where('ruc', $identificacionActual)
             ->where('vededorid', '<>', Auth::user()->usuariosid)
             ->orderBy('soporteid', 'desc')
             ->first();
-
 
         if ($soporteAnteriorPro || $soporteAnteriorGb) {
             $mensaje = "Ya existe una capacitación registrada para este cliente";
@@ -386,21 +385,22 @@ class SoporteEspcialController extends Controller
         $contenido .= "</ul>";
         $soporte->actividades = json_encode([["fecha" => now(), "escritor" => Auth::user()->nombres, "contenido" => $contenido]]);
 
+        NuevoRegistroSopEsp::dispatch($soporte, $factura, $soporteAnteriorPro);
+
         try {
 
+            ComisionesController::actualizar_comision($factura, $soporte->soporteid);
             if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;
                 $this->notificar_asignacion($soporte->tecnicoid, $soporte->tipo);
-                $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
+                // $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
             } else {
-                $this->notificar_nuevo_registro($soporte, $factura);
+                // $this->notificar_nuevo_registro($soporte, $factura);
             }
 
             $soporte->save();
             $factura->capacitacionid = $soporte->soporteid;
             $factura->save();
-
-            ComisionesController::actualizar_comision($factura, $soporte->soporteid);
 
             $log = new Log();
             $log->usuario = Auth::user()->nombres;
@@ -411,10 +411,10 @@ class SoporteEspcialController extends Controller
             $log->save();
 
             flash("Capacitación registrada exitosamente")->success();
-            return back();
+            return redirect()->route('facturas.editar', $factura->facturaid);
         } catch (\Throwable $th) {
             flash("Hubo un error al registrar el soporte: " . $th->getMessage())->error();
-            return back();
+            return redirect()->route('facturas.editar', $factura->facturaid);
         }
     }
 
@@ -893,8 +893,11 @@ class SoporteEspcialController extends Controller
 
             $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
 
-            $nombreRevisor = "Katherine Sarabia";
-            $mailRevisor = "katherine.sarabia@perseo.ec";
+            // $nombreRevisor = "Katherine Sarabia";
+            // $mailRevisor = "katherine.sarabia@perseo.ec";
+
+            $nombreRevisor = "Test Notification";
+            $mailRevisor = "desarrollo@perseo.ec";
 
             $array = [
                 'from' => "noresponder@perseo.ec",

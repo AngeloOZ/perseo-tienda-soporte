@@ -643,7 +643,7 @@ class FirmaController extends Controller
     public function filtrado_listado_revisor(Request $request)
     {
         if ($request->ajax()) {
-            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
+            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.numero_secuencia', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
                 ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
                 ->where('estado', 3)->orWhere('estado', 4)
                 ->when($request->fecha, function ($query, $fecha) {
@@ -709,7 +709,7 @@ class FirmaController extends Controller
     public function filtrado_listado_revisor_enviadas_correo(Request $request)
     {
         if ($request->ajax()) {
-            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
+            $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.numero_secuencia', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
                 ->when($request->fecha, function ($query, $fecha) {
                     $dates = explode(" / ", $fecha);
 

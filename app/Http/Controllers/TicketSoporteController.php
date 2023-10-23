@@ -759,13 +759,14 @@ class TicketSoporteController extends Controller
     {
         $this->asignacion_tickets();
         if ($request->ajax()) {
-            $data = Ticket::when($request->asignados, function ($query, $asignados) {
-                if ($asignados == "si") {
-                    return $query->whereNotNull('tecnicosid');
-                } else {
-                    return $query->whereNull('tecnicosid');
-                }
-            })
+            $data = Ticket::select('ticketid', 'numero_ticket', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'fecha_creado', 'fecha_asignacion', 'fecha_cierre', 'tiempo_activo', 'producto', 'distribuidor', 'tecnicosid')
+                ->when($request->asignados, function ($query, $asignados) {
+                    if ($asignados == "si") {
+                        return $query->whereNotNull('tecnicosid');
+                    } else {
+                        return $query->whereNull('tecnicosid');
+                    }
+                })
                 ->when($request->tecnico, function ($query, $tecnico) {
                     return $query->where('ticket_tienda.tecnicosid', $tecnico);
                 })
