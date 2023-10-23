@@ -26,6 +26,15 @@
                             </div>
                             <div class="card-body">
                                 <div class="row mb-8">
+                                    <div class="col-12 col-md-2">
+                                        <label>Estado:</label>
+                                        <select class="form-control select" id="filtroEstado">
+                                            <option value="" selected>Todos</option>
+                                            <option value="3">En progreso</option>
+                                            <option value="4">Finalizado</option>
+                                        </select>
+                                    </div>
+
                                     <div class="col-12 col-md-3">
                                         <label>Vendedores:</label>
                                         <select class="form-control select select2" id="filtroVendedores">
@@ -34,15 +43,6 @@
                                                 <option value="{{ $vendedor->usuariosid }}">{{ $vendedor->nombres }}
                                                 </option>
                                             @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="col-12 col-md-3">
-                                        <label>Estado:</label>
-                                        <select class="form-control select" id="filtroEstado">
-                                            <option value="" selected>Todos</option>
-                                            <option value="3">En progreso</option>
-                                            <option value="4">Finalizado</option>
                                         </select>
                                     </div>
 
@@ -59,7 +59,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-3">
+                                    <div class="col-12 col-md-4">
                                         <div class="pt-8">
                                             <button class="btn btn-primary btn-primary--icon" id="kt_search">
                                                 <span>
@@ -83,6 +83,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no-exportar">#</th>
+                                            <th>Secuencia factura</th>
                                             <th>Tipo Persona</th>
                                             <th data-priority="1">Identificacion</th>
                                             <th data-priority="2">Nombres</th>
@@ -156,14 +157,16 @@
                         visible: false
                     },
                     {
+                        data: 'numero_secuencia',
+                        name: 'numero_secuencia',
+                    },
+                    {
                         data: 'tipo_persona',
                         name: 'tipo_persona',
-
                     },
                     {
                         data: 'identificacion',
                         name: 'identificacion',
-
                     },
                     {
                         data: 'nombres',
@@ -172,7 +175,6 @@
                     {
                         data: 'correo',
                         name: 'correo',
-
                     },
                     {
                         data: 'celular',
@@ -181,12 +183,10 @@
                     {
                         data: 'fecha_creacion',
                         name: 'fecha_creacion',
-
                     },
                     {
                         data: 'estado',
                         name: 'estado',
-
                     },
                     {
                         data: 'action',
@@ -287,13 +287,13 @@
 
             $('#kt_search').on('click', function(e) {
                 e.preventDefault();
-                // guardarEstadoFiltro();
                 table.draw();
             });
 
             $('#kt_reset').on('click', function() {
                 $("#filtroEstado").val("");
                 $("#filtroVendedores").val("");
+                $("#filtroVendedores").trigger('change');
                 initDateMonth();
                 table.draw();
             });

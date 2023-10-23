@@ -28,7 +28,15 @@
                             </div>
                             <div class="card-body">
                                 <div class="row mb-8">
-                                    <div class="col-12 col-md-4">
+
+                                    <div class="col-12 col-md-2">
+                                        <label>Estado:</label>
+                                        <select class="form-control select" disabled id="filtroEstado">
+                                            <option value="5" selected>Enviado al correo</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12 col-md-3">
                                         <label>Vendedores:</label>
                                         <select class="form-control select select2" id="filtroVendedores">
                                             <option value="" selected>Todos</option>
@@ -39,7 +47,8 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-12 col-md-4">
+
+                                    <div class="col-12 col-md-3">
                                         <label>Fecha:</label>
                                         <div class="input-group" id='kt_fecha'>
                                             <div class="input-group-prepend">
@@ -76,6 +85,7 @@
                                     <thead>
                                         <tr>
                                             <th class="no-exportar">#</th>
+                                            <th>Secuencia factura</th>
                                             <th>Tipo Persona</th>
                                             <th data-priority="1">Identificacion</th>
                                             <th data-priority="2">Nombres</th>
@@ -134,11 +144,12 @@
                 serverSide: true,
                 //Peticion ajax que devuelve los registros
                 ajax: {
-                    url: "{{ route('firma.filtrado_revisor_correo') }}",
+                    url: "{{ route('firma.filtrado_revisor') }}",
                     type: 'POST',
                     data: function(d) {
                         d.vendedores = $("#filtroVendedores").val();
                         d.fecha = $("#filtroFecha").val();
+                        d.estado = $("#filtroEstado").val();
                     },
                 },
                 buttons: [{
@@ -179,14 +190,16 @@
                         visible: false
                     },
                     {
+                        data: 'numero_secuencia',
+                        name: 'numero_secuencia',
+                    },
+                    {
                         data: 'tipo_persona',
                         name: 'tipo_persona',
-
                     },
                     {
                         data: 'identificacion',
                         name: 'identificacion',
-
                     },
                     {
                         data: 'nombres',
@@ -195,7 +208,6 @@
                     {
                         data: 'correo',
                         name: 'correo',
-
                     },
                     {
                         data: 'celular',
@@ -204,12 +216,10 @@
                     {
                         data: 'fecha_creacion',
                         name: 'fecha_creacion',
-
                     },
                     {
                         data: 'estado',
                         name: 'estado',
-
                     },
                     {
                         data: 'action',
@@ -279,13 +289,13 @@
 
             $('#kt_search').on('click', function(e) {
                 e.preventDefault();
-                // guardarEstadoFiltro();
                 table.draw();
             });
 
             $('#kt_reset').on('click', function() {
-                $("#filtroEstado").val("");
+                $("#filtroEstado").val("5");
                 $("#filtroVendedores").val("");
+                $("#filtroVendedores").trigger('change');
                 initDateMonth();
                 table.draw();
             });
