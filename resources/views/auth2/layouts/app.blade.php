@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Firma</title>
+    <title>@yield('title','Revisor facturas')</title>
     <meta name="description" content="Firma" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />

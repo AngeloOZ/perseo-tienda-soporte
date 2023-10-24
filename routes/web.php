@@ -109,6 +109,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
         Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name('facturas.liberar_producto_manual');
 
+        Route::get('/por-pagar', [FacturasController::class, 'listado_revisor_por_pagar'])->name('facturas.porpagar');
+
         Route::prefix('whatsapp')->group(function () {
             Route::get('/configuracion', [WhatsappRenovacionesController::class, 'index'])->name('facturas.whatsapp.config');
             Route::post('/iniciar', [WhatsappRenovacionesController::class, 'iniciar_whatsapp'])->name('facturas.whatsapp.iniciar');

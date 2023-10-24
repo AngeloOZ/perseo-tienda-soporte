@@ -1008,11 +1008,16 @@ class FacturasController extends Controller
     {
         if ($request->ajax()) {
             $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado')
-                ->where('facturado', '=', 1)
-                ->where('estado_pago', '>=', 1)
                 ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
+                ->where('facturado', 1)
                 ->when($request->pago, function ($query, $pago) {
-                    $query->where('estado_pago', $pago);
+                    if ($pago === "no") {
+                        return $query->where('estado_pago', 0);
+                    } else if ($pago == 3) {
+                        return $query->whereIn('estado_pago', [1, 2]);
+                    } else {
+                        return $query->where('estado_pago', $pago);
+                    }
                 })
                 ->when($request->liberado, function ($query, $liberado) {
                     switch ($liberado) {
@@ -1115,6 +1120,11 @@ class FacturasController extends Controller
         return back();
     }
 
+    public function listado_revisor_por_pagar()
+    {
+        return view('auth2.revisor_facturas.porpagar');
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                       Funciones para generar facturas                      */
     /* -------------------------------------------------------------------------- */
@@ -1135,7 +1145,6 @@ class FacturasController extends Controller
             }
 
             $cliente = $this->crear_cliente($vendedor, $factura);
-            // dd($cliente);
 
             $resp = $this->crear_factura($factura, $cliente["cliente"], $cliente["vendedor"]);
 

@@ -99,8 +99,16 @@
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['facturas.revisor']) }} " aria-haspopup="true">
                         <a href="{{ route('facturas.revisor') }}" class="menu-link">
-                            <i class="menu-icon fas fa-file-invoice-dollar"></i>
+                            <i class="menu-icon fas fa-file-invoice"></i>
                             <span class="menu-text">Listado de facturas</span>
+                        </a>
+                    </li>
+                @endif
+                @if (in_array(Auth::user()->rol, [2]))
+                    <li class="menu-item {{ areActiveRoutes(['facturas.porpagar']) }} " aria-haspopup="true">
+                        <a href="{{ route('facturas.porpagar') }}" class="menu-link">
+                            <i class="menu-icon fas fa-file-invoice-dollar"></i>
+                            <span class="menu-text">Listado de facturas por pagar</span>
                         </a>
                     </li>
                 @endif
