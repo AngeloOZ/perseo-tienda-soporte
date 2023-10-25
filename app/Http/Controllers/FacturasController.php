@@ -1049,11 +1049,11 @@ class FacturasController extends Controller
             return DataTables::of($data)
                 ->editColumn('fecha_creacion', function ($fecha) {
                     $date = new DateTime($fecha->fecha_creacion);
-                    return $date->format('d/m/Y H:i');
+                    return $date->format('d-m-Y');
                 })
                 ->editColumn('fecha_actualizado', function ($fecha) {
                     $date = new DateTime($fecha->fecha_actualizado);
-                    return $date->format('d/m/Y H:i');
+                    return $date->format('d-m-Y H:i');
                 })
                 ->editColumn('estado', function ($estado) {
                     if ($estado->estado_pago == 0) {
