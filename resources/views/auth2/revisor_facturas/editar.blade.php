@@ -16,7 +16,7 @@
                                     <div class="card-toolbar">
                                         <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="">
                                             <div class="btn-group" role="group" aria-label="First group">
-                                                <a href="{{ url()->previous() ?? route('facturas.revisor') }}"
+                                                <a href="{{ route('facturas.revisor') }}"
                                                     class="btn btn-secondary btn-icon" data-toggle="tooltip"
                                                     title="Volver"><i class="la la-long-arrow-left"></i></a>
 
