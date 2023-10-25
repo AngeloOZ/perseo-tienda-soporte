@@ -46,7 +46,7 @@ Route::get('/', [usuariosController::class, 'redirect_login']);
 Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.login');
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
-Route::prefix('pagos')->group(function(){
+Route::prefix('pagos')->group(function () {
     Route::get('/registrar-comprobante/{factura}', [PagosController::class, 'registrar_pago_cliente'])->name('pagos.registrar');
     Route::post('/guardar-comprobantes', [PagosController::class, 'guardar_pago'])->name('pagos.guardar');
     Route::post('/actualizar-comprobante', [PagosController::class, 'actualizar_pago'])->name('pagos.actualizar');
@@ -56,10 +56,10 @@ Route::prefix('pagos')->group(function(){
 
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/facturas', function(){
+    Route::get('/facturas', function () {
         return redirect()->route('facturas.listado');
     });
-    
+
     /* Rutas para seccion facturas */
     Route::prefix('factura')->group(function () {
         Route::get('/descargar/{id_factura}/{id_comprobante}', [FacturasController::class, 'descargar_comprobante'])->name("factura.descargar_comprobante");
@@ -104,12 +104,11 @@ Route::group(['middleware' => 'auth'], function () {
     /* Rutas para admin facturas (Joyce) */
     Route::prefix('revisor-facturas')->group(function () {
         Route::get('/', [FacturasController::class, 'listado_revisor'])->name('facturas.revisor');
+        Route::get('/por-pagar', [FacturasController::class, 'listado_revisor_por_pagar'])->name('facturas.porpagar');
         Route::post('/filtrado-listado', [FacturasController::class, 'filtrado_listado_revisor'])->name('facturas.filtrado_revisor');
 
         Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
         Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name('facturas.liberar_producto_manual');
-
-        Route::get('/por-pagar', [FacturasController::class, 'listado_revisor_por_pagar'])->name('facturas.porpagar');
 
         Route::prefix('whatsapp')->group(function () {
             Route::get('/configuracion', [WhatsappRenovacionesController::class, 'index'])->name('facturas.whatsapp.config');
@@ -201,7 +200,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     /* Rutas para demos y lite */
-    Route::prefix('demos')->group(function(){
+    Route::prefix('demos')->group(function () {
 
         Route::get('/listado', [SoporteEspcialController::class, 'listado_demos_lites'])->name('demos.listado');
         Route::post('/filtrado-listado', [SoporteEspcialController::class, 'filtrado_listado_demos_lites'])->name('demos.filtrado.listado');

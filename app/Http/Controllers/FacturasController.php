@@ -1004,27 +1004,33 @@ class FacturasController extends Controller
         return view('auth2.revisor_facturas.index');
     }
 
+    public function listado_revisor_por_pagar()
+    {
+        return view('auth2.revisor_facturas.porpagar');
+    }
+
     public function filtrado_listado_revisor(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado')
-                ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
-                ->where('facturado', 1)
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor')
+                ->join('usuarios', 'usuarios.usuariosid', '=', 'facturas.usuariosid')
+                ->where('facturas.distribuidoresid', '=', Auth::user()->distribuidoresid)
+                ->where('facturas.facturado', 1)
                 ->when($request->pago, function ($query, $pago) {
                     if ($pago === "no") {
-                        return $query->where('estado_pago', 0);
+                        return $query->where('facturas.estado_pago', 0);
                     } else if ($pago == 3) {
-                        return $query->whereIn('estado_pago', [1, 2]);
+                        return $query->whereIn('facturas.estado_pago', [1, 2]);
                     } else {
-                        return $query->where('estado_pago', $pago);
+                        return $query->where('facturas.estado_pago', $pago);
                     }
                 })
                 ->when($request->liberado, function ($query, $liberado) {
                     switch ($liberado) {
                         case 1:
-                            return $query->where('liberado', 0);
+                            return $query->where('facturas.liberado', 0);
                         case 2:
-                            return $query->where('liberado', 1);
+                            return $query->where('facturas.liberado', 1);
                     }
                 })
                 ->when($request->fecha, function ($query, $fecha) {
@@ -1036,7 +1042,7 @@ class FacturasController extends Controller
                     $date2 = strtotime($dates[1] . ' +1 day -1 second');
                     $hasta = date('Y-m-d H:i:s', $date2);
 
-                    return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
+                    return $query->whereBetween('facturas.fecha_creacion', [$desde, $hasta]);
                 })
                 ->get();
 
@@ -1118,11 +1124,6 @@ class FacturasController extends Controller
         $log->save();
         flash('Producto liberado')->success();
         return back();
-    }
-
-    public function listado_revisor_por_pagar()
-    {
-        return view('auth2.revisor_facturas.porpagar');
     }
 
     /* -------------------------------------------------------------------------- */

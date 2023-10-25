@@ -61,14 +61,15 @@
                                     id="kt_datatable">
                                     <thead>
                                         <tr>
-                                            <th class="no-exportar">#</th>
+                                            <th class="no-export">#</th>
                                             <th data-priority="1">Identificacion</th>
-                                            <th data-priority="2">Nombres</th>
+                                            <th data-priority="2">Cliente</th>
                                             <th>Concepto de factura</th>
                                             <th>Secuencia de factura</th>
                                             <th>Estado del producto</th>
                                             <th>Estado del pago</th>
-                                            <th class="no-exportar">Acciones</th>
+                                            <th>Vendedor</th>
+                                            <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -133,13 +134,13 @@
                     type: 'POST',
                     data: function(d) {
                         d.pago = $("#filtroEstadoPagado").val();
-                        // d.liberado = $("#filtroEstadoLiberado").val();
                         d.fecha = $("#filtroFecha").val();
                     },
                 },
                 columns: [{
                         data: 'facturaid',
                         name: 'facturaid',
+                        class: "no-export",
                         searchable: false,
                         visible: true,
                     },
@@ -168,6 +169,10 @@
                     {
                         data: 'estado',
                         name: 'estado',
+                    },
+                    {
+                        data: 'vendedor',
+                        name: 'vendedor',
                     },
                     {
                         data: 'action',
