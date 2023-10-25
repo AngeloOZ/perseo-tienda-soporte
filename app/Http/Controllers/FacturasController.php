@@ -1012,7 +1012,7 @@ class FacturasController extends Controller
     public function filtrado_listado_revisor(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor')
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor', 'facturas.fecha_creacion', 'facturas.fecha_actualizado', 'facturas.origen')
                 ->join('usuarios', 'usuarios.usuariosid', '=', 'facturas.usuariosid')
                 ->where('facturas.distribuidoresid', '=', Auth::user()->distribuidoresid)
                 ->where('facturas.facturado', 1)
@@ -1049,7 +1049,11 @@ class FacturasController extends Controller
             return DataTables::of($data)
                 ->editColumn('fecha_creacion', function ($fecha) {
                     $date = new DateTime($fecha->fecha_creacion);
-                    return $date->format('d-m-Y');
+                    return $date->format('d/m/Y H:i');
+                })
+                ->editColumn('fecha_actualizado', function ($fecha) {
+                    $date = new DateTime($fecha->fecha_actualizado);
+                    return $date->format('d/m/Y H:i');
                 })
                 ->editColumn('estado', function ($estado) {
                     if ($estado->estado_pago == 0) {

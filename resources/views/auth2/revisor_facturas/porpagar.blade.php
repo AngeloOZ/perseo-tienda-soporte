@@ -69,6 +69,9 @@
                                             <th>Estado del producto</th>
                                             <th>Estado del pago</th>
                                             <th>Vendedor</th>
+                                            <th>Origen</th>
+                                            <th>Fecha creada</th>
+                                            <th>Fecha modificada</th>
                                             <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
@@ -173,6 +176,22 @@
                     {
                         data: 'vendedor',
                         name: 'vendedor',
+                    },
+                    {
+                        data: 'origen',
+                        name: 'origen',
+                    },
+                    {
+                        data: 'fecha_creacion',
+                        name: 'fecha_creacion',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'fecha_actualizado',
+                        name: 'fecha_actualizado',
+                        searchable: false,
+                        visible: false,
                     },
                     {
                         data: 'action',
