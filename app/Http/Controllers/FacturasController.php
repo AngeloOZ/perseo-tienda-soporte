@@ -1394,6 +1394,7 @@ class FacturasController extends Controller
 
             try {
                 $factura->productos = json_encode($productos);
+                $factura->total_venta = round($valoresFactura["total"], 2);
                 $factura->save();
             } catch (\Throwable $th) {
             }
