@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\adminController;
+use App\Http\Controllers\BitrixController;
 use App\Http\Controllers\CiudadesController;
 use App\Http\Controllers\CobrosController;
 use App\Http\Controllers\ComisionesController;
@@ -212,5 +213,11 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('convertir/lite/{soporte}', [SoporteEspcialController::class, 'convertir_lite'])->name('demos.convertir.lite');
 
         Route::post('/liberar-lite/{soporte}', [SoporteEspcialController::class, 'liberar_lite'])->name('demos.liberar.lite');
+    });
+
+    Route::prefix('bitrix')->group(function () {
+
+        Route::get('/list', [BitrixController::class, 'index'])->name('bitrix.list');
+        
     });
 });
