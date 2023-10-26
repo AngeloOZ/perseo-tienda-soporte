@@ -24,6 +24,8 @@ class BitrixController extends Controller
                 if (isset($prod[0]->precioiva)) return true;
             })->flatten(1);
 
+            dd($facturas->count());
+
             $numFillasAfectadas = 0;
 
             foreach ($facturas as $key => $factura) {
