@@ -218,6 +218,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::prefix('bitrix')->group(function () {
 
         Route::get('/list', [BitrixController::class, 'index'])->name('bitrix.list');
-        
+
+        Route::post('/promedio-ventas', [BitrixController::class, 'obtener_promedio_ventas'])->name('bitrix.promedio_ventas');
+        Route::post('/tasa-utilidad-prospectos',[BitrixController::class, 'obtener_tasa_utilidad_prospectos'])->name('bitrix.tasa_utilidad_prospectos');
+        Route::post('/tiempo-de-conversion',[BitrixController::class, 'obtener_tiempo_de_cierre_de_conversion'])->name('bitrix.tiempo_de_conversion');
     });
 });
