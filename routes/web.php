@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\adminController;
+use App\Http\Controllers\BitrixController;
 use App\Http\Controllers\CiudadesController;
 use App\Http\Controllers\CobrosController;
 use App\Http\Controllers\ComisionesController;
@@ -212,5 +213,14 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('convertir/lite/{soporte}', [SoporteEspcialController::class, 'convertir_lite'])->name('demos.convertir.lite');
 
         Route::post('/liberar-lite/{soporte}', [SoporteEspcialController::class, 'liberar_lite'])->name('demos.liberar.lite');
+    });
+
+    Route::prefix('bitrix')->group(function () {
+
+        Route::get('/list', [BitrixController::class, 'index'])->name('bitrix.list');
+
+        Route::post('/promedio-ventas', [BitrixController::class, 'obtener_promedio_ventas'])->name('bitrix.promedio_ventas');
+        Route::post('/tasa-utilidad-prospectos',[BitrixController::class, 'obtener_tasa_utilidad_prospectos'])->name('bitrix.tasa_utilidad_prospectos');
+        Route::post('/tiempo-de-conversion',[BitrixController::class, 'obtener_tiempo_de_cierre_de_conversion'])->name('bitrix.tiempo_de_conversion');
     });
 });
