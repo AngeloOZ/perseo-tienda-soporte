@@ -116,7 +116,9 @@ class BitrixController extends Controller
                 $this->STATUS_BITRIX['NO_UTIL'],
             ];
 
-            $prospectosValidos = $this->obtener_todos_prospectos([...$filter, 'STATUS_ID' => $estados]);
+            $filter['STATUS_ID'] = $estados;
+
+            $prospectosValidos = $this->obtener_todos_prospectos($filter);
             $prospectosAgrupadosPorVendedor = $prospectosValidos->groupBy('ASSIGNED_BY_ID');
             $datosChart = [
                 'series' => [

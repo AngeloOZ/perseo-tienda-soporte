@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                             <div class="card-body">
-                                <div class="container">
+                                <div class="container-fluid">
                                     <div class="form-group row">
                                         <div class="col-4">
                                             <label for="">Vendedores:</label>
