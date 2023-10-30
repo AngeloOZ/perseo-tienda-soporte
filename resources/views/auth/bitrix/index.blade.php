@@ -1,3 +1,7 @@
+@php
+    $disabled = Auth::user()->rol == 1 ? 'disabled' : '';
+    $vendedorActual = Auth::user()->rol == 1 ? Auth::user()->usuariosid : '';
+@endphp
 @extends('auth.layouts.app')
 @section('titulo', 'Mis estadisticas')
 @section('contenido')
@@ -21,19 +25,21 @@
                             <div class="card-body">
                                 <div class="container">
                                     <div class="form-group row">
-                                        @if (1 != 1)
-                                            <div class="col-3">
-                                                <label for="">Vendedores:</label>
-                                                <select name="" id="filtroVendedores" class="form-control select2">
-                                                    <option value="">Todos</option>
-                                                    @foreach ($vendedores as $vendedor)
-                                                        <option value="{{ $vendedor->usuariosid }}">{{ $vendedor->nombres }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        @endif
-                                        <div class="col-6">
+                                        <div class="col-4">
+                                            <label for="">Vendedores:</label>
+                                            <select name="" id="filtroVendedores" class="form-control select2"
+                                                {{ $disabled }}>
+                                                <option value="" selected>Todos</option>
+                                                @foreach ($vendedores as $vendedor)
+                                                    <option value="{{ $vendedor->usuariosid }}"
+                                                        {{ $vendedor->usuariosid == $vendedorActual ? 'selected' : '' }}>
+                                                        {{ $vendedor->nombres }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="col-4">
                                             <label for="">Fecha</label>
                                             <input type="text" id="filtroFecha" class="form-control">
                                         </div>
@@ -42,18 +48,23 @@
                                         </div>
                                     </div>
                                     <div class="row mb-10">
+                                        <div class="col-12 min-h-250px">
+                                            <div class="d-flex h-100 justify-content-center align-items-center"
+                                                id="loaderUtilidadProsecto">
+                                                @include('auth.bitrix.inc.spiner')
+                                            </div>
+                                            <div id="utilidadProspectos"></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-10">
                                         <div class="col-12 col-md-6 min-h-250px">
                                             <div id="promedioDeVentas"></div>
                                         </div>
                                         <div class="col-12 col-md-6">
-                                            <div id="utilidadProspectos"></div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-12 col-md-6 min-h-250px">
                                             <div id="tiempoDeCierreDeConversion"></div>
                                         </div>
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -67,7 +78,6 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    {{-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> --}}
     <script>
         const HEIGHT_CHART = 250;
         let chartPromedioVentas = null;
@@ -158,6 +168,7 @@
         async function obtenerPromedioVentas() {
             const body = {
                 _token: '{{ csrf_token() }}',
+                vendedor: $('#filtroVendedores').val()
             }
 
             const fechas = validarFiltroFecha('YYYY-MM-DD 00:00:00', 'YYYY-MM-DD 23:59:59');
@@ -225,9 +236,10 @@
 
         }
 
-        async function obtenerTasaUtilidadProspectos(destroy = false) {
+        async function obtenerTasaUtilidadProspectos() {
             const body = {
                 _token: '{{ csrf_token() }}',
+                vendedor: $('#filtroVendedores').val()
             }
 
             const fechas = validarFiltroFecha();
@@ -240,46 +252,65 @@
                 data
             } = await axios.post("{{ route('bitrix.tasa_utilidad_prospectos') }}", body);
 
+
             const options = {
-                series: [{
-                    name: 'Prospectos',
-                    data: data.data
-                }],
+                series: data.series,
                 chart: {
-                    height: HEIGHT_CHART,
                     type: 'bar',
+                    height: HEIGHT_CHART + 50,
+                    stacked: true,
                 },
-                colors: ['#dc3545', '#0090FF', '#198754'],
                 plotOptions: {
                     bar: {
-                        columnWidth: '45%',
-                        distributed: true,
+                        horizontal: true,
                         dataLabels: {
-                            position: 'top',
-                        },
+                            enable: true,
+                            total: {
+                                enabled: true,
+                                offsetX: -10,
+                                style: {
+                                    fontSize: '13px',
+                                    fontWeight: 900,
+                                    colors: ["#304758"]
+                                }
+                            }
+                        }
                     },
                 },
-                legend: {
-                    show: true
+                colors: ['#dc3545', '#ffc107', '#28a745'],
+                stroke: {
+                    width: 1,
+                    colors: ['#fff']
+                },
+                title: {
+                    text: 'Tasa de utilidad de prospectos',
                 },
                 xaxis: {
                     categories: data.categories,
-                },
-                axisTicks: {
-                    show: false
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function(val) {
-                        return val + "%";
-                    },
-                    offsetY: -25,
-                    style: {
-                        fontSize: '14px',
-                        colors: ["#304758"]
+                    labels: {
+                        formatter: function(val) {
+                            return val + ""
+                        }
                     }
                 },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return val + ""
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right',
+                    offsetX: 0
+                }
             };
+
+            document.getElementById('loaderUtilidadProsecto')?.remove();
 
             if (!chartUtilidadProspectos) {
                 chartUtilidadProspectos = new ApexCharts(document.querySelector("#utilidadProspectos"), options);
@@ -293,6 +324,7 @@
 
             const body = {
                 _token: '{{ csrf_token() }}',
+                vendedor: $('#filtroVendedores').val()
             }
 
             const fechas = validarFiltroFecha();

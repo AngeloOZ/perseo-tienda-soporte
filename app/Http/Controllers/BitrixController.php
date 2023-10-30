@@ -15,24 +15,26 @@ class BitrixController extends Controller
     private $urlBit = 'https://b24-mh9fll.bitrix24.es/rest/1/8d1mnav2yurzdqk3';
 
     private $STATUS_BITRIX = [
-        'invalid' => "JUNK",
-        'valid' => "NEW",
-        'inProcess' => "IN_PROCESS",
-        'converted' => "CONVERTED",
+        'ASIGNADO_RESPONSABLE' => '1',
+        'CONVERTIDO' => "CONVERTED",
+        'COTIZACION' => "UC_43I4S7",
+        'DEMOSTRACION' => "UC_A5770Y",
+        'LLAMADA' => "IN_PROCESS",
+        'NO_UTIL' => "JUNK",
+        'SIN_ASIGNAR' => "NEW",
+        "WHATSAPP" => 'PROCESSED',
     ];
 
     public function index()
     {
-        $vendedores = [];
 
-        if (Auth::user()->rol == 2) {
-            $vendedores = User::select('usuariosid', 'nombres', 'bitrix_id')
-                ->where('rol', 1)
-                ->where('distribuidoresid', Auth::user()->distribuidoresid)
-                ->where('bitrix_id', '!=', null)
-                ->where('estado', '!=', 0)
-                ->get();
-        }
+        $vendedores = User::select('usuariosid', 'nombres', 'bitrix_id')
+            ->where('rol', 1)
+            ->where('distribuidoresid', Auth::user()->distribuidoresid)
+            ->where('bitrix_id', '!=', null)
+            ->where('estado', '!=', 0)
+            ->get();
+
 
         return view('auth.bitrix.index', compact('vendedores'));
     }
@@ -47,6 +49,9 @@ class BitrixController extends Controller
                     return $query->where('facturas.distribuidoresid', Auth::user()->distribuidoresid);
                 }
             })
+                ->when($request->vendedor, function ($query, $vendedor) {
+                    return $query->where('facturas.usuariosid', $vendedor);
+                })
                 ->when($request->fecha_inicio, function ($query, $fecha_inicio) {
                     $query->where('facturas.fecha_creacion', '>=', $fecha_inicio);
                 })
@@ -93,7 +98,7 @@ class BitrixController extends Controller
     {
         try {
             $filter = [
-                'ASSIGNED_BY_ID' => $this->obtener_id_asignados(),
+                'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
             ];
 
             if ($request->fecha_inicio && $request->fecha_fin) {
@@ -101,16 +106,61 @@ class BitrixController extends Controller
                 $filter['<=DATE_CREATE'] = $request->fecha_fin;
             }
 
-            $prospectosIvalidos = $this->obtener_prospectos([...$filter, 'STATUS_ID' => $this->STATUS_BITRIX['invalid'],])->total;
-            $prospectosValidos = $this->obtener_prospectos([...$filter, 'STATUS_ID<>' => $this->STATUS_BITRIX['invalid'],])->total;
-            $prospectosConvertidos = $this->obtener_prospectos([...$filter, 'STATUS_ID' => $this->STATUS_BITRIX['converted'],])->total;
-
-            $data = [
-                'data' => [$prospectosIvalidos, $prospectosValidos, $prospectosConvertidos],
-                'categories' => ['Invalidos', 'Validos', 'Convertidos']
+            $estados = [
+                $this->STATUS_BITRIX['ASIGNADO_RESPONSABLE'],
+                $this->STATUS_BITRIX['CONVERTIDO'],
+                $this->STATUS_BITRIX['COTIZACION'],
+                $this->STATUS_BITRIX['DEMOSTRACION'],
+                $this->STATUS_BITRIX['LLAMADA'],
+                $this->STATUS_BITRIX['WHATSAPP'],
+                $this->STATUS_BITRIX['NO_UTIL'],
             ];
 
-            return response($data, 200, ['Content-Type' => 'application/json']);
+            $prospectosValidos = $this->obtener_todos_prospectos([...$filter, 'STATUS_ID' => $estados]);
+            $prospectosAgrupadosPorVendedor = $prospectosValidos->groupBy('ASSIGNED_BY_ID');
+            $datosChart = [
+                'series' => [
+                    [
+                        'name' => 'No utiles',
+                        'data' => [],
+                    ],
+                    [
+                        'name' => 'Utiles',
+                        'data' => [],
+                    ],
+                    [
+                        'name' => 'Convertidos',
+                        'data' => [],
+                    ]
+                ],
+                'categories' => [],
+            ];
+
+            foreach ($prospectosAgrupadosPorVendedor as $key => $prospectos) {
+
+                $vendedor = User::select('nombres', 'usuariosid', 'bitrix_id')->firstWhere('bitrix_id', $key);
+
+                if (!$vendedor) continue;
+
+                $invalidos = $prospectos->filter(function ($pros) {
+                    return $pros->STATUS_ID === $this->STATUS_BITRIX['NO_UTIL'];
+                })->count();
+
+                $validos = $prospectos->filter(function ($pros) {
+                    return $pros->STATUS_ID !== $this->STATUS_BITRIX['NO_UTIL'];
+                })->count();
+
+                $convertidos = $prospectos->filter(function ($pros) {
+                    return $pros->STATUS_ID === $this->STATUS_BITRIX['CONVERTIDO'];
+                })->count();
+
+                array_push($datosChart['categories'], $vendedor->nombres);
+                array_push($datosChart['series'][0]['data'], $invalidos);
+                array_push($datosChart['series'][1]['data'], $validos);
+                array_push($datosChart['series'][2]['data'], $convertidos);
+            }
+
+            return response($datosChart, 200, ['Content-Type' => 'application/json']);
         } catch (\Throwable $th) {
             dd($th);
         }
@@ -120,8 +170,8 @@ class BitrixController extends Controller
     {
         try {
             $filter = [
-                'ASSIGNED_BY_ID' => $this->obtener_id_asignados(),
-                'STATUS_ID' => $this->STATUS_BITRIX['converted'],
+                'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
+                'STATUS_ID' => $this->STATUS_BITRIX['CONVERTIDO'],
             ];
 
             if ($request->fecha_inicio && $request->fecha_fin) {
@@ -234,7 +284,7 @@ class BitrixController extends Controller
         }
     }
 
-    private function obtener_id_asignados()
+    private function obtener_id_asignados($vendedor = null)
     {
         $isAdmin = Auth::user()->rol == 2;
         $ASSIGNED_BY_ID = [Auth::user()->bitrix_id];
@@ -245,6 +295,9 @@ class BitrixController extends Controller
                 ->where('distribuidoresid', Auth::user()->distribuidoresid)
                 ->where('bitrix_id', '!=', null)
                 ->where('estado', '!=', 0)
+                ->when($vendedor, function ($query, $user) {
+                    return $query->where('usuariosid', $user);
+                })
                 ->get()
                 ->each(function ($user) use (&$ASSIGNED_BY_ID) {
                     array_push($ASSIGNED_BY_ID, $user->bitrix_id);
