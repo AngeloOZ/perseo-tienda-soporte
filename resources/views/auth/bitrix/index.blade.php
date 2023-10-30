@@ -24,8 +24,9 @@
                             </div>
                             <div class="card-body">
                                 <div class="container-fluid">
+                                    {{-- Filtros --}}
                                     <div class="form-group row">
-                                        <div class="col-4">
+                                        <div class="col-12 mb-2 col-md-3 mb-md-0">
                                             <label for="">Vendedores:</label>
                                             <select name="" id="filtroVendedores" class="form-control select2"
                                                 {{ $disabled }}>
@@ -39,32 +40,55 @@
                                             </select>
                                         </div>
 
-                                        <div class="col-4">
+                                        <div class="col-12 mb-2 col-md-3 mb-md-0">
                                             <label for="">Fecha</label>
                                             <input type="text" id="filtroFecha" class="form-control">
                                         </div>
-                                        <div class="col-2">
+                                        <div class="col-12 mb-2 col-md-2 mb-md-0">
+                                            <label>Tipo de busqueda</label>
+                                            <div class="radio-list">
+                                                <label class="radio">
+                                                    <input type="radio" checked="checked" name="tipoFecha"
+                                                        value="created" />
+                                                    <span></span>
+                                                    Fecha de creación
+                                                </label>
+                                                <label class="radio">
+                                                    <input type="radio" name="tipoFecha" value="closed" />
+                                                    <span></span>
+                                                    Fecha de cierre
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 mb-2 col-md-3 mb-md-0">
                                             <button class="btn btn-primary mt-8" id="buscar">Buscar</button>
                                         </div>
                                     </div>
+                                    {{-- End Filtros --}}
                                     <div class="row mb-10">
-                                        <div class="col-12 min-h-250px">
+                                        <div class="col-12 col-md-6 min-h-250px">
                                             <div class="d-flex h-100 justify-content-center align-items-center"
                                                 id="loaderUtilidadProsecto">
                                                 @include('auth.bitrix.inc.spiner')
                                             </div>
                                             <div id="utilidadProspectos"></div>
                                         </div>
+                                        <div class="col-12 col-md-6 min-h-250px">
+                                            <div class="d-flex h-100 justify-content-center align-items-center"
+                                                id="loaderTasaConversion">
+                                                @include('auth.bitrix.inc.spiner')
+                                            </div>
+                                            <div id="tasaDeCierreVentas"></div>
+                                        </div>
                                     </div>
                                     <div class="row mb-10">
                                         <div class="col-12 col-md-6 min-h-250px">
                                             <div id="promedioDeVentas"></div>
                                         </div>
-                                        <div class="col-12 col-md-6">
+                                        <div class="col-12 col-md-6 min-h-250px">
                                             <div id="tiempoDeCierreDeConversion"></div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -78,11 +102,13 @@
 
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         const HEIGHT_CHART = 250;
         let chartPromedioVentas = null;
         let chartUtilidadProspectos = null;
         let chartTiempoDeCierreDeConversion = null;
+        let chartTasaDeCierreVentas = null;
 
         $(document).ready(function() {
             const btnBuscar = document.querySelector('#buscar');
@@ -146,6 +172,7 @@
             obtenerPromedioVentas();
             obtenerTasaUtilidadProspectos();
             obtenerTiempoDeCierreDeConversion();
+            obtenerTasaConvertido();
 
 
             btnBuscar.addEventListener('click', function() {
@@ -153,7 +180,8 @@
                 Promise.all([
                     obtenerPromedioVentas(),
                     obtenerTasaUtilidadProspectos(),
-                    obtenerTiempoDeCierreDeConversion()
+                    obtenerTiempoDeCierreDeConversion(),
+                    obtenerTasaConvertido(),
                 ]).then().catch().finally(() => {
                     btnBuscar.removeAttribute('disabled');
                 });
@@ -166,236 +194,317 @@
         /* -------------------------------------------------------------------------- */
 
         async function obtenerPromedioVentas() {
-            const body = {
-                _token: '{{ csrf_token() }}',
-                vendedor: $('#filtroVendedores').val()
-            }
+            try {
+                const body = {
+                    _token: '{{ csrf_token() }}',
+                    vendedor: $('#filtroVendedores').val()
+                }
 
-            const fechas = validarFiltroFecha('YYYY-MM-DD 00:00:00', 'YYYY-MM-DD 23:59:59');
-            if (fechas) {
-                body.fecha_inicio = fechas.fecha_inicio;
-                body.fecha_fin = fechas.fecha_fin;
-            }
+                const fechas = validarFiltroFecha('YYYY-MM-DD 00:00:00', 'YYYY-MM-DD 23:59:59');
+                if (fechas) {
+                    body.fecha_inicio = fechas.fecha_inicio;
+                    body.fecha_fin = fechas.fecha_fin;
+                }
 
-            const {
-                data
-            } = await axios.post("{{ route('bitrix.promedio_ventas') }}", body)
+                const {
+                    data
+                } = await axios.post("{{ route('bitrix.promedio_ventas') }}", body)
 
 
-            const options = {
-                series: [{
-                    name: 'Promedio de ventas',
-                    data: data.data
-                }],
-                title: {
-                    text: 'Promedio de ventas',
-                    align: 'left'
-                },
-                chart: {
-                    type: 'bar',
-                    height: HEIGHT_CHART
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        horizontal: true,
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                xaxis: {
-                    categories: data.categories,
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return "$" + val;
+                const options = {
+                    series: [{
+                        name: 'Promedio de ventas',
+                        data: data.data
+                    }],
+                    title: {
+                        text: 'Promedio de ventas',
+                        align: 'left'
+                    },
+                    chart: {
+                        type: 'bar',
+                        height: HEIGHT_CHART
+                    },
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 4,
+                            horizontal: true,
                         }
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    textAnchor: 'start',
-                    style: {
-                        colors: ['#fff']
                     },
-                    formatter: function(val, opt) {
-                        return `$${val}`;
+                    dataLabels: {
+                        enabled: false
                     },
-                    offsetX: 0,
-                },
-            };
-
-            if (!chartPromedioVentas) {
-                chartPromedioVentas = new ApexCharts(document.querySelector('#promedioDeVentas'), options);
-                chartPromedioVentas.render();
-            } else {
-                chartPromedioVentas.updateOptions(options);
-            }
-
-        }
-
-        async function obtenerTasaUtilidadProspectos() {
-            const body = {
-                _token: '{{ csrf_token() }}',
-                vendedor: $('#filtroVendedores').val()
-            }
-
-            const fechas = validarFiltroFecha();
-            if (fechas) {
-                body.fecha_inicio = fechas.fecha_inicio;
-                body.fecha_fin = fechas.fecha_fin;
-            }
-
-            const {
-                data
-            } = await axios.post("{{ route('bitrix.tasa_utilidad_prospectos') }}", body);
-
-
-            const options = {
-                series: data.series,
-                chart: {
-                    type: 'bar',
-                    height: HEIGHT_CHART + 50,
-                    stacked: true,
-                },
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        dataLabels: {
-                            enable: true,
-                            total: {
-                                enabled: true,
-                                offsetX: -10,
-                                style: {
-                                    fontSize: '13px',
-                                    fontWeight: 900,
-                                    colors: ["#304758"]
-                                }
+                    xaxis: {
+                        categories: data.categories,
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return "$" + val;
                             }
                         }
                     },
-                },
-                colors: ['#dc3545', '#ffc107', '#28a745'],
-                stroke: {
-                    width: 1,
-                    colors: ['#fff']
-                },
-                title: {
-                    text: 'Tasa de utilidad de prospectos',
-                },
-                xaxis: {
-                    categories: data.categories,
-                    labels: {
-                        formatter: function(val) {
-                            return val + ""
-                        }
-                    }
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return val + ""
-                        }
-                    }
-                },
-                fill: {
-                    opacity: 1
-                },
-                legend: {
-                    position: 'top',
-                    horizontalAlign: 'right',
-                    offsetX: 0
+                    dataLabels: {
+                        enabled: true,
+                        textAnchor: 'start',
+                        style: {
+                            colors: ['#fff']
+                        },
+                        formatter: function(val, opt) {
+                            return `$${val}`;
+                        },
+                        offsetX: 0,
+                    },
+                };
+
+                if (!chartPromedioVentas) {
+                    chartPromedioVentas = new ApexCharts(document.querySelector('#promedioDeVentas'), options);
+                    chartPromedioVentas.render();
+                } else {
+                    chartPromedioVentas.updateOptions(options);
                 }
-            };
+            } catch (error) {
+                console.log(error);
+            }
+        }
 
-            document.getElementById('loaderUtilidadProsecto')?.remove();
+        async function obtenerTasaUtilidadProspectos() {
+            try {
+                const body = {
+                    _token: '{{ csrf_token() }}',
+                    vendedor: $('#filtroVendedores').val(),
+                    tipoBusqueda: obtenerTipodeBusqueda(),
+                }
 
-            if (!chartUtilidadProspectos) {
-                chartUtilidadProspectos = new ApexCharts(document.querySelector("#utilidadProspectos"), options);
-                chartUtilidadProspectos.render();
-            } else {
-                chartUtilidadProspectos.updateOptions(options);
+                const fechas = validarFiltroFecha();
+                if (fechas) {
+                    body.fecha_inicio = fechas.fecha_inicio;
+                    body.fecha_fin = fechas.fecha_fin;
+                }
+
+                const {
+                    data
+                } = await axios.post("{{ route('bitrix.tasa_utilidad_prospectos') }}", body);
+
+                const options = {
+                    series: data.series,
+                    chart: {
+                        type: 'bar',
+                        height: HEIGHT_CHART + 50,
+                        stacked: true,
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: true,
+                            dataLabels: {
+                                enable: true,
+                                total: {
+                                    enabled: true,
+                                    offsetX: 10,
+                                    style: {
+                                        fontSize: '13px',
+                                        fontWeight: 900,
+                                        colors: ["#304758"]
+                                    }
+                                }
+                            }
+                        },
+                    },
+                    colors: ['#dc3545', '#0d6efd'],
+                    stroke: {
+                        width: 1,
+                        colors: ['#fff']
+                    },
+                    title: {
+                        text: 'Tasa de utilidad de prospectos',
+                    },
+                    xaxis: {
+                        categories: data.categories,
+                        labels: {
+                            formatter: function(val) {
+                                return val + ""
+                            }
+                        }
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return val + ""
+                            }
+                        }
+                    },
+                    fill: {
+                        opacity: 1
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'right',
+                        offsetX: 0
+                    }
+                };
+
+                document.getElementById('loaderUtilidadProsecto')?.remove();
+
+                if (!chartUtilidadProspectos) {
+                    chartUtilidadProspectos = new ApexCharts(document.querySelector("#utilidadProspectos"), options);
+                    chartUtilidadProspectos.render();
+                } else {
+                    chartUtilidadProspectos.updateOptions(options);
+                }
+            } catch (error) {
+                console.log(error);
             }
         }
 
         async function obtenerTiempoDeCierreDeConversion() {
+            try {
+                const body = {
+                    _token: '{{ csrf_token() }}',
+                    vendedor: $('#filtroVendedores').val(),
+                    tipoBusqueda: obtenerTipodeBusqueda(),
+                }
 
-            const body = {
-                _token: '{{ csrf_token() }}',
-                vendedor: $('#filtroVendedores').val()
-            }
+                const fechas = validarFiltroFecha();
+                if (fechas) {
+                    body.fecha_inicio = fechas.fecha_inicio;
+                    body.fecha_fin = fechas.fecha_fin;
+                }
 
-            const fechas = validarFiltroFecha();
-            if (fechas) {
-                body.fecha_inicio = fechas.fecha_inicio;
-                body.fecha_fin = fechas.fecha_fin;
-            }
+                const {
+                    data
+                } = await axios.post("{{ route('bitrix.tiempo_de_conversion') }}", body);
 
-            const {
-                data
-            } = await axios.post("{{ route('bitrix.tiempo_de_conversion') }}", body);
-
-            const options = {
-                series: [{
-                    name: '',
-                    data: data.data
-                }],
-                dataLabels: {
-                    enabled: true,
-                    textAnchor: 'start',
-                    offsetY: 0,
-                    style: {
-                        fontSize: '14px',
-                        colors: ["#304758"]
+                const options = {
+                    series: [{
+                        name: '',
+                        data: data.data
+                    }],
+                    dataLabels: {
+                        enabled: true,
+                        textAnchor: 'start',
+                        offsetY: 0,
+                        style: {
+                            fontSize: '14px',
+                            colors: ["#304758"]
+                        },
+                        formatter: function(val, opt) {
+                            const dias = Math.floor(val / 24);
+                            const horas = val % 24;
+                            return `${dias} dias y ${horas.toFixed(2)} horas`;
+                        },
                     },
-                    formatter: function(val, opt) {
-                        const dias = Math.floor(val / 24);
-                        const horas = val % 24;
-                        return `${dias} dias y ${horas.toFixed(2)} horas`;
+                    xaxis: {
+                        categories: data.categories,
                     },
-                },
-                xaxis: {
-                    categories: data.categories,
-                },
-                yaxis: {
-                    labels: {
-                        show: true
-                    }
-                },
-                title: {
-                    text: 'Promedio de tiempo de conversión',
-                    align: 'left'
-                },
-                chart: {
-                    type: 'bar',
-                    height: HEIGHT_CHART
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 4,
-                        horizontal: true,
-                    }
-                },
-                colors: ['#00E396'],
-                tooltip: {
-                    y: {
-                        formatter: function(val) {
-                            return val + " horas"
+                    yaxis: {
+                        labels: {
+                            show: true
+                        }
+                    },
+                    title: {
+                        text: 'Promedio de tiempo de conversión',
+                        align: 'left'
+                    },
+                    chart: {
+                        type: 'bar',
+                        height: HEIGHT_CHART
+                    },
+                    plotOptions: {
+                        bar: {
+                            borderRadius: 4,
+                            horizontal: true,
+                        }
+                    },
+                    colors: ['#00E396'],
+                    tooltip: {
+                        y: {
+                            formatter: function(val) {
+                                return val + " horas"
+                            }
                         }
                     }
+                };
+
+                if (!chartTiempoDeCierreDeConversion) {
+                    chartTiempoDeCierreDeConversion = new ApexCharts(document.querySelector(
+                            "#tiempoDeCierreDeConversion"),
+                        options);
+                    chartTiempoDeCierreDeConversion.render();
+                } else {
+                    chartTiempoDeCierreDeConversion.updateOptions(options);
                 }
-            };
-
-            if (!chartTiempoDeCierreDeConversion) {
-                chartTiempoDeCierreDeConversion = new ApexCharts(document.querySelector("#tiempoDeCierreDeConversion"),
-                    options);
-                chartTiempoDeCierreDeConversion.render();
-            } else {
-                chartTiempoDeCierreDeConversion.updateOptions(options);
+            } catch (error) {
+                console.log(error);
             }
+        }
 
+        async function obtenerTasaConvertido() {
+            try {
+                const body = {
+                    _token: '{{ csrf_token() }}',
+                    vendedor: $('#filtroVendedores').val(),
+                    tipoBusqueda: obtenerTipodeBusqueda(),
+                }
+
+                const fechas = validarFiltroFecha();
+                if (fechas) {
+                    body.fecha_inicio = fechas.fecha_inicio;
+                    body.fecha_fin = fechas.fecha_fin;
+                }
+
+                const {
+                    data
+                } = await axios.post("{{ route('bitrix.tasa_conversion_prospectos') }}", body);
+
+                var options = {
+                    series: data.series,
+                    chart: {
+                        type: 'bar',
+                        height: HEIGHT_CHART + 50,
+                        stacked: true,
+                    },
+                    stroke: {
+                        width: 1,
+                        colors: ['#fff']
+                    },
+                    dataLabels: {
+                        formatter: (val) => {
+                            return val
+                        }
+                    },
+                    plotOptions: {
+                        bar: {
+                            horizontal: true
+                        }
+                    },
+                    xaxis: {
+                        categories: data.categories,
+                        labels: {
+                            formatter: (val) => {
+                                return val
+                            }
+                        }
+                    },
+                    fill: {
+                        opacity: 1,
+                    },
+                    legend: {
+                        position: 'top',
+                        horizontalAlign: 'left'
+                    }
+                };
+
+                document.getElementById('loaderTasaConversion')?.remove();
+
+                if (!chartTasaDeCierreVentas) {
+                    const chartTasaDeCierreVentas = new ApexCharts(document.querySelector("#tasaDeCierreVentas"),
+                        options);
+                    chartTasaDeCierreVentas.render();
+                } else {
+                    chartTasaDeCierreVentas.updateOptions(options);
+                }
+            } catch (error) {
+                console.log(error);
+            }
         }
 
         /* -------------------------------------------------------------------------- */
@@ -418,6 +527,14 @@
                 fecha_inicio: moment(fecha[0], 'DD-MM-YYYY').format(format1),
                 fecha_fin: moment(fecha[1], 'DD-MM-YYYY').format(format2),
             }
+        }
+
+        function obtenerTipodeBusqueda() {
+            const tipos = [...document.querySelectorAll('input[name="tipoFecha"]')];
+
+            const tipo = tipos.find(tipo => tipo.checked);
+
+            return tipo.value;
         }
     </script>
 @endsection

@@ -102,13 +102,17 @@ class BitrixController extends Controller
             ];
 
             if ($request->fecha_inicio && $request->fecha_fin) {
-                $filter['>=DATE_CREATE'] = $request->fecha_inicio;
-                $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                if ($request->tipoBusqueda === "created") {
+                    $filter['>=DATE_CREATE'] = $request->fecha_inicio;
+                    $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                } else {
+                    $filter['>=DATE_CLOSED'] = $request->fecha_inicio;
+                    $filter['<=DATE_CLOSED'] = $request->fecha_fin;
+                }
             }
 
             $estados = [
                 $this->STATUS_BITRIX['ASIGNADO_RESPONSABLE'],
-                $this->STATUS_BITRIX['CONVERTIDO'],
                 $this->STATUS_BITRIX['COTIZACION'],
                 $this->STATUS_BITRIX['DEMOSTRACION'],
                 $this->STATUS_BITRIX['LLAMADA'],
@@ -130,10 +134,6 @@ class BitrixController extends Controller
                         'name' => 'Utiles',
                         'data' => [],
                     ],
-                    [
-                        'name' => 'Convertidos',
-                        'data' => [],
-                    ]
                 ],
                 'categories' => [],
             ];
@@ -152,14 +152,9 @@ class BitrixController extends Controller
                     return $pros->STATUS_ID !== $this->STATUS_BITRIX['NO_UTIL'];
                 })->count();
 
-                $convertidos = $prospectos->filter(function ($pros) {
-                    return $pros->STATUS_ID === $this->STATUS_BITRIX['CONVERTIDO'];
-                })->count();
-
                 array_push($datosChart['categories'], $vendedor->nombres);
                 array_push($datosChart['series'][0]['data'], $invalidos);
                 array_push($datosChart['series'][1]['data'], $validos);
-                array_push($datosChart['series'][2]['data'], $convertidos);
             }
 
             return response($datosChart, 200, ['Content-Type' => 'application/json']);
@@ -177,8 +172,13 @@ class BitrixController extends Controller
             ];
 
             if ($request->fecha_inicio && $request->fecha_fin) {
-                $filter['>=DATE_CREATE'] = $request->fecha_inicio;
-                $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                if ($request->tipoBusqueda === "created") {
+                    $filter['>=DATE_CREATE'] = $request->fecha_inicio;
+                    $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                } else {
+                    $filter['>=DATE_CLOSED'] = $request->fecha_inicio;
+                    $filter['<=DATE_CLOSED'] = $request->fecha_fin;
+                }
             }
 
 
@@ -219,6 +219,81 @@ class BitrixController extends Controller
             dd($th);
         }
     }
+
+    public function obtener_tasa_de_conversion(Request $request)
+    {
+        try {
+            $filter = [
+                "CLOSED" => "Y",
+                'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
+            ];
+
+            if ($request->fecha_inicio && $request->fecha_fin) {
+                if ($request->tipoBusqueda === "created") {
+                    $filter['>=DATE_CREATE'] = $request->fecha_inicio;
+                    $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                } else {
+                    $filter['>=CLOSEDATE'] = $request->fecha_inicio;
+                    $filter['<=CLOSEDATE'] = $request->fecha_fin;
+                }
+            }
+
+            $listadoNegociaciones = $this->obtener_todas_negociaciones($filter);
+            $negociacionesAgrupadas = $listadoNegociaciones->groupBy('ASSIGNED_BY_ID');
+
+            $datosChart = [
+                "series" => [
+                    [
+                        "name" => 'Leads convertidos',
+                        "group" => 'convertidos',
+                        "data" => []
+                    ],
+                    [
+                        "name" => 'Negociaciones ganadas',
+                        "group" => 'negociaciones',
+                        "data" => []
+                    ]
+                ],
+                "categories" => []
+            ];
+
+            foreach ($negociacionesAgrupadas as $key => $negociaciones) {
+                $vendedor = User::select('nombres', 'usuariosid', 'bitrix_id')->firstWhere('bitrix_id', $key);
+
+                if (!$vendedor) continue;
+
+                $filterAux = [
+                    "ASSIGNED_BY_ID" => $key,
+                    "STATUS_ID" => $this->STATUS_BITRIX['CONVERTIDO'],
+                ];
+
+                if ($request->fecha_inicio && $request->fecha_fin) {
+                    if ($request->tipoBusqueda === "created") {
+                        $filterAux['>=DATE_CREATE'] = $request->fecha_inicio;
+                        $filterAux['<=DATE_CREATE'] = $request->fecha_fin;
+                    } else {
+                        $filterAux['>=DATE_CLOSED'] = $request->fecha_inicio;
+                        $filterAux['<=DATE_CLOSED'] = $request->fecha_fin;
+                    }
+                }
+
+                $numeroConvertidos = $this->obtener_prospectos($filterAux)->total;
+                $numeroNegociaciones = $negociaciones->count();
+
+                array_push($datosChart['categories'], $vendedor->nombres);
+                array_push($datosChart['series'][0]['data'], $numeroConvertidos);
+                array_push($datosChart['series'][1]['data'], $numeroNegociaciones);
+            }
+
+            return response($datosChart, 200, ['Content-Type' => 'application/json']);
+        } catch (\Throwable $th) {
+            dd($th);
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             Funciones genericas                            */
+    /* -------------------------------------------------------------------------- */
 
     private function obtener_prospectos($filter = [], $other = [])
     {
@@ -307,6 +382,69 @@ class BitrixController extends Controller
         }
 
         return $ASSIGNED_BY_ID;
+    }
+
+    private function obtener_negociaciones($filter = [], $other = [])
+    {
+        $client = new Client();
+
+        $body = [
+            'order' => [
+                'ID' => 'ASC'
+            ],
+            'filter' => $filter,
+            'start' => 1,
+            ...$other
+        ];
+
+        try {
+            $response = $client->post($this->urlBit . '/crm.deal.list', [
+                'json' => $body
+            ]);
+            $data = $response->getBody()->getContents();
+            return json_decode($data);
+        } catch (\Exception $e) {
+            dd($e);
+        }
+    }
+
+    private function obtener_todas_negociaciones($filter = [], $other = [])
+    {
+        $client = new Client();
+        $prospectos = collect([]);
+        $band = true;
+        $body = [
+            'order' => [
+                'ID' => 'ASC'
+            ],
+            'filter' => $filter,
+            'start' => 0,
+            ...$other
+        ];
+
+        try {
+            do {
+                $response = $client->post($this->urlBit . '/crm.deal.list', [
+                    'json' => $body
+                ]);
+                $data = $response->getBody()->getContents();
+                $data = json_decode($data);
+
+                if (isset($data->result)) {
+                    $prospectos = $prospectos->merge($data->result);
+                }
+
+                if (isset($data->next)) {
+                    $body['start'] = $data->next;
+                } else {
+                    $band = false;
+                }
+            } while ($band);
+
+            return $prospectos;
+        } catch (\Exception $e) {
+            dd($e);
+        }
     }
 
     private function calcular_diferencia_fechas($prospecto)
