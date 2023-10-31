@@ -285,6 +285,10 @@
                     data
                 } = await axios.post("{{ route('bitrix.tasa_utilidad_prospectos') }}", body);
 
+                const totalNoUtiles = data.series[0].data?.reduce((a, b) => a + b, 0);
+                const totalUtiles = data.series[1].data?.reduce((a, b) => a + b, 0);
+                const totalProspectos = totalNoUtiles + totalUtiles;
+
                 const options = {
                     series: data.series,
                     chart: {
@@ -338,7 +342,17 @@
                     legend: {
                         position: 'top',
                         horizontalAlign: 'right',
-                        offsetX: 0
+                        offsetX: 0,
+                        fontSize: '14px',
+                        formatter: function(seriesName, opts) {
+                            if (seriesName == "Utiles") {
+                                const porcentaje = ((totalUtiles * 100) / totalProspectos).toFixed(2);
+                                return [seriesName, ' ', porcentaje + "%"]
+                            } else {
+                                const porcentaje = ((totalNoUtiles * 100) / totalProspectos).toFixed(2);
+                                return [seriesName, ' ', porcentaje + "%"]
+                            }
+                        },
                     }
                 };
 
@@ -406,7 +420,7 @@
                     },
                     chart: {
                         type: 'bar',
-                        height: HEIGHT_CHART
+                        height: HEIGHT_CHART,
                     },
                     plotOptions: {
                         bar: {
@@ -490,7 +504,11 @@
                     legend: {
                         position: 'top',
                         horizontalAlign: 'left'
-                    }
+                    },
+                    title: {
+                        text: 'Ratio de conversion de clientes',
+                        align: 'left'
+                    },
                 };
 
                 document.getElementById('loaderTasaConversion')?.remove();
