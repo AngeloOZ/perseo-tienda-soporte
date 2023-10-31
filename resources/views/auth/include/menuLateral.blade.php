@@ -96,7 +96,7 @@
                         </li>
                         <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                             <a href="{{ route('bitrix.list') }}" class="menu-link">
-                                <i class="menu-icon fas fa-file-invoice"></i>
+                                <i class="menu-icon fas fa-chart-area"></i>
                                 <span class="menu-text">Mis estadisticas</span>
                             </a>
                         </li>
@@ -105,7 +105,7 @@
                 {{-- @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                         <a href="{{ route('bitrix.list') }}" class="menu-link">
-                            <i class="menu-icon fas fa-file-invoice"></i>
+                            <i class="menu-icon fas fa-chart-area"></i>
                             <span class="menu-text">Mis estadisticas</span>
                         </a>
                     </li>
@@ -137,7 +137,7 @@
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                         <a href="{{ route('bitrix.list') }}" class="menu-link">
-                            <i class="menu-icon fas fa-file-invoice"></i>
+                            <i class="menu-icon fas fa-chart-area"></i>
                             <span class="menu-text">Estadisticas</span>
                         </a>
                     </li>
