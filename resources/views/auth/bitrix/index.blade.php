@@ -44,7 +44,7 @@
                                             <label for="">Fecha</label>
                                             <input type="text" id="filtroFecha" class="form-control">
                                         </div>
-                                        <div class="col-12 mb-2 col-md-2 mb-md-0">
+                                        <div class="col-12 mb-2 col-md-2 mb-md-0 d-none">
                                             <label>Tipo de busqueda</label>
                                             <div class="radio-list">
                                                 <label class="radio">
@@ -169,19 +169,19 @@
             });
 
             inicializarFecha();
-            obtenerPromedioVentas();
             obtenerTasaUtilidadProspectos();
-            obtenerTiempoDeCierreDeConversion();
             obtenerTasaConvertido();
+            obtenerPromedioVentas();
+            obtenerTiempoDeCierreDeConversion();
 
 
             btnBuscar.addEventListener('click', function() {
                 btnBuscar.setAttribute('disabled', 'enable');
                 Promise.all([
-                    obtenerPromedioVentas(),
                     obtenerTasaUtilidadProspectos(),
-                    obtenerTiempoDeCierreDeConversion(),
                     obtenerTasaConvertido(),
+                    obtenerTiempoDeCierreDeConversion(),
+                    obtenerPromedioVentas(),
                 ]).then().catch().finally(() => {
                     btnBuscar.removeAttribute('disabled');
                 });
@@ -496,7 +496,7 @@
                 document.getElementById('loaderTasaConversion')?.remove();
 
                 if (!chartTasaDeCierreVentas) {
-                    const chartTasaDeCierreVentas = new ApexCharts(document.querySelector("#tasaDeCierreVentas"),
+                    chartTasaDeCierreVentas = new ApexCharts(document.querySelector("#tasaDeCierreVentas"),
                         options);
                     chartTasaDeCierreVentas.render();
                 } else {

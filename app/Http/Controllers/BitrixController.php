@@ -7,6 +7,7 @@ use App\Models\Factura;
 use App\Models\User;
 use DateTime;
 use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,7 +28,6 @@ class BitrixController extends Controller
 
     public function index()
     {
-
         $vendedores = User::select('usuariosid', 'nombres', 'bitrix_id')
             ->where('rol', 1)
             ->where('distribuidoresid', Auth::user()->distribuidoresid)
@@ -181,13 +181,13 @@ class BitrixController extends Controller
                 }
             }
 
-
             $prospectos = $this->obtener_todos_prospectos($filter);
             $prospectosAgrupados = $prospectos->groupBy('ASSIGNED_BY_ID');
             $estadisticaVendedores = [];
 
             $prospectosAgrupados->each(function ($leads, $key) use (&$estadisticaVendedores) {
                 $totalHoras = 0;
+
                 $leads->each(function ($prospecto) use (&$totalHoras) {
                     $horas = $this->calcular_diferencia_fechas($prospecto);
                     $totalHoras += $horas;
@@ -325,7 +325,7 @@ class BitrixController extends Controller
     {
         $client = new Client();
         $prospectos = collect([]);
-        $band = true;
+        $promises = [];
         $body = [
             'order' => [
                 'ID' => 'ASC'
@@ -337,24 +337,27 @@ class BitrixController extends Controller
         ];
 
         try {
-            do {
-                $response = $client->post($this->urlBit . '/crm.lead.list', [
-                    'json' => $body
-                ]);
-                $data = $response->getBody()->getContents();
-                $data = json_decode($data);
+            $initialProps = $this->obtener_prospectos($filter);
+            $prospectos = $prospectos->merge($initialProps->result);
 
-                if (isset($data->result)) {
+            $startIndex = $initialProps->next ?? null;
+            $perPage = count($initialProps->result);
+            $total = $initialProps->total;
+            $totalPages = ceil($total / $perPage);
+
+            if ($startIndex != null) {
+                for ($i = 1; $i < $totalPages; $i++) {
+                    $body['start'] = $startIndex + ($perPage * $i);
+                    $promises[] = $client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
+                }
+                $results = Promise\Utils::all($promises);
+                $results = $results->wait();
+
+                foreach ($results as $result) {
+                    $data = json_decode($result->getBody()->getContents());
                     $prospectos = $prospectos->merge($data->result);
                 }
-
-                if (isset($data->next)) {
-                    $body['start'] = $data->next;
-                } else {
-                    $band = false;
-                }
-            } while ($band);
-
+            }
             return $prospectos;
         } catch (\Exception $e) {
             dd($e);
@@ -411,8 +414,7 @@ class BitrixController extends Controller
     private function obtener_todas_negociaciones($filter = [], $other = [])
     {
         $client = new Client();
-        $prospectos = collect([]);
-        $band = true;
+        $negociaciones = collect([]);
         $body = [
             'order' => [
                 'ID' => 'ASC'
@@ -423,25 +425,30 @@ class BitrixController extends Controller
         ];
 
         try {
-            do {
-                $response = $client->post($this->urlBit . '/crm.deal.list', [
-                    'json' => $body
-                ]);
-                $data = $response->getBody()->getContents();
-                $data = json_decode($data);
+            $initialNegot = $this->obtener_negociaciones($filter);
+            $negociaciones = $negociaciones->merge($initialNegot->result);
 
-                if (isset($data->result)) {
-                    $prospectos = $prospectos->merge($data->result);
+            $startIndex = $initialNegot->next ?? null;
+            $perPage = count($initialNegot->result);
+            $total = $initialNegot->total;
+            $totalPages = ceil($total / $perPage);
+
+            if ($startIndex != null) {
+                for ($i = 1; $i < $totalPages; $i++) {
+                    $body['start'] = $startIndex + ($perPage * $i);
+                    $promises[] = $client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
                 }
 
-                if (isset($data->next)) {
-                    $body['start'] = $data->next;
-                } else {
-                    $band = false;
-                }
-            } while ($band);
+                $results = Promise\Utils::all($promises);
+                $results = $results->wait();
 
-            return $prospectos;
+                foreach ($results as $result) {
+                    $data = json_decode($result->getBody()->getContents());
+                    $negociaciones = $negociaciones->merge($data->result);
+                }
+            }
+
+            return $negociaciones;
         } catch (\Exception $e) {
             dd($e);
         }
