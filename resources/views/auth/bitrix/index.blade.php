@@ -287,7 +287,7 @@
 
                 const totalNoUtiles = data.series[0].data?.reduce((a, b) => a + b, 0);
                 const totalUtiles = data.series[1].data?.reduce((a, b) => a + b, 0);
-                const totalProspectos = totalNoUtiles + totalUtiles;
+                const totalProspectos = (totalNoUtiles + totalUtiles) == 0 ? 1 : (totalNoUtiles + totalUtiles);
 
                 const options = {
                     series: data.series,
@@ -525,7 +525,7 @@
 
                                 if (seriesName == 'Leads convertidos') {
                                     const key = opt.w.globals.labels[opt.dataPointIndex];
-                                    return val + " ≈ "+data.porcentaje[key] + '%';
+                                    return val + " ≈ " + data.porcentaje[key] + '%';
                                 }
                                 return val;
                             }
@@ -553,7 +553,7 @@
 
         function inicializarFecha() {
             $("#filtroFecha").val(
-            `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
+                `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
         }
 
         function validarFiltroFecha(format1 = 'YYYY-MM-DD', format2 = 'YYYY-MM-DD') {

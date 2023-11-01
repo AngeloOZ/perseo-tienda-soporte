@@ -188,8 +188,8 @@ class BitrixController extends Controller
                     $horas = $this->calcular_diferencia_fechas($prospecto);
                     $totalHoras += $horas;
                 });
-
-                $promedioHoras = $totalHoras / $leads->count();
+                $numeroProspectos = $leads->count() == 0 ? 1 : $leads->count();
+                $promedioHoras = $totalHoras / $numeroProspectos;
                 $promedioHoras = floatval(number_format($promedioHoras, 2));
 
                 $newData = [
@@ -281,7 +281,7 @@ class BitrixController extends Controller
                 $datos = $this->beta_obtener_datos_utilidad($filterAux, $sendRequest);
 
                 $numeroConvertidos = $datos['convertido']->total;
-                $numeroUtiles = $datos['utiles']->total;
+                $numeroUtiles = $datos['utiles']->total == 0 ? 1 : $datos['utiles']->total;
                 $numeroNegociaciones = $negociaciones->count();
 
                 $porcentajeConvertidos = ($numeroConvertidos / $numeroUtiles) * 100;
@@ -408,7 +408,7 @@ class BitrixController extends Controller
             $prospectos = $prospectos->merge($initialProps->result);
 
             $startIndex = $initialProps->next ?? null;
-            $perPage = count($initialProps->result);
+            $perPage = count($initialProps->result) == 0 ? 1 : count($initialProps->result);
             $total = $initialProps->total;
             $totalPages = ceil($total / $perPage);
 
@@ -496,7 +496,7 @@ class BitrixController extends Controller
             $negociaciones = $negociaciones->merge($initialNegot->result);
 
             $startIndex = $initialNegot->next ?? null;
-            $perPage = count($initialNegot->result);
+            $perPage = count($initialNegot->result) == 0 ? 1 : count($initialNegot->result);
             $total = $initialNegot->total;
             $totalPages = ceil($total / $perPage);
 
