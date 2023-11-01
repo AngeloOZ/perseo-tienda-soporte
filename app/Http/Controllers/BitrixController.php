@@ -318,10 +318,7 @@ class BitrixController extends Controller
             'order' => [
                 'ID' => 'ASC'
             ],
-            'filter' => [
-                "STATUS_ID" => $this->STATUS_BITRIX['CONVERTIDO'],
-                ...$filter,
-            ],
+            'filter' => $filter,
             'select' => ['ID', 'TITLE', 'OPPORTUNITY', 'PHONE', 'HAS_MAIL', 'EMAIL', 'STATUS_ID', 'DATE_CREATE', 'DATE_CLOSED', 'ASSIGNED_BY_ID'],
             'start' => 1,
         ];
@@ -329,6 +326,7 @@ class BitrixController extends Controller
         try {
 
             if ($sendRequest['convertido']) {
+                $body['filter']['STATUS_ID'] = $this->STATUS_BITRIX['CONVERTIDO'];
                 $promises['convertido'] = $this->client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
             }
 
