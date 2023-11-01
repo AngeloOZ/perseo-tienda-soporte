@@ -26,6 +26,13 @@ class BitrixController extends Controller
         "WHATSAPP" => 'PROCESSED',
     ];
 
+    private $client;
+
+    public function __construct()
+    {
+        $this->client = new Client();
+    }
+
     public function index()
     {
         $vendedores = User::select('usuariosid', 'nombres', 'bitrix_id')
@@ -97,33 +104,7 @@ class BitrixController extends Controller
     public function obtener_tasa_utilidad_prospectos(Request $request)
     {
         try {
-            $filter = [
-                'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
-            ];
-
-            if ($request->fecha_inicio && $request->fecha_fin) {
-                if ($request->tipoBusqueda === "created") {
-                    $filter['>=DATE_CREATE'] = $request->fecha_inicio;
-                    $filter['<=DATE_CREATE'] = $request->fecha_fin;
-                } else {
-                    $filter['>=DATE_CLOSED'] = $request->fecha_inicio;
-                    $filter['<=DATE_CLOSED'] = $request->fecha_fin;
-                }
-            }
-
-            $estados = [
-                $this->STATUS_BITRIX['ASIGNADO_RESPONSABLE'],
-                $this->STATUS_BITRIX['COTIZACION'],
-                $this->STATUS_BITRIX['DEMOSTRACION'],
-                $this->STATUS_BITRIX['LLAMADA'],
-                $this->STATUS_BITRIX['WHATSAPP'],
-                $this->STATUS_BITRIX['NO_UTIL'],
-            ];
-
-            $filter['STATUS_ID'] = $estados;
-
-            $prospectosValidos = $this->obtener_todos_prospectos($filter);
-            $prospectosAgrupadosPorVendedor = $prospectosValidos->groupBy('ASSIGNED_BY_ID');
+            $filter = [];
             $datosChart = [
                 'series' => [
                     [
@@ -137,20 +118,32 @@ class BitrixController extends Controller
                 ],
                 'categories' => [],
             ];
+            $sendRequest = [
+                'convertido' => false,
+                'no_util' => true,
+                'utiles' => true,
+            ];
 
-            foreach ($prospectosAgrupadosPorVendedor as $key => $prospectos) {
+            if ($request->fecha_inicio && $request->fecha_fin) {
+                if ($request->tipoBusqueda === "created") {
+                    $filter['>=DATE_CREATE'] = $request->fecha_inicio;
+                    $filter['<=DATE_CREATE'] = $request->fecha_fin;
+                } else {
+                    $filter['>=DATE_CLOSED'] = $request->fecha_inicio;
+                    $filter['<=DATE_CLOSED'] = $request->fecha_fin;
+                }
+            }
 
-                $vendedor = User::select('nombres', 'usuariosid', 'bitrix_id')->firstWhere('bitrix_id', $key);
+            foreach ($this->obtener_id_asignados($request->vendedor) as $bitrixId) {
+                $vendedor = User::select('nombres', 'usuariosid', 'bitrix_id')->firstWhere('bitrix_id', $bitrixId);
 
                 if (!$vendedor) continue;
 
-                $invalidos = $prospectos->filter(function ($pros) {
-                    return $pros->STATUS_ID === $this->STATUS_BITRIX['NO_UTIL'];
-                })->count();
+                $filter['ASSIGNED_BY_ID'] = $bitrixId;
+                $datos = $this->beta_obtener_datos_utilidad($filter, $sendRequest);
 
-                $validos = $prospectos->filter(function ($pros) {
-                    return $pros->STATUS_ID !== $this->STATUS_BITRIX['NO_UTIL'];
-                })->count();
+                $invalidos = $datos['no_util']->total;
+                $validos = $datos['utiles']->total;
 
                 array_push($datosChart['categories'], $vendedor->nombres);
                 array_push($datosChart['series'][0]['data'], $invalidos);
@@ -167,7 +160,6 @@ class BitrixController extends Controller
     {
         try {
             $filter = [
-                'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
                 'STATUS_ID' => $this->STATUS_BITRIX['CONVERTIDO'],
             ];
 
@@ -181,8 +173,12 @@ class BitrixController extends Controller
                 }
             }
 
-            $prospectos = $this->obtener_todos_prospectos($filter);
-            $prospectosAgrupados = $prospectos->groupBy('ASSIGNED_BY_ID');
+            $prospectosAgrupados = collect([]);
+            foreach ($this->obtener_id_asignados($request->vendedor) as $bitrixId) {
+                $filter['ASSIGNED_BY_ID'] = $bitrixId;
+                $prospectosAgrupados[$bitrixId] = $this->obtener_todos_prospectos($filter);
+            }
+
             $estadisticaVendedores = [];
 
             $prospectosAgrupados->each(function ($leads, $key) use (&$estadisticaVendedores) {
@@ -227,6 +223,22 @@ class BitrixController extends Controller
                 "CLOSED" => "Y",
                 'ASSIGNED_BY_ID' => $this->obtener_id_asignados($request->vendedor),
             ];
+            $datosChart = [
+                "series" => [
+                    [
+                        "name" => 'Leads convertidos',
+                        "group" => 'convertidos',
+                        "data" => []
+                    ],
+                    [
+                        "name" => 'Negociaciones ganadas',
+                        "group" => 'negociaciones',
+                        "data" => []
+                    ]
+                ],
+                "porcentaje" => [],
+                "categories" => []
+            ];
 
             if ($request->fecha_inicio && $request->fecha_fin) {
                 if ($request->tipoBusqueda === "created") {
@@ -241,22 +253,6 @@ class BitrixController extends Controller
             $listadoNegociaciones = $this->obtener_todas_negociaciones($filter);
             $negociacionesAgrupadas = $listadoNegociaciones->groupBy('ASSIGNED_BY_ID');
 
-            $datosChart = [
-                "series" => [
-                    [
-                        "name" => 'Leads convertidos',
-                        "group" => 'convertidos',
-                        "data" => []
-                    ],
-                    [
-                        "name" => 'Negociaciones ganadas',
-                        "group" => 'negociaciones',
-                        "data" => []
-                    ]
-                ],
-                "categories" => []
-            ];
-
             foreach ($negociacionesAgrupadas as $key => $negociaciones) {
                 $vendedor = User::select('nombres', 'usuariosid', 'bitrix_id')->firstWhere('bitrix_id', $key);
 
@@ -264,7 +260,12 @@ class BitrixController extends Controller
 
                 $filterAux = [
                     "ASSIGNED_BY_ID" => $key,
-                    "STATUS_ID" => $this->STATUS_BITRIX['CONVERTIDO'],
+                ];
+
+                $sendRequest = [
+                    'convertido' => true,
+                    'utiles' => true,
+                    'no_util' => false,
                 ];
 
                 if ($request->fecha_inicio && $request->fecha_fin) {
@@ -277,9 +278,16 @@ class BitrixController extends Controller
                     }
                 }
 
-                $numeroConvertidos = $this->obtener_prospectos($filterAux)->total;
+                $datos = $this->beta_obtener_datos_utilidad($filterAux, $sendRequest);
+
+                $numeroConvertidos = $datos['convertido']->total;
+                $numeroUtiles = $datos['utiles']->total;
                 $numeroNegociaciones = $negociaciones->count();
 
+                $porcentajeConvertidos = ($numeroConvertidos / $numeroUtiles) * 100;
+                $porcentajeConvertidos = floatval(number_format($porcentajeConvertidos, 2));
+
+                $datosChart['porcentaje'][$vendedor->nombres] = $porcentajeConvertidos;
                 array_push($datosChart['categories'], $vendedor->nombres);
                 array_push($datosChart['series'][0]['data'], $numeroConvertidos);
                 array_push($datosChart['series'][1]['data'], $numeroNegociaciones);
@@ -294,6 +302,65 @@ class BitrixController extends Controller
     /* -------------------------------------------------------------------------- */
     /*                             Funciones genericas                            */
     /* -------------------------------------------------------------------------- */
+
+    private function beta_obtener_datos_utilidad($filter = [], $sendRequest = null)
+    {
+        if ($sendRequest == null) {
+            $sendRequest = [
+                'convertido' => true,
+                'no_util' => true,
+                'utiles' => true,
+            ];
+        }
+
+        $promises = [];
+        $body = [
+            'order' => [
+                'ID' => 'ASC'
+            ],
+            'filter' => [
+                ...$filter,
+                "STATUS_ID" => $this->STATUS_BITRIX['CONVERTIDO'],
+            ],
+            'select' => ['ID', 'TITLE', 'OPPORTUNITY', 'PHONE', 'HAS_MAIL', 'EMAIL', 'STATUS_ID', 'DATE_CREATE', 'DATE_CLOSED', 'ASSIGNED_BY_ID'],
+            'start' => 1,
+        ];
+
+        try {
+
+            if ($sendRequest['convertido']) {
+                $promises['convertido'] = $this->client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
+            }
+
+            if ($sendRequest['no_util']) {
+                $body['filter']['STATUS_ID'] = $this->STATUS_BITRIX['NO_UTIL'];
+                $promises['no_util'] = $this->client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
+            }
+
+            if ($sendRequest['utiles']) {
+                $body['filter']['STATUS_ID'] = [
+                    $this->STATUS_BITRIX['ASIGNADO_RESPONSABLE'],
+                    $this->STATUS_BITRIX['COTIZACION'],
+                    $this->STATUS_BITRIX['DEMOSTRACION'],
+                    $this->STATUS_BITRIX['LLAMADA'],
+                    $this->STATUS_BITRIX['WHATSAPP'],
+                    $this->STATUS_BITRIX['CONVERTIDO'],
+                ];
+                $promises['utiles'] = $this->client->postAsync($this->urlBit . '/crm.lead.list', ['json' => $body]);
+            }
+
+            $results = Promise\Utils::all($promises)->wait();
+
+            $data = [];
+            foreach ($results as $key => $result) {
+                $data[$key] = json_decode($result->getBody()->getContents());
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            dd($e);
+        }
+    }
 
     private function obtener_prospectos($filter = [], $other = [])
     {

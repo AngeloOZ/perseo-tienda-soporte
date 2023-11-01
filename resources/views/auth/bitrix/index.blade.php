@@ -303,9 +303,9 @@
                                 enable: true,
                                 total: {
                                     enabled: true,
-                                    offsetX: 10,
+                                    offsetX: 0,
                                     style: {
-                                        fontSize: '13px',
+                                        fontSize: '12px',
                                         fontWeight: 900,
                                         colors: ["#304758"]
                                     }
@@ -469,6 +469,7 @@
                     data
                 } = await axios.post("{{ route('bitrix.tasa_conversion_prospectos') }}", body);
 
+
                 var options = {
                     series: data.series,
                     chart: {
@@ -481,14 +482,22 @@
                         colors: ['#fff']
                     },
                     dataLabels: {
-                        formatter: (val) => {
-                            return val
+                        formatter: (val, opt) => {
+                            const seriesName = opt.w.config.series[opt.seriesIndex].name;
+
+                            // if (seriesName == 'Leads convertidos') {
+                            //     const keyLabel = opt.w.globals.labels[opt.dataPointIndex];
+                            //     return data.porcentaje[keyLabel] + '%';
+                            // }
+                            return val;
                         }
                     },
                     plotOptions: {
                         bar: {
-                            horizontal: true
-                        }
+                            horizontal: true,
+                            columnWidth: '90%',
+                            barHeight: '90%',
+                        },
                     },
                     xaxis: {
                         categories: data.categories,
@@ -503,11 +512,24 @@
                     },
                     legend: {
                         position: 'top',
-                        horizontalAlign: 'left'
+                        horizontalAlign: 'right'
                     },
                     title: {
                         text: 'Ratio de conversion de clientes',
                         align: 'left'
+                    },
+                    tooltip: {
+                        y: {
+                            formatter: function(val, opt) {
+                                const seriesName = opt.w.config.series[opt.seriesIndex].name;
+
+                                if (seriesName == 'Leads convertidos') {
+                                    const key = opt.w.globals.labels[opt.dataPointIndex];
+                                    return val + " ≈ "+data.porcentaje[key] + '%';
+                                }
+                                return val;
+                            }
+                        }
                     },
                 };
 
@@ -530,8 +552,9 @@
         /* -------------------------------------------------------------------------- */
 
         function inicializarFecha() {
-            $("#filtroFecha").val(
-                `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
+            // $("#filtroFecha").val(
+            // `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
+            $('#filtroFecha').val('01-10-2023 / 31-10-2023');
         }
 
         function validarFiltroFecha(format1 = 'YYYY-MM-DD', format2 = 'YYYY-MM-DD') {
