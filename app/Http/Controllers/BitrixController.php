@@ -319,8 +319,8 @@ class BitrixController extends Controller
                 'ID' => 'ASC'
             ],
             'filter' => [
-                ...$filter,
                 "STATUS_ID" => $this->STATUS_BITRIX['CONVERTIDO'],
+                ...$filter,
             ],
             'select' => ['ID', 'TITLE', 'OPPORTUNITY', 'PHONE', 'HAS_MAIL', 'EMAIL', 'STATUS_ID', 'DATE_CREATE', 'DATE_CLOSED', 'ASSIGNED_BY_ID'],
             'start' => 1,
