@@ -81,13 +81,35 @@
                                 <span class="menu-text">Mis comisiones</span>
                             </a>
                         </li>
+                        <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
+                            <a href="{{ route('bitrix.list') }}" class="menu-link">
+                                <i class="menu-icon fas fa-chart-area"></i>
+                                <span class="menu-text">Mis estadisticas</span>
+                            </a>
+                        </li>
                     @endif
                 @endif
+                {{-- @if (in_array(Auth::user()->rol, [1]))
+                    <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
+                        <a href="{{ route('bitrix.list') }}" class="menu-link">
+                            <i class="menu-icon fas fa-chart-area"></i>
+                            <span class="menu-text">Mis estadisticas</span>
+                        </a>
+                    </li>
+                @endif --}}
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['facturas.revisor']) }} " aria-haspopup="true">
                         <a href="{{ route('facturas.revisor') }}" class="menu-link">
-                            <i class="menu-icon fas fa-file-invoice-dollar"></i>
+                            <i class="menu-icon fas fa-file-invoice"></i>
                             <span class="menu-text">Listado de facturas</span>
+                        </a>
+                    </li>
+                @endif
+                @if (in_array(Auth::user()->rol, [2]))
+                    <li class="menu-item {{ areActiveRoutes(['facturas.porpagar']) }} " aria-haspopup="true">
+                        <a href="{{ route('facturas.porpagar') }}" class="menu-link">
+                            <i class="menu-icon fas fa-file-invoice-dollar"></i>
+                            <span class="menu-text">Listado de facturas por pagar</span>
                         </a>
                     </li>
                 @endif
@@ -96,6 +118,14 @@
                         <a href="{{ route('cobros.listado.revisor') }}" class="menu-link">
                             <i class="menu-icon fas fa-dollar-sign"></i>
                             <span class="menu-text">Listado de cobros</span>
+                        </a>
+                    </li>
+                @endif
+                @if (in_array(Auth::user()->rol, [2]))
+                    <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
+                        <a href="{{ route('bitrix.list') }}" class="menu-link">
+                            <i class="menu-icon fas fa-chart-area"></i>
+                            <span class="menu-text">Estadisticas</span>
                         </a>
                     </li>
                 @endif

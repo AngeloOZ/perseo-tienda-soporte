@@ -1004,22 +1004,33 @@ class FacturasController extends Controller
         return view('auth2.revisor_facturas.index');
     }
 
+    public function listado_revisor_por_pagar()
+    {
+        return view('auth2.revisor_facturas.porpagar');
+    }
+
     public function filtrado_listado_revisor(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado')
-                ->where('facturado', '=', 1)
-                ->where('estado_pago', '>=', 1)
-                ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor', 'facturas.fecha_creacion', 'facturas.fecha_actualizado', 'facturas.origen')
+                ->join('usuarios', 'usuarios.usuariosid', '=', 'facturas.usuariosid')
+                ->where('facturas.distribuidoresid', '=', Auth::user()->distribuidoresid)
+                ->where('facturas.facturado', 1)
                 ->when($request->pago, function ($query, $pago) {
-                    $query->where('estado_pago', $pago);
+                    if ($pago === "no") {
+                        return $query->where('facturas.estado_pago', 0);
+                    } else if ($pago == 3) {
+                        return $query->whereIn('facturas.estado_pago', [1, 2]);
+                    } else {
+                        return $query->where('facturas.estado_pago', $pago);
+                    }
                 })
                 ->when($request->liberado, function ($query, $liberado) {
                     switch ($liberado) {
                         case 1:
-                            return $query->where('liberado', 0);
+                            return $query->where('facturas.liberado', 0);
                         case 2:
-                            return $query->where('liberado', 1);
+                            return $query->where('facturas.liberado', 1);
                     }
                 })
                 ->when($request->fecha, function ($query, $fecha) {
@@ -1031,7 +1042,7 @@ class FacturasController extends Controller
                     $date2 = strtotime($dates[1] . ' +1 day -1 second');
                     $hasta = date('Y-m-d H:i:s', $date2);
 
-                    return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
+                    return $query->whereBetween('facturas.fecha_creacion', [$desde, $hasta]);
                 })
                 ->get();
 
@@ -1039,6 +1050,10 @@ class FacturasController extends Controller
                 ->editColumn('fecha_creacion', function ($fecha) {
                     $date = new DateTime($fecha->fecha_creacion);
                     return $date->format('d-m-Y');
+                })
+                ->editColumn('fecha_actualizado', function ($fecha) {
+                    $date = new DateTime($fecha->fecha_actualizado);
+                    return $date->format('d-m-Y H:i');
                 })
                 ->editColumn('estado', function ($estado) {
                     if ($estado->estado_pago == 0) {
@@ -1135,7 +1150,6 @@ class FacturasController extends Controller
             }
 
             $cliente = $this->crear_cliente($vendedor, $factura);
-            // dd($cliente);
 
             $resp = $this->crear_factura($factura, $cliente["cliente"], $cliente["vendedor"]);
 
@@ -1380,6 +1394,7 @@ class FacturasController extends Controller
 
             try {
                 $factura->productos = json_encode($productos);
+                $factura->total_venta = round($valoresFactura["total"], 2);
                 $factura->save();
             } catch (\Throwable $th) {
             }

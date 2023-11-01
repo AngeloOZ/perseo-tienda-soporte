@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\adminController;
+use App\Http\Controllers\BitrixController;
 use App\Http\Controllers\CiudadesController;
 use App\Http\Controllers\CobrosController;
 use App\Http\Controllers\ComisionesController;
@@ -46,7 +47,7 @@ Route::get('/', [usuariosController::class, 'redirect_login']);
 Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.login');
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
-Route::prefix('pagos')->group(function(){
+Route::prefix('pagos')->group(function () {
     Route::get('/registrar-comprobante/{factura}', [PagosController::class, 'registrar_pago_cliente'])->name('pagos.registrar');
     Route::post('/guardar-comprobantes', [PagosController::class, 'guardar_pago'])->name('pagos.guardar');
     Route::post('/actualizar-comprobante', [PagosController::class, 'actualizar_pago'])->name('pagos.actualizar');
@@ -56,10 +57,10 @@ Route::prefix('pagos')->group(function(){
 
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/facturas', function(){
+    Route::get('/facturas', function () {
         return redirect()->route('facturas.listado');
     });
-    
+
     /* Rutas para seccion facturas */
     Route::prefix('factura')->group(function () {
         Route::get('/descargar/{id_factura}/{id_comprobante}', [FacturasController::class, 'descargar_comprobante'])->name("factura.descargar_comprobante");
@@ -104,6 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
     /* Rutas para admin facturas (Joyce) */
     Route::prefix('revisor-facturas')->group(function () {
         Route::get('/', [FacturasController::class, 'listado_revisor'])->name('facturas.revisor');
+        Route::get('/por-pagar', [FacturasController::class, 'listado_revisor_por_pagar'])->name('facturas.porpagar');
         Route::post('/filtrado-listado', [FacturasController::class, 'filtrado_listado_revisor'])->name('facturas.filtrado_revisor');
 
         Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
@@ -199,7 +201,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     /* Rutas para demos y lite */
-    Route::prefix('demos')->group(function(){
+    Route::prefix('demos')->group(function () {
 
         Route::get('/listado', [SoporteEspcialController::class, 'listado_demos_lites'])->name('demos.listado');
         Route::post('/filtrado-listado', [SoporteEspcialController::class, 'filtrado_listado_demos_lites'])->name('demos.filtrado.listado');
@@ -211,5 +213,16 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('convertir/lite/{soporte}', [SoporteEspcialController::class, 'convertir_lite'])->name('demos.convertir.lite');
 
         Route::post('/liberar-lite/{soporte}', [SoporteEspcialController::class, 'liberar_lite'])->name('demos.liberar.lite');
+    });
+
+    Route::prefix('bitrix')->group(function () {
+
+        Route::get('/list', [BitrixController::class, 'index'])->name('bitrix.list');
+
+        Route::post('/promedio-ventas', [BitrixController::class, 'obtener_promedio_ventas'])->name('bitrix.promedio_ventas');
+        Route::post('/tasa-utilidad-prospectos', [BitrixController::class, 'obtener_tasa_utilidad_prospectos'])->name('bitrix.tasa_utilidad_prospectos');
+        Route::post('/tiempo-de-conversion', [BitrixController::class, 'obtener_tiempo_de_cierre_de_conversion'])->name('bitrix.tiempo_de_conversion');
+
+        Route::post('/tasa-conversion-prospectos', [BitrixController::class, 'obtener_tasa_de_conversion'])->name('bitrix.tasa_conversion_prospectos');
     });
 });

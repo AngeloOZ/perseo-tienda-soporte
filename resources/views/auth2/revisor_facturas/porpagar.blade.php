@@ -1,5 +1,5 @@
 @extends('auth2.layouts.app')
-
+@section('title', 'Facturas por pagar')
 @section('contenido')
     <style>
         #kt_datatable td {
@@ -15,26 +15,15 @@
                         <div class="card card-custom card-sticky" id="kt_page_sticky_card">
                             <div class="card-header ">
                                 <div class="card-title">
-                                    <h3 class="card-label">Facturas</h3>
+                                    <h3 class="card-label">Facturas por pagar</h3>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-8">
-                                    <div class="col-12 col-md-2">
-                                        <label>Estado:</label>
-                                        <select class="form-control datatable-input" id="filtroEstadoPagado">
-                                            <option value="3" selected>Todos</option>
-                                            <option value="1">Pagado</option>
-                                            <option value="2">Pagado y revisado</option>
-                                        </select>
-                                    </div>
-
                                     <div class="col-12 col-md-3">
-                                        <label>Estado liberado:</label>
-                                        <select class="form-control datatable-input" id="filtroEstadoLiberado">
-                                            <option value="" selected>Todos</option>
-                                            <option value="1">Por liberar</option>
-                                            <option value="2">Liberado</option>
+                                        <label>Estado:</label>
+                                        <select class="form-control datatable-input" disabled id="filtroEstadoPagado">
+                                            <option value="no" selected>Por pagar</option>
                                         </select>
                                     </div>
 
@@ -72,14 +61,18 @@
                                     id="kt_datatable">
                                     <thead>
                                         <tr>
-                                            <th class="no-exportar">#</th>
+                                            <th class="no-export">#</th>
                                             <th data-priority="1">Identificacion</th>
-                                            <th data-priority="2">Nombres</th>
+                                            <th data-priority="2">Cliente</th>
                                             <th>Concepto de factura</th>
                                             <th>Secuencia de factura</th>
                                             <th>Estado del producto</th>
                                             <th>Estado del pago</th>
-                                            <th class="no-exportar">Acciones</th>
+                                            <th>Vendedor</th>
+                                            <th>Origen</th>
+                                            <th>Fecha creada</th>
+                                            <th>Fecha modificada</th>
+                                            <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -144,13 +137,13 @@
                     type: 'POST',
                     data: function(d) {
                         d.pago = $("#filtroEstadoPagado").val();
-                        d.liberado = $("#filtroEstadoLiberado").val();
                         d.fecha = $("#filtroFecha").val();
                     },
                 },
                 columns: [{
                         data: 'facturaid',
                         name: 'facturaid',
+                        class: "no-export",
                         searchable: false,
                         visible: true,
                     },
@@ -179,6 +172,26 @@
                     {
                         data: 'estado',
                         name: 'estado',
+                    },
+                    {
+                        data: 'vendedor',
+                        name: 'vendedor',
+                    },
+                    {
+                        data: 'origen',
+                        name: 'origen',
+                    },
+                    {
+                        data: 'fecha_creacion',
+                        name: 'fecha_creacion',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'fecha_actualizado',
+                        name: 'fecha_actualizado',
+                        searchable: false,
+                        visible: false,
                     },
                     {
                         data: 'action',
@@ -285,15 +298,15 @@
 
             $('#kt_reset').on('click', function() {
                 resetearEstadoFiltro();
-                $("#filtroEstadoPagado").val("");
-                $("#filtroEstadoLiberado").val("");
+                $("#filtroEstadoPagado").val("no");
+                // $("#filtroEstadoLiberado").val("");
                 initDateMonth();
                 table.draw();
             });
 
             function initDateMonth() {
                 $("#filtroFecha").val(
-                    `${moment().startOf('month').format('DD-MM-YYYY')} / ${ moment().endOf('month').format('DD-MM-YYYY')}`
+                    `${moment().subtract(1,'days').format('DD-MM-YYYY')} / ${moment().format('DD-MM-YYYY')}`
                 );
             }
 
