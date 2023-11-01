@@ -6,7 +6,12 @@
         <div class="row mt-0">
             <div class="col-12 mt-5 col-lg-6 mt-md-0">
                 <h2 class="font-size-h3 font-weight-bold mb-6">Estado del pago</h2>
-                <div class="form-group">
+
+                <div class="form-group mt-2">
+                    
+                </div>
+                
+                <div class="form-group mt-2">
                     <label for="estado_pago">Estado del pago</label>
                     <select class="form-control form-control" id="estado_pago" name="estado_pago">
                         <option value="0" {{ $factura->estado_pago == 0 ? 'selected' : '' }}>Por pagar</option>

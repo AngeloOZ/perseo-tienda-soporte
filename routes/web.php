@@ -3,12 +3,12 @@
 use App\Http\Controllers\adminController;
 use App\Http\Controllers\BitrixController;
 use App\Http\Controllers\CiudadesController;
+use App\Http\Controllers\CobrosClientesController;
 use App\Http\Controllers\CobrosController;
 use App\Http\Controllers\ComisionesController;
 use App\Http\Controllers\CuponesController;
 use App\Http\Controllers\FacturasController;
 use App\Http\Controllers\FirmaController;
-use App\Http\Controllers\PagosController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
@@ -48,11 +48,11 @@ Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.log
 Route::post('/login', [usuariosController::class, 'login'])->name('login_usuarios');
 
 Route::prefix('pagos')->group(function () {
-    Route::get('/registrar-comprobante/{factura}', [PagosController::class, 'registrar_pago_cliente'])->name('pagos.registrar');
-    Route::post('/guardar-comprobantes', [PagosController::class, 'guardar_pago'])->name('pagos.guardar');
-    Route::post('/actualizar-comprobante', [PagosController::class, 'actualizar_pago'])->name('pagos.actualizar');
+    Route::get('/registrar-comprobante/{factura}', [CobrosClientesController::class, 'registrar_pago_cliente'])->name('pagos.registrar');
+    Route::post('/guardar-comprobantes', [CobrosClientesController::class, 'guardar_pago'])->name('pagos.guardar');
+    Route::post('/actualizar-comprobante', [CobrosClientesController::class, 'actualizar_pago'])->name('pagos.actualizar');
 
-    Route::get('/reactivar-comprobante/{cobro}', [PagosController::class, 'reactivar_pago'])->name('pagos.reactivar');
+    Route::get('/reactivar-comprobante/{cobro}', [CobrosClientesController::class, 'reactivar_pago'])->name('pagos.reactivar');
 });
 
 

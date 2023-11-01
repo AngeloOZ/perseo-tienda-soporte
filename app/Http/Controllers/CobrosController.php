@@ -6,6 +6,8 @@ use App\Mail\NotificarPago;
 use App\Models\Cobros;
 use App\Models\RenovacionLicencias;
 use App\Models\User;
+use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -13,6 +15,15 @@ use Yajra\DataTables\Facades\DataTables;
 
 class CobrosController extends Controller
 {
+    private $client;
+    private $cobrosClientesController;
+
+    public function __construct()
+    {
+        $this->client = new Client();
+        $this->cobrosClientesController = new CobrosClientesController();
+    }
+
     public function listado_vendedor()
     {
         return view('auth.cobros.index');
@@ -73,7 +84,8 @@ class CobrosController extends Controller
 
     public function agregar()
     {
-        return view('auth.cobros.agregar');
+        $bancos = $this->cobrosClientesController->obtener_bancos(Auth::user());
+        return view('auth.cobros.agregar', compact('bancos'));
     }
 
     public function guardar(Request $request)
@@ -173,24 +185,6 @@ class CobrosController extends Controller
             return back();
         }
     }
-
-
-    // public function eliminar(Request $request)
-    // {
-    //     try {
-
-    //         $cobro = Cobros::find($request->cobro);
-    //         $cobro->delete();
-
-    //         flash("Cobro eliminado correctamente")->success();
-    //         return back();
-    //     } catch (\Throwable $th) {
-
-    //         dd($th);
-    //         flash("Error al eliminar el cobro")->error();
-    //         return back();
-    //     }
-    // }
 
     public function descargar_comprobante($cobroid, $id_unique)
     {
