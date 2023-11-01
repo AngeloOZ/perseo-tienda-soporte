@@ -552,9 +552,8 @@
         /* -------------------------------------------------------------------------- */
 
         function inicializarFecha() {
-            // $("#filtroFecha").val(
-            // `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
-            $('#filtroFecha').val('01-10-2023 / 31-10-2023');
+            $("#filtroFecha").val(
+            `${moment().startOf('month').format('DD-MM-YYYY')} / ${moment().endOf('month').format('DD-MM-YYYY')}`);
         }
 
         function validarFiltroFecha(format1 = 'YYYY-MM-DD', format2 = 'YYYY-MM-DD') {
