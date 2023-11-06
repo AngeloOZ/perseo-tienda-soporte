@@ -69,7 +69,7 @@
                                             <select name="banco_origen" class="form-control select2">
                                                 @foreach ($bancos->origen as $banco)
                                                     <option
-                                                        value="{{ $banco->bancocid }} {{ old('banco_origen') == $banco->bancocid ? 'selected' : '' }}">
+                                                        value="{{ $banco->bancocid }}" {{ old('banco_origen') == $banco->bancocid ? 'selected' : '' }}>
                                                         {{ $banco->descripcion }}</option>
                                                 @endforeach
                                             </select>
@@ -83,7 +83,7 @@
                                             <select name="banco_destino" class="form-control select2">
                                                 @foreach ($bancos->destino as $banco)
                                                     <option
-                                                        value="{{ $banco->bancoid }} {{ old('banco_destino') == $banco->bancoid ? 'selected' : '' }}">
+                                                        value="{{ $banco->bancoid }}" {{ old('banco_destino') == $banco->bancoid ? 'selected' : '' }}>
                                                         {{ $banco->descripcion }}</option>
                                                 @endforeach
                                             </select>

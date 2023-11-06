@@ -93,12 +93,19 @@ class CobrosController extends Controller
         $request->validate(
             [
                 'secuencias' => 'required',
+                'numero_comprobante' => 'required:min:6',
+                'banco_origen' => 'required',
+                'banco_destino' => 'required',
                 'estado' => 'required',
                 'obs_vendedor' => 'min:0|max:255',
                 'comprobante' => 'required',
             ],
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
+                'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
+                'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                'banco_origen.required' => 'El campo banco de origen es obligatorio',
+                'banco_destino.required' => 'El campo banco de destino es obligatorio',
                 'estado.required' => 'El campo estado es obligatorio',
                 'comprobante.required' => 'Se debe subir al menos 1 comprobante',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
@@ -111,6 +118,9 @@ class CobrosController extends Controller
             $cobro->secuencias = $request->secuencias;
             $cobro->estado = $request->estado;
             $cobro->obs_vendedor = $request->obs_vendedor;
+            $cobro->numero_comprobante = $request->numero_comprobante;
+            $cobro->banco_origen = $request->banco_origen;
+            $cobro->banco_destino = $request->banco_destino;
 
             $temp = [];
             if (isset($request->comprobante)) {
@@ -141,7 +151,8 @@ class CobrosController extends Controller
 
     public function editar(Cobros $cobro)
     {
-        return view('auth.cobros.editar', compact('cobro'));
+        $bancos = $this->cobrosClientesController->obtener_bancos(Auth::user());
+        return view('auth.cobros.editar', compact('cobro', 'bancos'));
     }
 
     public function actualizar(Cobros $cobro, Request $request)
@@ -149,11 +160,18 @@ class CobrosController extends Controller
         $request->validate(
             [
                 'secuencias' => 'required',
+                'numero_comprobante' => 'required:min:6',
+                'banco_origen' => 'required',
+                'banco_destino' => 'required',
                 'estado' => 'required',
                 'obs_vendedor' => 'min:0|max:255',
             ],
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
+                'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
+                'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                'banco_origen.required' => 'El campo banco de origen es obligatorio',
+                'banco_destino.required' => 'El campo banco de destino es obligatorio',
                 'estado.required' => 'El campo estado es obligatorio',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
             ]
@@ -163,6 +181,9 @@ class CobrosController extends Controller
             $cobro->secuencias = $request->secuencias;
             $cobro->estado = 1;
             $cobro->obs_vendedor = $request->obs_vendedor;
+            $cobro->numero_comprobante = $request->numero_comprobante;
+            $cobro->banco_origen = $request->banco_origen;
+            $cobro->banco_destino = $request->banco_destino;
 
             $temp = [];
             if (isset($request->comprobante)) {
