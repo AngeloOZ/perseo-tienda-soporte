@@ -86,9 +86,8 @@ class CobrosClientesController extends Controller
             $renovacion->banco_destino = $request->banco_destino;
             $renovacion->save();
 
-            // TODO: No se renueva
-            // $isRenewed = $this->renovar_licencia($licencia);
-            $isRenewed = false;
+            // $isRenewed = false;
+            $isRenewed = $this->renovar_licencia($licencia);
             session()->put('isRenewedLicence', $isRenewed);
 
             return response()->json([
