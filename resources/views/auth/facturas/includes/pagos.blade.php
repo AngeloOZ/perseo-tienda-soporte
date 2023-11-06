@@ -6,6 +6,10 @@
 
     $client = new App\Http\Controllers\CobrosClientesController();
     $bancos = $client->obtener_bancos(Auth::user());
+    $detallePago = json_decode($factura->detalle_pagos);
+    $bancoDestino = $detallePago->banco_destino ?? null;
+    $bancoOrigen = $detallePago->banco_origen ?? null;
+    $numeroComprobante = $detallePago->numero_comprobante ?? null;
 @endphp
 <div class="container p-8">
     <form action="{{ route('facturas.subir_comprobantes', $factura->facturaid) }}" method="POST" id="form_pagos"
@@ -21,7 +25,8 @@
                         <label>Banco de Origen <span class="text-danger">*</span></label>
                         <select name="banco_origen" class="form-control select2" {{ $disabled }}>
                             @foreach ($bancos->origen as $banco)
-                                <option value="{{ $banco->bancocid }}">
+                                <option value="{{ $banco->bancocid }}"
+                                    {{ $bancoOrigen == $banco->bancocid ? 'selected' : '' }}>
                                     {{ $banco->descripcion }}</option>
                             @endforeach
                         </select>
@@ -31,7 +36,7 @@
                         <label>Banco de Destino <span class="text-danger">*</span></label>
                         <select name="banco_destino" class="form-control select2" {{ $disabled }}>
                             @foreach ($bancos->destino as $banco)
-                                <option value="{{ $banco->bancoid }}">
+                                <option value="{{ $banco->bancoid }}" {{ $bancoDestino == $banco->bancoid ? 'selected' : '' }}>
                                     {{ $banco->descripcion }}</option>
                             @endforeach
                         </select>
@@ -42,8 +47,10 @@
                     <div class="col-12 mb-2 col-md-6 mb-md-0">
                         <label>Número de comprobante <span class="text-danger">*</span>
                         </label>
-                        <input type="text" class="form-control" id="numero_comprobante" name="numero_comprobante" {{ $disabled }}
-                            placeholder="XXXXXXX" />
+                        <input type="text" class="form-control" id="numero_comprobante" name="numero_comprobante"
+                            {{ $disabled }} placeholder="XXXXXXX"
+                            value="{{ $numeroComprobante }}" />
+                        <p class="text-danger d-none" id="mensajeComprobante"></p>
                     </div>
 
                     <div class="col-12 mb-2 col-md-6 mb-md-0">
@@ -145,6 +152,15 @@
                 event.preventDefault();
                 btnSubmit.setAttribute('disabled', 'true');
 
+                if (this.numero_comprobante.value.length < 6) {
+                    $('#mensajeComprobante').text('El número de comprobante debe tener al menos 6 caracteres');
+                    $('#mensajeComprobante').removeClass('d-none');
+                    btnSubmit.removeAttribute('disabled');
+                    return;
+                } else {
+                    $('#mensajeComprobante').addClass('d-none');
+                }
+
                 @if (!isset($factura->comprobante_pago))
                     if (this.comprobante_pago.files.length == 0) {
                         mensajeArchios.classList.remove('d-none');
@@ -194,6 +210,5 @@
             }
             return true;
         }
-
     </script>
 @endsection
