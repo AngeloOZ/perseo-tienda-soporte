@@ -28,10 +28,12 @@
         </a>
     @endif
 
-    @if ($noRegistrado)
-        <button id="btnRegistrarCobro" type="button" class="btn btn-primary btn-icon" data-toggle="tooltip"
-            title="Registrar cobro">
-            <i class="la la-cash-register"></i>
-        </button>
+    @if (Auth::user()->distribuidoresid == 1)
+        @if ($noRegistrado)
+            <button id="btnRegistrarCobro" type="button" class="btn btn-primary btn-icon" data-toggle="tooltip"
+                title="Registrar cobro">
+                <i class="la la-cash-register"></i>
+            </button>
+        @endif
     @endif
 </div>

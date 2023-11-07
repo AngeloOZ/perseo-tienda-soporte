@@ -1,5 +1,7 @@
+@php
+    $noRegistrado = !isset($cobro->cobros_id_perseo);
+@endphp
 @extends('auth2.layouts.app')
-
 @section('title', 'Editar cobro')
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
@@ -117,7 +119,7 @@
                                                 @enderror
                                             </div>
                                         </div>
-                                        
+
                                         @if (isset($cobro->comprobante))
                                             <div class="col-12 mt-5 col-lg-6 mt-md-0">
                                                 <h2 class="font-size-h3 mb-6">Fotos de comprobantes</h2>
@@ -145,6 +147,11 @@
         </div>
     </div>
 @endsection
+@if ($noRegistrado)
+    @section('modal')
+        @include('auth2.revisor_facturas.inc.modal_cobros')
+    @endsection
+@endif
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
@@ -153,6 +160,11 @@
         $(document).ready(function() {
             initTagify();
             init_subir_archivos();
+        });
+
+        $("#btnRegistrarCobro").click(function() {
+            $("#modalCobros").modal("show");
+            $("#modalFormCobros").attr("action", "{{ route('cobros.registrar.sistema') }}");
         });
 
         function initTagify() {

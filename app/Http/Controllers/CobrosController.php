@@ -317,6 +317,10 @@ class CobrosController extends Controller
         }
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                  Funciones para registrar cobros en perseo                 */
+    /* -------------------------------------------------------------------------- */
+
     public function registrar_cobro_sistema(Request $request)
     {
         if (!$request->forma_pago) {
@@ -339,12 +343,12 @@ class CobrosController extends Controller
                 $facturaid = $factura->facturaid_perseo;
             } else {
                 $cobro = Cobros::findOrFail($request->cobrosid, ['banco_destino', 'numero_comprobante', 'renovacionid']);
-
                 $renovaciones = RenovacionLicencias::findOrFail($cobro->renovacionid, ['renovacionid', 'datos']);
-                $datos = json_decode($renovaciones->datos);
 
-                $facturaid = $datos->facturaid;
-                $datos_cobro = [
+                $datos = json_decode($renovaciones->datos);
+                
+                $facturaid = $datos->factura->facturaid;
+                $datos_cobro = (object)[
                     'numero_comprobante' => $cobro->numero_comprobante,
                     'banco_destino' => $cobro->banco_destino,
                     'banco_origen' => $cobro->banco_origen,
@@ -447,6 +451,9 @@ class CobrosController extends Controller
         }
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                            Notificacion de cobro                           */
+    /* -------------------------------------------------------------------------- */
     private function notificar_pago_correo($cobro)
     {
         try {
