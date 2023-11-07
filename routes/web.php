@@ -161,6 +161,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/editar-revisor/{cobro}', [CobrosController::class, 'editar_revisor'])->name('cobros.editar_revisor');
         Route::post('/filtrado-listado-revisor', [CobrosController::class, 'filtrado_listado_revisor'])->name('cobros.listado.revisor_ajax');
         Route::put('/actualizar-revisor/{cobro}', [CobrosController::class, 'actualizar_revisor'])->name('cobros.actualizar_revisor');
+
+        Route::post('/registrar-cobro-sistema', [CobrosController::class, 'registrar_cobro_sistema'])->name('cobros.registrar.sistema');
     });
 
     /* Rutas para comisiones */
