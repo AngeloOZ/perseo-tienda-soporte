@@ -235,12 +235,12 @@ class CobrosController extends Controller
             $estado = $request->estado;
 
             $cobros = Cobros::select('cobrosid', 'secuencias', 'estado', 'obs_vendedor', 'obs_revisor', 'fecha_registro')
-                ->where('distribuidoresid', Auth::user()->distribuidoresid)
-                ->where('estado', '<=', '2')
-                ->get();
+                ->where('distribuidoresid', Auth::user()->distribuidoresid);
 
             if ($estado != "") {
-                $cobros = $cobros->where('estado', $estado);
+                $cobros = $cobros->where('estado', $estado)->get();
+            } else {
+                $cobros = $cobros->whereIn('estado', [1, 2])->get();
             }
 
             return DataTables::of($cobros)
@@ -283,8 +283,10 @@ class CobrosController extends Controller
         if ($cobro->renovacionid) {
             $renovacion = RenovacionLicencias::where('renovacionid', $cobro->renovacionid)->first();
         }
+
         $usuario = User::find($cobro->usuariosid);
-        return view('auth2.revisor_facturas.cobros.editar', ['cobro' => $cobro, 'vendedor' => $usuario, 'renovacion' => $renovacion]);
+        $bancos = $this->cobrosClientesController->obtener_bancos(Auth::user());
+        return view('auth2.revisor_facturas.cobros.editar', ['cobro' => $cobro, 'vendedor' => $usuario, 'renovacion' => $renovacion, 'bancos' => $bancos]);
     }
 
     public function actualizar_revisor(Cobros $cobro, Request $request)
@@ -292,10 +294,17 @@ class CobrosController extends Controller
         try {
             $request->validate(
                 [
+                    'numero_comprobante' => 'required:min:6',
+                    'banco_origen' => 'required',
+                    'banco_destino' => 'required',
                     'estado' => 'required',
-                    'obs_revisor' => 'min:0|max:255',
+                    'obs_vendedor' => 'min:0|max:255',
                 ],
                 [
+                    'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
+                    'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                    'banco_origen.required' => 'El campo banco de origen es obligatorio',
+                    'banco_destino.required' => 'El campo banco de destino es obligatorio',
                     'estado.required' => 'El campo estado es obligatorio',
                     'obs_revisor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
                 ]

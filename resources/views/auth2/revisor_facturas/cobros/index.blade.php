@@ -1,5 +1,5 @@
 @extends('auth2.layouts.app')
-@section('title_page', 'Listado de técnicos')
+@section('title', 'Listado de cobros')
 @section('contenido')
     <style>
         #kt_datatable td {
@@ -26,6 +26,7 @@
                                             <option value="">Todos</option>
                                             <option value="1" selected>Registrados</option>
                                             <option value="2">Verificados</option>
+                                            <option value="3">Rechazados</option>
                                         </select>
                                     </div>
                                 </div>

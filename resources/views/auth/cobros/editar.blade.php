@@ -1,5 +1,5 @@
 @extends('auth.layouts.app')
-
+@section('titulo', 'Editar cobro')
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <div class="d-flex flex-column-fluid">

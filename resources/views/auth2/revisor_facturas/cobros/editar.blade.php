@@ -1,5 +1,6 @@
 @extends('auth2.layouts.app')
 
+@section('title', 'Editar cobro')
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
         <div class="d-flex flex-column-fluid">
@@ -39,23 +40,65 @@
                                                 </div>
                                             </div>
 
-                                            <div class="form-group">
-                                                <label>Estado del pago</label>
-                                                <select name="estado"
-                                                    class="form-control {{ $errors->has('estado') ? 'is-invalid' : '' }}">
-                                                    <option value="1" {{ $cobro->estado == 1 ? 'selected' : '' }}>
-                                                        Registrado
-                                                    </option>
-                                                    <option value="2" {{ $cobro->estado == 2 ? 'selected' : '' }}>
-                                                        Verificado
-                                                    </option>
-                                                    <option value="3" {{ $cobro->estado == 3 ? 'selected' : '' }}>
-                                                        Rechazado
-                                                    </option>
-                                                </select>
-                                                @error('estado')
-                                                    <span class="text-danger">{{ $errors->first('estado') }}</span>
-                                                @enderror
+                                            <div class="form-group row">
+                                                <div class="col-12 mb-2 col-md-6 mb-md-0">
+                                                    <label>Banco de Origen <span class="text-danger">*</span></label>
+                                                    <select name="banco_origen" class="form-control select2">
+                                                        @foreach ($bancos->origen as $banco)
+                                                            <option value="{{ $banco->bancocid }}"
+                                                                {{ old('banco_origen', $cobro->banco_origen) == $banco->bancocid ? 'selected' : '' }}>
+                                                                {{ $banco->descripcion }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-12 mb-2 col-md-6 mb-md-0">
+                                                    <label>Banco de Destino <span class="text-danger">*</span></label>
+                                                    <select name="banco_destino" class="form-control select2">
+                                                        @foreach ($bancos->destino as $banco)
+                                                            <option value="{{ $banco->bancoid }}"
+                                                                {{ old('banco_destino', $cobro->banco_destino) == $banco->bancoid ? 'selected' : '' }}>
+                                                                {{ $banco->descripcion }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <div class="col-12 mb-2 col-md-6 mb-md-0">
+                                                    <label>Número de comprobante <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text"
+                                                        class="form-control {{ $errors->has('numero_comprobante') ? 'is-invalid' : '' }}"
+                                                        id="numero_comprobante" name="numero_comprobante"
+                                                        placeholder="XXXXXXX"
+                                                        value="{{ old('numero_comprobante', $cobro->numero_comprobante) }}" />
+                                                    @error('numero_comprobante')
+                                                        <span
+                                                            class="text-danger">{{ $errors->first('numero_comprobante') }}</span>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-12 mb-2 col-md-6 mb-md-0">
+                                                    <label>Estado del pago</label>
+                                                    <select name="estado"
+                                                        class="form-control {{ $errors->has('estado') ? 'is-invalid' : '' }}">
+                                                        <option value="1" {{ $cobro->estado == 1 ? 'selected' : '' }}>
+                                                            Registrado
+                                                        </option>
+                                                        <option value="2" {{ $cobro->estado == 2 ? 'selected' : '' }}>
+                                                            Verificado
+                                                        </option>
+                                                        <option value="3" {{ $cobro->estado == 3 ? 'selected' : '' }}>
+                                                            Rechazado
+                                                        </option>
+                                                    </select>
+                                                    @error('estado')
+                                                        <span class="text-danger">{{ $errors->first('estado') }}</span>
+                                                    @enderror
+
+                                                </div>
+
                                             </div>
 
                                             @if ($cobro->obs_vendedor != null)
@@ -74,6 +117,7 @@
                                                 @enderror
                                             </div>
                                         </div>
+                                        
                                         @if (isset($cobro->comprobante))
                                             <div class="col-12 mt-5 col-lg-6 mt-md-0">
                                                 <h2 class="font-size-h3 mb-6">Fotos de comprobantes</h2>
