@@ -362,12 +362,12 @@ class CobrosController extends Controller
             $datos_cobro->cobros_cod_perseo = $cobro_registrado->codigo_nuevo;
             
             if ($esFactura) {
-                $factura->update(['detalle_pagos' => json_encode($datos_cobro)]);
+                $factura->update(['detalle_pagos' => json_encode($datos_cobro), 'estado_pago' => 2]);
             } else {
                 unset($datos_cobro->banco_origen);
                 unset($datos_cobro->banco_destino);
                 unset($datos_cobro->numero_comprobante);
-                $cobro->update(['cobros_id_perseo' => json_encode($datos_cobro)]);
+                $cobro->update(['cobros_id_perseo' => json_encode($datos_cobro), 'estado' => 2]);
             }
 
             flash("Cobro registrado correctamente")->success();
