@@ -284,6 +284,7 @@ class CobrosController extends Controller
 
         $usuario = User::find($cobro->usuariosid);
         $bancos = $this->cobrosClientesController->obtener_bancos(Auth::user());
+
         return view('auth2.revisor_facturas.cobros.editar', ['cobro' => $cobro, 'vendedor' => $usuario, 'renovacion' => $renovacion, 'bancos' => $bancos]);
     }
 
@@ -328,6 +329,16 @@ class CobrosController extends Controller
             return back();
         }
 
+        if (!$request->monto || $request->monto <= 0) {
+            flash("El monto debe ser mayor a 0")->error();
+            return back();
+        }
+
+        if (!$request->fecha) {
+            flash("Debe seleccionar la fecha del pago")->error();
+            return back();
+        }
+
         if (!$request->facturaid && !$request->cobrosid) {
             flash("No existe ninguna referencia para registrar el cobro")->warning();
             return back();
@@ -337,22 +348,27 @@ class CobrosController extends Controller
 
         try {
             if ($esFactura) {
-                $factura = Factura::findOrFail($request->facturaid, ['facturaid', 'facturaid_perseo', 'secuencia_perseo', 'total_venta', 'detalle_pagos', 'usuariosid']);
+                $factura = Factura::findOrFail($request->facturaid, ['facturaid', 'facturaid_perseo', 'secuencia_perseo', 'total_venta', 'detalle_pagos', 'usuariosid', 'estado_pago']);
                 $datos_cobro = json_decode($factura->detalle_pagos);
                 $datos_cobro->forma_pago = $request->forma_pago;
+                $datos_cobro->monto = $request->monto;
+                $datos_cobro->fecha = date("Ymd", strtotime($request->fecha));
+
                 $facturaid = $factura->facturaid_perseo;
             } else {
-                $cobro = Cobros::findOrFail($request->cobrosid, ['banco_destino', 'numero_comprobante', 'renovacionid']);
+                $cobro = Cobros::findOrFail($request->cobrosid, ['banco_destino', 'numero_comprobante', 'renovacionid', 'estado', 'cobros_id_perseo']);
                 $renovaciones = RenovacionLicencias::findOrFail($cobro->renovacionid, ['renovacionid', 'datos']);
 
                 $datos = json_decode($renovaciones->datos);
-                
+
                 $facturaid = $datos->factura->facturaid;
                 $datos_cobro = (object)[
                     'numero_comprobante' => $cobro->numero_comprobante,
                     'banco_destino' => $cobro->banco_destino,
                     'banco_origen' => $cobro->banco_origen,
                     'forma_pago' => $request->forma_pago,
+                    'monto' => $request->monto,
+                    'fecha' => date("Ymd", strtotime($request->fecha)),
                 ];
             }
 
@@ -360,14 +376,20 @@ class CobrosController extends Controller
             $cobro_registrado = $this->registro_del_cobro($factura_perseo, $datos_cobro);
             $datos_cobro->cobros_id_perseo = $cobro_registrado->cobrosid_nuevo;
             $datos_cobro->cobros_cod_perseo = $cobro_registrado->codigo_nuevo;
-            
+
             if ($esFactura) {
                 $factura->update(['detalle_pagos' => json_encode($datos_cobro), 'estado_pago' => 2]);
             } else {
-                unset($datos_cobro->banco_origen);
-                unset($datos_cobro->banco_destino);
-                unset($datos_cobro->numero_comprobante);
-                $cobro->update(['cobros_id_perseo' => json_encode($datos_cobro), 'estado' => 2]);
+                $data = [
+                    'estado' => 2,
+                    'cobros_id_perseo' => json_encode([
+                        'cobros_id_perseo' => $datos_cobro->cobros_id_perseo,
+                        'cobros_cod_perseo' => $datos_cobro->cobros_cod_perseo,
+                        'forma_pago' => $datos_cobro->forma_pago,
+                        'monto' => $datos_cobro->monto,
+                    ]),
+                ];
+                Cobros::where('cobrosid', $request->cobrosid)->update($data);
             }
 
             flash("Cobro registrado correctamente")->success();
@@ -414,10 +436,10 @@ class CobrosController extends Controller
                             'movimientos_conceptosid' => 3, //Default 
                             'forma_pago_empresaid' => $datos_cobro->forma_pago,
                             'concepto' => $factura->concepto,
-                            'fechaemision' => $factura->emision,
-                            'fecharecepcion' => $factura->emision,
-                            'fechavencimiento' => $factura->vence,
-                            'importe' => $factura->total,
+                            'fechaemision' => $datos_cobro->fecha,
+                            'fecharecepcion' => $datos_cobro->fecha,
+                            'fechavencimiento' => $datos_cobro->fecha,
+                            'importe' => floatval($datos_cobro->monto),
                             'cajasid' => Auth::user()->cajasid,
                             'bancosid' => $datos_cobro->banco_destino,
                             'usuariocreacion' => Auth::user()->identificacion,
@@ -427,7 +449,7 @@ class CobrosController extends Controller
                                     'bancoid' => 0, // Solo si es cheque o TC
                                     'cajasid' => $datos_cobro->banco_destino,
                                     'comprobante' => $datos_cobro->numero_comprobante,
-                                    'importe' => $factura->total,
+                                    'importe' => floatval($datos_cobro->monto),
                                     'documentosid' => $factura->facturasid,
                                     'formapago' => $datos_cobro->forma_pago,
                                     'saldo' => 0, // Default
@@ -447,7 +469,7 @@ class CobrosController extends Controller
             $response_cobro = $response->cobros[0];
             return $response_cobro;
         } catch (\Throwable $th) {
-            throw $th;
+            throw new \Exception("el servicio API fallo");
         }
     }
 

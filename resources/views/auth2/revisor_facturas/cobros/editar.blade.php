@@ -159,12 +159,6 @@
     <script>
         $(document).ready(function() {
             initTagify();
-            init_subir_archivos();
-        });
-
-        $("#btnRegistrarCobro").click(function() {
-            $("#modalCobros").modal("show");
-            $("#modalFormCobros").attr("action", "{{ route('cobros.registrar.sistema') }}");
         });
 
         function initTagify() {
@@ -172,4 +166,5 @@
             var tagify = new Tagify(input);
         }
     </script>
+    @yield('modal_script')
 @endsection

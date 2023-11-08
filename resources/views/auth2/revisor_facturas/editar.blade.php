@@ -96,10 +96,6 @@
                 }
             });
         })
-
-        $("#btnRegistrarCobro").click(function() {
-            $("#modalCobros").modal("show");
-            $("#modalFormCobros").attr("action", "{{ route('cobros.registrar.sistema') }}");
-        });
     </script>
+    @yield('modal_script')
 @endsection
