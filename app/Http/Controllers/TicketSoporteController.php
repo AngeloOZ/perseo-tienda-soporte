@@ -1413,6 +1413,12 @@ class TicketSoporteController extends Controller
         }
     }
 
+    public function listado_tickets_supervisor()
+    {
+        $tecnicos = $this->obtener_tecnicos_distribuidor();
+        return view('soporte.admin.revisor.listado_revisor', ['tecnicos' => $tecnicos,]);
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                    Funciones para asignacion de tickets                    */
     /* -------------------------------------------------------------------------- */

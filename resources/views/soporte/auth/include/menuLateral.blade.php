@@ -108,6 +108,15 @@
                     </li>
                 @endif
 
+                @if (in_array($userRol, [8]))
+                    <li class="menu-item {{ areActiveRoutes(['soporte.listado.supervisor']) }}" aria-haspopup="true">
+                        <a href="{{ route('soporte.listado.supervisor') }}" class="menu-link">
+                            <i class="menu-icon fas fa-ticket-alt"></i>
+                            <span class="menu-text">Listado de tickets</span>
+                        </a>
+                    </li>
+                @endif
+
                 @if (in_array($userRol, [7]))
                     <li class="menu-item {{ areActiveRoutes(['soporte.revisor_listar_soporte_especial']) }}"
                         aria-haspopup="true">
