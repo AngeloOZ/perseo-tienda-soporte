@@ -1,13 +1,13 @@
 @php
     use App\Constants\ConstantesTecnicos;
-    
+
     $tecnico = ConstantesTecnicos::ROL_TECNICOS;
     $desarrollo = ConstantesTecnicos::ROL_DESARROLLO;
     $admin = ConstantesTecnicos::ROL_ADMINISTRADOR;
     $revisor = ConstantesTecnicos::ROL_REVISOR;
-    
+
     $userRol = Auth::guard('tecnico')->user()->rol;
-    
+
 @endphp
 <div class="aside aside-left aside-fixed d-flex flex-column flex-row-auto aside" id="kt_aside">
     <div class="brand flex-column-auto " id="kt_brand">
@@ -96,6 +96,15 @@
                 @if (in_array($userRol, [$admin]))
                     <li class="menu-item {{ areActiveRoutes(['soporte.listado.revisor']) }}" aria-haspopup="true">
                         <a href="{{ route('soporte.listado.revisor') }}" class="menu-link">
+                            <i class="menu-icon fas fa-ticket-alt"></i>
+                            <span class="menu-text">Listado de tickets</span>
+                        </a>
+                    </li>
+                @endif
+
+                @if (in_array($userRol, [$revisor]))
+                    <li class="menu-item {{ areActiveRoutes(['soporte.listado.supervisor']) }}" aria-haspopup="true">
+                        <a href="{{ route('soporte.listado.supervisor') }}" class="menu-link">
                             <i class="menu-icon fas fa-ticket-alt"></i>
                             <span class="menu-text">Listado de tickets</span>
                         </a>
@@ -295,7 +304,8 @@
                     </li>
                 @endif
 
-                <li class="menu-item menu-item-submenu {{ areActiveRoutesMenu(['detalles.listado', 'listadoCotizaciones.listado', 'cotizarPlantilla1.index', 'temas.index']) }}" aria-haspopup="true" data-menu-toggle="hover">
+                <li class="menu-item menu-item-submenu {{ areActiveRoutesMenu(['detalles.listado', 'listadoCotizaciones.listado', 'cotizarPlantilla1.index', 'temas.index']) }}"
+                    aria-haspopup="true" data-menu-toggle="hover">
                     <a href="javascript:;" class="menu-link menu-toggle">
                         <i class="menu-icon fas fa-dollar-sign"></i>
                         <span class="menu-text">Cotizar</span>

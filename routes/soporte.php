@@ -101,6 +101,10 @@ Route::prefix('soporte')->group(function () {
             Route::post('/borrar-token', [WhatsappController::class, 'eliminar_token'])->name('whatsapp.eliminar_token');
         });
 
+        Route::prefix('supervisor')->group(function () {
+            Route::get('/listado-tickets', [TicketSoporteController::class, 'listado_tickets_supervisor'])->name('soporte.listado.supervisor');
+        });
+
         Route::prefix('soporte-especial')->group(function () {
 
             /* tecnico */
@@ -117,6 +121,7 @@ Route::prefix('soporte')->group(function () {
             /* supervisor */
             Route::get('/listado-supervisor', [SoporteEspcialController::class, 'supervisor_listar_soporte'])->name('especiales.listado_supervisor');
             Route::post('/filtrado-supervisor', [SoporteEspcialController::class, 'filtrado_supervisor_soporte'])->name('especiales.filtrado_supervidor');
+
 
             /* revisor */
             Route::get('/listado-revisor', [SoporteEspcialController::class, 'revisor_listar_soporte_especial'])->name('soporte.revisor_listar_soporte_especial');

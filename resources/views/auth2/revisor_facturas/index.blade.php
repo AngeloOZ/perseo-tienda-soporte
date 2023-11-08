@@ -72,14 +72,15 @@
                                     id="kt_datatable">
                                     <thead>
                                         <tr>
-                                            <th class="no-exportar">#</th>
+                                            <th class="no-export">#</th>
                                             <th data-priority="1">Identificacion</th>
                                             <th data-priority="2">Nombres</th>
                                             <th>Concepto de factura</th>
                                             <th>Secuencia de factura</th>
                                             <th>Estado del producto</th>
                                             <th>Estado del pago</th>
-                                            <th class="no-exportar">Acciones</th>
+                                            <th>Origen</th>
+                                            <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -179,6 +180,10 @@
                     {
                         data: 'estado',
                         name: 'estado',
+                    },
+                    {
+                        data: 'origen',
+                        name: 'origen',
                     },
                     {
                         data: 'action',

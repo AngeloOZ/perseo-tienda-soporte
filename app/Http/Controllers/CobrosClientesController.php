@@ -5,11 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Cobros;
 use App\Models\RenovacionLicencias;
 use App\Models\User;
+use GuzzleHttp\Client;
+use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class PagosController extends Controller
+class CobrosClientesController extends Controller
 {
+    private $client;
+
+    public function __construct()
+    {
+        $this->client = new Client();
+    }
+
     public function registrar_pago_cliente($factura)
     {
         $renovacion = RenovacionLicencias::where('uuid', $factura)->firstOrfail();
@@ -23,9 +32,13 @@ class PagosController extends Controller
             }
             return view('pagos.resultado', ["renovacion" => $renovacion, 'isRenewed' => $isRenewed]);
         }
-        $datos = json_decode($renovacion->datos);
 
-        return view('pagos.cargar_pago', ['renovacion' => $renovacion, 'total' => $datos->factura->total_facturado]);
+        $datos = json_decode($renovacion->datos);
+        $das = $this->homologar_distribuidor($datos->licencia->sis_distribuidoresid);
+        $default = $this->obtener_vendedor_default($das);
+        $bancos = $this->obtener_bancos($default);
+
+        return view('pagos.cargar_pago', ['renovacion' => $renovacion, 'total' => $datos->factura->total_facturado, 'bancos' => $bancos]);
     }
 
     public function guardar_pago(Request $request)
@@ -42,7 +55,7 @@ class PagosController extends Controller
             $cobro->secuencias = json_encode([["value" => $factura->secuencia]]);
             $cobro->estado = 1;
             $cobro->obs_vendedor = "Renovacion automatica: {$licencia->identificacion} - {$licencia->nombres}";
-            
+
             if (isset($licencia->esContador) && $licencia->esContador == true) {
                 $cobro->obs_vendedor = "Renovacion automatica: {$licencia->identificacion} - {$licencia->nombres}\nContador: {$licencia->contador_identificacion} - {$licencia->contador_nombres}";
             }
@@ -60,9 +73,12 @@ class PagosController extends Controller
             $cobro->distribuidoresid = $distribuidor;
             $cobro->fecha_registro = now();
             $cobro->fecha_actualizacion = now();
+            $cobro->banco_origen = $request->banco_origen;
+            $cobro->banco_destino = $request->banco_destino;
             $cobro->renovacionid = $renovacion->renovacionid;
-
+            $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->save();
+
             $renovacion->registrado = 1;
             $renovacion->cobrosid = $cobro->cobrosid;
             $renovacion->numero_comprobante = $request->numero_comprobante;
@@ -70,8 +86,8 @@ class PagosController extends Controller
             $renovacion->banco_destino = $request->banco_destino;
             $renovacion->save();
 
-            $isRenewed = $this->renovar_licencia($licencia);
             // $isRenewed = false;
+            $isRenewed = $this->renovar_licencia($licencia);
             session()->put('isRenewedLicence', $isRenewed);
 
             return response()->json([
@@ -100,6 +116,9 @@ class PagosController extends Controller
             }
             $cobro->estado = 1;
             $cobro->fecha_actualizacion = now();
+            $cobro->banco_origen = $request->banco_origen;
+            $cobro->banco_destino = $request->banco_destino;
+            $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->save();
 
             $renovacion->registrado = 1;
@@ -203,6 +222,30 @@ class PagosController extends Controller
             return true;
         } catch (\Throwable $th) {
             return false;
+        }
+    }
+
+    public function obtener_bancos($vendedor)
+    {
+        try {
+            $urlApi = $vendedor->api;
+            $body = [
+                'api_key' => $vendedor->token,
+            ];
+
+            $promises = [
+                'destino' => $this->client->postAsync($urlApi . '/bancos_consulta', ['json' => $body]),
+                'origen' => $this->client->postAsync($urlApi . '/clientes_bancos_consulta', ['json' => $body]),
+            ];
+
+            $results = Promise\Utils::all($promises)->wait();
+
+            return (object)[
+                'destino' => json_decode($results['destino']->getBody()->getContents())->banco,
+                'origen' => json_decode($results['origen']->getBody()->getContents())->bancoc,
+            ];
+        } catch (\Throwable $th) {
+            dd($th->getMessage());
         }
     }
 }

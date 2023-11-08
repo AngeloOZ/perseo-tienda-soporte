@@ -152,7 +152,7 @@
         }
 
         function calcularTotal() {
-             const subTotalText = document.getElementById('subTotal');
+            const subTotalText = document.getElementById('subTotal');
             const ivaText = document.getElementById('iva');
             const totalText = document.getElementById('total');
             const descuentoText = document.getElementById('descuento');
@@ -191,7 +191,7 @@
             })
             input.value = JSON.stringify($prod);
         }
-        
+
         function cancelar_factura() {
             const numeroNotaCredito = document.getElementById('numeroNotaCredito');
             const btnAnularFactura = document.getElementById('btnAnularFactura');
@@ -206,91 +206,6 @@
         }
 
         /* -------------------------------------------------------------------------- */
-        /*                            funciones para pagos                            */
-        /* -------------------------------------------------------------------------- */
-
-        function init_subir_archivos() {
-            const mensajeArchios = document.getElementById('mensajeArchios');
-            const mesajeEstado = document.getElementById('mesajeEstado');
-
-            const form_pagos = document.getElementById('form_pagos');
-            const comprobante_pago = document.getElementById('comprobante_pago');
-            const btnSubmit = document.getElementById('btnSubmit');
-
-            comprobante_pago.addEventListener('change', function() {
-                if (this.files.length > 5) {
-                    this.value = "";
-                    return Swal.fire({
-                        title: "Demasiados archivos",
-                        text: "El número máximo de archivos es de 5 y el tamaño máximo de cada archivo es de 2 MB",
-                        icon: "warning",
-                        confirmButtonText: "OK",
-                    })
-                }
-                this.files.forEach(file => {
-                    if(!validar_peso(file)){
-                        this.value = ""
-                        return
-                    } 
-                })
-            })
-
-            form_pagos.addEventListener('submit', function(event){
-                event.preventDefault();
-                btnSubmit.setAttribute('disabled', 'true');
-
-                @if (!isset($factura->comprobante_pago))
-                    if (this.comprobante_pago.files.length == 0) {
-                        mensajeArchios.classList.remove('d-none');
-                        btnSubmit.removeAttribute('disabled');
-                        Swal.fire({
-                            title: "Seleccione un archivo",
-                            text: "Debe seleccionar un archivo para poder realizar el pago",
-                            icon: "warning",
-                            confirmButtonText: "OK",
-                        });
-                        return;
-                    } else {
-                        mensajeArchios.classList.add('d-none');
-                    }
-                @endif
-
-                this.submit();
-                btnSubmit.removeAttribute('disabled');
-            });
-        }
-
-        function validar_peso(file, pesoMax = 2097152) {
-            if (file.size > pesoMax) {
-                Swal.fire({
-                    title: "Archivo muy pesado",
-                    html: `El archivo: <strong>${file.name}</strong> excede el peso limite de 2MB`,
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                })
-                return false;
-            }
-           return validarExtensionArchivo(file);
-        }
-
-        function validarExtensionArchivo(file) {
-            const extensionesValidas = ['jpg', 'jpeg', 'png', ];
-
-            const extension = file.name.toLowerCase().split('.').pop();
-            if (!extensionesValidas.includes(extension)) {
-                Swal.fire({
-                    title: "Tipo de archivo no válido",
-                    html: `Solo se permite imagenes de tipo <strong>${extensionesValidas.join(', ')}</strong>`,
-                    icon: "warning",
-                    confirmButtonText: "OK",
-                })
-                return false;
-            }
-            return true;
-        }
-        
-        
-        /* -------------------------------------------------------------------------- */
         /*                      functiones para implementaciones                      */
         /* -------------------------------------------------------------------------- */
         $(document).on('click', '.modal-implementacion', function(e) {
@@ -299,7 +214,7 @@
             $("#implementacion-modal").modal("show");
             $("#implementacion-link").attr("action", url);
         });
-        
+
         const formModalImplementacion = document.getElementById('implementacion-link');
 
         formModalImplementacion?.addEventListener('submit', function(event) {
@@ -318,6 +233,6 @@
                 $('#btnSendNumber').removeAttr('disabled')
             }
         }
-        
     </script>
+    @yield('script-pagos')
 @endsection

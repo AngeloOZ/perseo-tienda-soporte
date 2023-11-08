@@ -2,17 +2,6 @@
 @section('titulo', 'Registrar pago')
 @section('descripcion', 'Productos listos para la compra')
 
-@php
-    $bancoOrigen = ['Banco Pichincha', 'Banco del Pacifíco', 'Banco Guayaquil', 'Banco Internacional', 'Banco Bolivariano', 'Banco de Loja', 'Banco de Machala', 'Coperativa JEP', 'Coperativa 29 de Octubre', 'OTRO'];
-    
-    $bancoDestino = ['Banco Pichincha', 'Banco Produbanco'];
-    $bancoDestino = [
-        '1' => ['Banco Pichincha', 'Banco Produbanco'],
-        '2' => ['Banco Pichincha', 'OTRO'],
-        '3' => ['Banco Pichincha', 'OTRO'],
-        '4' => ['Banco Pichincha', 'Banco Produbanco', 'Banco del Pacifico'],
-    ];
-@endphp
 
 @section('contenido')
     <style>
@@ -294,18 +283,19 @@
                                     </div>
                                     <div class="form-group m-0 mb-3">
                                         <label>Banco de Origén<span class="text-danger">*</span></label>
-                                        <select class="form-control form-control-sm" name="banco_origen" id="banco_origen">
-                                            @foreach ($bancoOrigen as $banco)
-                                                <option>{{ $banco }}</option>
+                                        <select class="form-control select2 form-control-sm" name="banco_origen"
+                                            id="banco_origen">
+                                            @foreach ($bancos->origen as $banco)
+                                                <option value="{{ $banco->bancocid }}">{{ $banco->descripcion }}</option>
                                             @endforeach
                                         </select>
                                     </div>
                                     <div class="form-group m-0 mb-5">
                                         <label>Banco de Destino<span class="text-danger">*</span></label>
-                                        <select class="form-control form-control-sm" name="banco_destino"
+                                        <select class="form-control select2 form-control-sm" name="banco_destino"
                                             id="banco_destino">
-                                            @foreach ($bancoDestino[$renovacion->distribuidoresid] as $banco)
-                                                <option>{{ $banco }}</option>
+                                            @foreach ($bancos->destino as $banco)
+                                                <option value="{{ $banco->bancoid }}">{{ $banco->descripcion }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -357,6 +347,9 @@
                 $('#numero_comprobante').val("{{ $renovacion->numero_comprobante }}");
                 $('#banco_origen').val("{{ $renovacion->banco_origen }}");
                 $('#banco_destino').val("{{ $renovacion->banco_destino }}");
+
+                $("#banco_origen").trigger('change');
+                $("#banco_destino").trigger('change');
             @endif
 
             form.addEventListener("click", () => {
@@ -415,6 +408,13 @@
                 if (comprobante.value.length <= 4) {
                     showAlert("Comprobante inválido",
                         `El comprobante debe tener al menos 5 dígitos`
+                    );
+                    return;
+                }
+
+                if (comprobante.value.length < 6) {
+                    showAlert("Número de comprobante no válido",
+                        `El número de comprobante debe tener al menos 6 dígitos`
                     );
                     return;
                 }

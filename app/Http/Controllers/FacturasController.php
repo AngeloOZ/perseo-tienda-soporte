@@ -662,6 +662,11 @@ class FacturasController extends Controller
             }
 
             $datos["estado_pago"] = $request->estado_pago;
+            $datos["detalle_pagos"] = json_encode([
+                "banco_origen" => $request->banco_origen,
+                "banco_destino" => $request->banco_destino,
+                "numero_comprobante" => $request->numero_comprobante,
+            ]);
 
             if (isset($request->observacion_pago_vendedor)) {
                 $datos["observacion_pago_vendedor"] = $request->observacion_pago_vendedor;

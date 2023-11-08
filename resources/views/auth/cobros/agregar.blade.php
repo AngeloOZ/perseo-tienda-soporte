@@ -37,16 +37,67 @@
                                 </div>
 
                                 <div class="card-body">
-                                    <div class="form-group">
-                                        <label style="flex-basis: 100%;">Números de facturas</label>
-                                        <div class="d-flex">
-                                            <input id="secuencias"
-                                                class="form-control {{ $errors->has('secuencias') ? 'is-invalid' : '' }}"
-                                                name="secuencias" value="{{ old('secuencias') }}" />
+                                    <div class="form-group row">
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            <label style="flex-basis: 100%;">Números de facturas</label>
+                                            <div class="d-flex">
+                                                <input id="secuencias"
+                                                    class="form-control {{ $errors->has('secuencias') ? 'is-invalid' : '' }}"
+                                                    name="secuencias" value="{{ old('secuencias') }}" />
+                                            </div>
+                                            @error('secuencias')
+                                                <span class="text-danger">{{ $errors->first('secuencias') }}</span>
+                                            @enderror
                                         </div>
-                                        @error('secuencias')
-                                            <span class="text-danger">{{ $errors->first('secuencias') }}</span>
-                                        @enderror
+
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            <label for="whatsapp">Número de comprobante <span class="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                type="text"class="form-control {{ $errors->has('numero_comprobante') ? 'is-invalid' : '' }}"
+                                                id="numero_comprobante" name="numero_comprobante"
+                                                value="{{ old('numero_comprobante') }}" placeholder="XXXXXXX" />
+                                            @error('numero_comprobante')
+                                                <span class="text-danger">{{ $errors->first('numero_comprobante') }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            <label>Banco de Origen <span class="text-danger">*</span></label>
+                                            <select name="banco_origen" class="form-control select2">
+                                                @foreach ($bancos->origen as $banco)
+                                                    <option
+                                                        value="{{ $banco->bancocid }}" {{ old('banco_origen') == $banco->bancocid ? 'selected' : '' }}>
+                                                        {{ $banco->descripcion }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('banco_origen')
+                                                <span class="text-danger">{{ $errors->first('banco_origen') }}</span>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            <label>Banco de Destino <span class="text-danger">*</span></label>
+                                            <select name="banco_destino" class="form-control select2">
+                                                @foreach ($bancos->destino as $banco)
+                                                    <option
+                                                        value="{{ $banco->bancoid }}" {{ old('banco_destino') == $banco->bancoid ? 'selected' : '' }}>
+                                                        {{ $banco->descripcion }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('banco_destino')
+                                                <span class="text-danger">{{ $errors->first('banco_destino') }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            
+                                        </div>
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0"></div>
                                     </div>
 
                                     <div class="form-group">
@@ -55,9 +106,11 @@
                                             class="form-control {{ $errors->has('estado') ? 'is-invalid' : '' }}">
                                             <option value="1" {{ old('estado') == 1 ? 'selected' : '' }}>Registrado
                                             </option>
-                                            <option value="2" {{ old('estado') == 2 ? 'selected' : '' }} disabled>Verificado
+                                            <option value="2" {{ old('estado') == 2 ? 'selected' : '' }} disabled>
+                                                Verificado
                                             </option>
-                                            <option value="3" {{ old('estado') == 3 ? 'selected' : '' }} disabled>Rechazado
+                                            <option value="3" {{ old('estado') == 3 ? 'selected' : '' }} disabled>
+                                                Rechazado
                                             </option>
                                         </select>
                                         @error('estado')

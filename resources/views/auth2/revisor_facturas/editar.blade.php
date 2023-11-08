@@ -1,3 +1,7 @@
+@php
+    $detallePagos = json_decode($factura->detalle_pagos);
+    $noRegistrado = !isset($detallePagos->cobros_id_perseo);
+@endphp
 @extends('auth2.layouts.app')
 
 @section('contenido')
@@ -15,44 +19,11 @@
                                     </div>
                                     <div class="card-toolbar">
                                         <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="">
-                                            <div class="btn-group" role="group" aria-label="First group">
-                                                <a href="{{ route('facturas.revisor') }}"
-                                                    class="btn btn-secondary btn-icon" data-toggle="tooltip"
-                                                    title="Volver"><i class="la la-long-arrow-left"></i></a>
-
-                                                @if (isset($liberable) && $liberable && Auth::user()->liberador == 1)
-                                                    @if ($factura->facturado == 1 && $factura->estado_pago >= 1 && $factura->liberado == 0)
-                                                        <button id="btnLiberarManual" type="submit"
-                                                            class="btn btn-warning btn-icon" data-toggle="tooltip"
-                                                            title="Marcar como liberado"><i class="la la-hand-pointer"></i>
-                                                        </button>
-                                                    @endif
-                                                    @if ($factura->facturado == 1 && $factura->estado_pago >= 1)
-                                                        <a href="{{ route('facturas.ver.liberar', $factura->facturaid) }}"
-                                                            class="btn btn-info btn-icon" data-toggle="tooltip"
-                                                            title="Ver productos a liberar"><i class="la la-rocket"></i></a>
-                                                    @endif
-                                                @endif
-                                                @if (isset($liberable) && !$liberable)
-                                                    @if ($factura->liberado == 0 && $factura->estado_pago >= 1)
-                                                        <a href="{{ route('facturas.liberar_producto_manual', $factura->facturaid) }}"
-                                                            id="btnLiberar" class="btn btn-warning btn-icon"
-                                                            data-toggle="tooltip" title="Liberar producto manual"><i
-                                                                class="la la-rocket"></i>
-                                                        </a>
-                                                    @endif
-                                                @endif
-                                                @if ($factura->facturado != 0 && $factura->autorizado == 0)
-                                                    <a href="{{ route('factura.autorizar', $factura->facturaid) }}"
-                                                        id="btnAutorizar" class="btn btn-success btn-icon"
-                                                        data-toggle="tooltip" title="Autorizar factura"><i
-                                                            class="la la-check-circle-o"></i>
-                                                    </a>
-                                                @endif
-                                            </div>
+                                            @include('auth2.revisor_facturas.inc.toolbar_facturas')
                                         </div>
                                     </div>
                                 </div>
+
                                 <ul class="nav nav-pills mb-5" id="myTab1" role="tablist">
                                     <li class="nav-item">
                                         <a class="nav-link active" id="datos-tab" data-toggle="tab" href="#datosTab">
@@ -100,6 +71,11 @@
         </div>
     </div>
 @endsection
+@if ($noRegistrado)
+    @section('modal')
+        @include('auth2.revisor_facturas.inc.modal_cobros')
+    @endsection
+@endif
 @section('script')
     <script>
         const btnLib = document.getElementById('btnLiberarManual');
@@ -121,4 +97,5 @@
             });
         })
     </script>
+    @yield('modal_script')
 @endsection
