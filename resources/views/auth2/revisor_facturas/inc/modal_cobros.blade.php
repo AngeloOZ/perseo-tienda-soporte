@@ -1,8 +1,10 @@
 @php
     $monto = 0;
     if (isset($cobro->cobrosid)) {
-        $datos = json_decode($renovacion->datos);
-        $monto = $datos->factura->total_facturado;
+        if (isset($renovacion->datos)) {
+            $datos = json_decode($renovacion->datos);
+            $monto = $datos->factura->total_facturado;
+        }
     } elseif (isset($factura->facturaid)) {
         $monto = $factura->total_venta;
     }
