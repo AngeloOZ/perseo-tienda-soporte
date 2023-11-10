@@ -20,6 +20,11 @@ class FacturasLicenciasRenovarController extends Controller
     public static function index(Request $request)
     {
         $instancia = new self();
+
+        $licencias = $instancia->obtener_licencias([1, 2, 3, 6]);
+
+        return $licencias;
+
         $vendedor = $instancia->obtener_vendedor_default(1);
         $factura = $instancia->autorizar_factura((object)["facturaid" => 14060], $vendedor);
 
@@ -497,7 +502,7 @@ class FacturasLicenciasRenovarController extends Controller
 
             Mail::to($correo["to"])->queue(new NotaficacionRenovacion($correo));
         } catch (\Throwable $th) {
-            echo "Error enviar corre: ".$th->getMessage() . "\n";
+            echo "Error enviar corre: " . $th->getMessage() . "\n";
         } finally {
             unlink($temporaryFilePath);
         }
