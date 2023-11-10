@@ -159,7 +159,7 @@ class FacturasLicenciasRenovarController extends Controller
                 return (object)$item;
             })
             ->filter(function ($item) {
-                return $item->producto != 9 && $item->producto != 10 && $item->producto != 12;
+                return $item->producto != 9 && $item->producto != 10;
             })
             ->filter(function ($item) use ($das) {
                 if ($das == null) return true;
