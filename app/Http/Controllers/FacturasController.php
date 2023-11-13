@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificacionNuevoVentaCobro;
 use App\Mail\NuevaCompraEmail;
 use App\Models\Cupones;
 use App\Models\Factura;
@@ -680,7 +681,12 @@ class FacturasController extends Controller
                 $factura->fecha_actualizado = now();
             }
 
+            
             if ($factura->update($datos)) {
+                if ($factura->estado_pago >= 1 && $factura->facturado != 0) {
+                    NotificacionNuevoVentaCobro::dispatch($factura);
+                }
+
                 flash("Comprobante de pago registrado")->success();
                 $log = new Log();
                 $log->usuario = Auth::user()->nombres;
