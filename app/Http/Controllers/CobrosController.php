@@ -6,6 +6,7 @@ use App\Events\RegistrarCobro;
 use App\Mail\NotificarPago;
 use App\Models\Cobros;
 use App\Models\Factura;
+use App\Models\Log;
 use App\Models\RenovacionLicencias;
 use App\Models\User;
 use GuzzleHttp\Client;
@@ -142,6 +143,15 @@ class CobrosController extends Controller
             $this->notificar_pago_correo($cobro);
 
             flash("Cobro registrado correctamente")->success();
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros";
+            $log->operacion = "registrar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             return redirect()->route('cobros.listado.vendedor');
         } catch (\Throwable $th) {
             flash("Error al registrar el cobro")->error();
@@ -199,6 +209,15 @@ class CobrosController extends Controller
 
             $cobro->save();
             flash("Cobro actualizado correctamente")->success();
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros";
+            $log->operacion = "actualizar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             return back();
         } catch (\Throwable $th) {
             flash("Error al registrar el cobro")->error();
@@ -311,6 +330,15 @@ class CobrosController extends Controller
             );
 
             $cobro->update($request->all());
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros - Revisor";
+            $log->operacion = "actualizar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             flash("Cobro actualizado correctamente")->success();
             return back();
         } catch (\Throwable $th) {
@@ -350,6 +378,14 @@ class CobrosController extends Controller
         try {
 
             RegistrarCobro::dispatch($request, $esFactura);
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros - Revisor";
+            $log->operacion = "registro sistema";
+            $log->fecha = now();
+            $log->detalle = json_encode($request->all());
+            $log->save();
 
             flash("Cobro registrado correctamente")->success();
             return back();
