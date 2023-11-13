@@ -683,7 +683,7 @@ class FacturasController extends Controller
 
             
             if ($factura->update($datos)) {
-                if ($factura->estado_pago >= 1 && $factura->facturado != 0) {
+                if ($factura->estado_pago > 0 && $factura->facturado != 0) {
                     NotificacionNuevoVentaCobro::dispatch($factura);
                 }
 

@@ -22,7 +22,6 @@ class NotificacionNuevoVentaCobro
      */
     public function __construct(public Factura $factura)
     {
-        //
     }
 
     /**

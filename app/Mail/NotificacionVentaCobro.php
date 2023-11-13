@@ -32,7 +32,7 @@ class NotificacionVentaCobro extends Mailable implements ShouldQueue
     public function build()
     {
         return $this->view('emails.notificacion_revisor_factura')
-            ->from($this->array['from'], "Perseo notificaciones ventas")
+            ->from($this->array['from'], "Notificacion venta y cobro")
             ->subject($this->array['subject']);
     }
 }

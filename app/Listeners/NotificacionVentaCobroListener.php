@@ -18,7 +18,6 @@ class NotificacionVentaCobroListener
      */
     public function __construct()
     {
-        //
     }
 
     /**
@@ -33,6 +32,7 @@ class NotificacionVentaCobroListener
         $revisor = User::where('distribuidoresid', $factura->distribuidoresid)->where('rol', 2)->first();
 
         if (!$revisor) return;
+
 
         $array = [
             'from' => "noresponder@perseo.ec",
