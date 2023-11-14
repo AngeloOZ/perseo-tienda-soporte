@@ -189,8 +189,6 @@ class FacturasLicenciasRenovarController extends Controller
             $productos = $instancia->buscar_producto($licencia);
             $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
             $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
-            return $datos_cliente;
-
             $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
             $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
             $respuesta->facturado = true;
