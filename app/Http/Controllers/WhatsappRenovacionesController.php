@@ -148,9 +148,9 @@ class WhatsappRenovacionesController extends Controller
         }
     }
 
-    private function init_config()
+    private function init_config($dasArgs = null)
     {
-        $das = Auth::user()->distribuidoresid;
+        $das = $dasArgs != null ? $dasArgs : Auth::user()->distribuidoresid;
         switch ($das) {
             case 1:
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
@@ -266,7 +266,7 @@ class WhatsappRenovacionesController extends Controller
         if ($cron) {
             $instancia->init_config_cron($data->distribuidor);
         } else {
-            $instancia->init_config();
+            $instancia->init_config($data->distribuidor);
         }
         $instancia->validar_existe_token();
 
