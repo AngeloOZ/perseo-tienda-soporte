@@ -645,7 +645,6 @@ class FirmaController extends Controller
         if ($request->ajax()) {
             $data = Firma::select('firma.firmasid',  'firma.identificacion', 'firma.numero_secuencia', 'firma.nombres', 'firma.codigo_cedula', 'firma.correo', 'firma.celular', 'firma.estado', 'firma.tipo_persona', 'firma.fecha_creacion')
                 ->where('distribuidoresid', '=', Auth::user()->distribuidoresid)
-                ->where('estado', 3)->orWhere('estado', 4)
                 ->when($request->fecha, function ($query, $fecha) {
                     $dates = explode(" / ", $fecha);
 
@@ -657,7 +656,11 @@ class FirmaController extends Controller
                     return $query->whereBetween("fecha_creacion", [$desde, $hasta]);
                 })
                 ->when($request->estado, function ($query, $estado) {
-                    return $query->where("estado", $estado);
+                    if ($estado == "todos") {
+                        return $query->whereIn("estado", [3, 4]);
+                    }else{
+                        return $query->where("estado", $estado);
+                    }
                 })
                 ->when($request->vendedores, function ($query, $vendedores) {
                     return $query->where("usuariosid", $vendedores);
