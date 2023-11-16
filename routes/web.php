@@ -9,6 +9,7 @@ use App\Http\Controllers\ComisionesController;
 use App\Http\Controllers\CuponesController;
 use App\Http\Controllers\FacturasController;
 use App\Http\Controllers\FirmaController;
+use App\Http\Controllers\LiberarLicenciasController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
@@ -82,13 +83,19 @@ Route::group(['middleware' => 'auth'], function () {
 
     /* Rutas para liberar licencias */
     Route::prefix('factura/liberar')->group(function () {
-        Route::post('/producto/{factura}', [FacturasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
+        Route::get('producto/{factura}', [LiberarLicenciasController::class, 'redirigir_vista'])->name('liberarlicencias');
+        // web
+        Route::get('/web/{factura}/{ruc?}', [LiberarLicenciasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
 
-        Route::get('/productos/{factura}/{ruc?}', [FacturasController::class, 'vista_liberar_producto'])->name('facturas.ver.liberar');
+        Route::post('/web/{factura}', [LiberarLicenciasController::class, 'liberar_producto'])->name("facturas.liberar_producto");
 
-        Route::post('/renovar-producto/{factura}', [FacturasController::class, 'renovar_licencia'])->name("facturas.renovar_licencia_producto");
+        Route::post('/renovar-web/{factura}', [LiberarLicenciasController::class, 'renovar_licencia'])->name("facturas.renovar_licencia_producto");
 
-        Route::put('/reactivacion/{factura}', [FacturasController::class, 'reactivar_liberacion'])->name('facturas.reactivar_liberacion');
+        Route::put('/reactivacion/{factura}', [LiberarLicenciasController::class, 'reactivar_liberacion'])->name('facturas.reactivar_liberacion');
+
+        // contafacil
+        Route::get('/contafacil/{factura}', [LiberarLicenciasController::class, 'vista_liberar_contafacil'])->name('liberar.vista.contafacil');
+        Route::post('/contafacil/{factura}', [LiberarLicenciasController::class, 'liberar_licencia_contafacil'])->name('liberar.licencia.contafacil');
     });
 
     /* Rutas para admin firmas (Steban)*/

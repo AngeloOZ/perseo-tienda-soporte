@@ -21,14 +21,6 @@
                 title="Confirmar datos"><i class="la la-rocket"></i>
             </button>
         @endif
-
-        {{-- @if ($contador->esContador && $licencias != null)
-            @if ($licencias->liberar == true && $licencias->accion == 'renovar')
-                <button type="button" class="btn btn-success btn-icon" data-toggle="tooltip" title="Renovar licencia"
-                    id="btnLiberar"><i class="la la-rocket"></i>
-                </button>
-            @endif
-        @endif --}}
     @endif
 
     @if ($factura->liberado == 1 && Auth::user()->liberador == 1)
