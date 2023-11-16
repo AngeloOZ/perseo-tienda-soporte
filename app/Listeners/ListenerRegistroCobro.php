@@ -104,9 +104,8 @@ class ListenerRegistroCobro
 
     private function registro_del_cobro($factura, $datos_cobro)
     {
+        $fechaActual = date("Ymd");
         try {
-            $fecha = date('Ymd');
-
             $cobro = [
                 'api_key' => Auth::user()->token,
                 'registros' => [
@@ -136,9 +135,10 @@ class ListenerRegistroCobro
                                     'documentosid' => $factura->facturasid,
                                     'formapago' => $datos_cobro->forma_pago,
                                     'saldo' => 0, // Default
-                                    'fechaemision' => $fecha,
-                                    'fecharecepcion' => $fecha,
-                                    'fechavence' => $fecha,
+                                    'fechaemision' => $datos_cobro->fecha,
+                                    'fecharecepcion' => $datos_cobro->fecha,
+                                    'fechavence' => $datos_cobro->fecha,
+                                    'fechavenceCH' => $fechaActual,
                                     'secuencia' => $factura->secuencial,
                                 ],
                             ],
