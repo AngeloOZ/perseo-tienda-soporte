@@ -9,7 +9,7 @@
             </button>
         @endif
         @if ($factura->facturado == 1 && $factura->estado_pago >= 1)
-            <a href="{{ route('facturas.ver.liberar', $factura->facturaid) }}" class="btn btn-info btn-icon"
+            <a href="{{ route('liberarlicencias', $factura->facturaid) }}" class="btn btn-info btn-icon"
                 data-toggle="tooltip" title="Ver productos a liberar"><i class="la la-rocket"></i></a>
         @endif
     @endif
@@ -21,12 +21,14 @@
             </a>
         @endif
     @endif
-    @if ($factura->facturado != 0 && $factura->autorizado == 0)
-        <a href="{{ route('factura.autorizar', $factura->facturaid) }}" id="btnAutorizar"
-            class="btn btn-success btn-icon" data-toggle="tooltip" title="Autorizar factura"><i
-                class="la la-check-circle-o"></i>
-        </a>
+
+    @if (isset($liberable) && $liberable && Auth::user()->liberador == 1)
+        @if ($factura->facturado == 1 && $factura->estado_pago >= 1)
+            <a href="{{ route('liberarlicencias', $factura->facturaid) }}" class="btn btn-info btn-icon"
+                data-toggle="tooltip" title="Ver productos a liberar"><i class="la la-rocket"></i></a>
+        @endif
     @endif
+
 
     @if (in_array(Auth::user()->distribuidoresid, [1, 2]))
         @if ($noRegistrado)
