@@ -152,7 +152,7 @@ class ListenerRegistroCobro
             $response_cobro = $response->cobros[0];
             return $response_cobro;
         } catch (\Throwable $th) {
-            throw new \Exception("el servicio API fallo");
+            throw $th;
         }
     }
 }
