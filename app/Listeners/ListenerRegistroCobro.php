@@ -138,7 +138,7 @@ class ListenerRegistroCobro
                                     'fechaemision' => $datos_cobro->fecha,
                                     'fecharecepcion' => $datos_cobro->fecha,
                                     'fechavence' => $datos_cobro->fecha,
-                                    'fechavenceCH' => $fechaActual,
+                                    'fechavenceCH' => $datos_cobro->fecha,
                                     'secuencia' => $factura->secuencial,
                                 ],
                             ],
