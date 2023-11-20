@@ -23,7 +23,7 @@
                 </a>
             @endif
             
-            @if (Auth::user()->distribuidoresid == 1)
+            @if (in_array(Auth::user()->distribuidoresid, [1, 2, 5]))
                 @if (isset($cobro->renovacionid) && $noRegistrado)
                     <button id="btnRegistrarCobro" type="button" class="btn btn-primary btn-icon" data-toggle="tooltip"
                         title="Registrar cobro">

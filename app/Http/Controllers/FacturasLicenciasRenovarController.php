@@ -21,21 +21,31 @@ class FacturasLicenciasRenovarController extends Controller
 
     public static function index(Request $request)
     {
-        $tecnicoLibre = Tecnicos::where('rol', 5)
-            ->where('estado', 1)
-            ->where('activo', 1)
-            ->where('tickets_activos', '<', DB::raw('tickets_maximos'))
-            ->where('distribuidoresid', 2)
-            // ->where('productos', 'like', '%pc%')
-            ->orderBy('tickets_activos')
-            ->first();
+        $instancia = new self();
 
-        if ($tecnicoLibre == null) {
-            echo "No hay técnicos disponibles";
-        }
-        else{
-            return $tecnicoLibre;
-        }
+        $licencias = $instancia->obtener_licencias([1, 2, 3, 6]);
+
+        return $licencias;
+
+        $vendedor = $instancia->obtener_vendedor_default(1);
+        $factura = $instancia->autorizar_factura((object)["facturaid" => 14060], $vendedor);
+
+        $instancia->notificar_renovacion_correo([
+            "to" => "angello.ordonez@hotmail.com",
+            "from" => "Sistema de renovación",
+            "subject" => "Renovación del sistema contable Perseo",
+            "pdfBase64" => $factura->pdf,
+            "cliente" => "CELLERI PESANTEZ RAUL OSVALDO",
+            "comprobante" => "e12q42e59th8",
+            "secuencia" => "000013423",
+        ]);
+
+        $decodedPdf = base64_decode($factura->pdf);
+
+        return response($decodedPdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="filename.pdf"',
+        ]);
     }
 
     public static function generar_facturas_renovacion()
@@ -133,6 +143,104 @@ class FacturasLicenciasRenovarController extends Controller
         }
     }
 
+    /* -------------------------------------------------------------------------- */
+    /*                   Funciones para renovacion desde la API                   */
+    /* -------------------------------------------------------------------------- */
+
+    public static function generar_factura_licenciador(Request $request)
+    {
+        $usuario = $request->header('usuario');
+        $clave = $request->header('clave');
+
+        if ($usuario != "Perseo" || $clave != "Perseo1232*") {
+            return response()->json(['error' => 'Acceso no autorizado'], 401);
+        }
+
+        $respuesta = (object)[
+            'facturado' => false,
+            'autorizado' => false,
+            'cobros_generado' => false,
+            'enlace_pago' => null,
+            'error' => null,
+        ];
+
+        try {
+            $instancia = new self();
+
+            $licencia = (object)[
+                "identificacion" => $request->identificacion,
+                "nombres" => $request->nombres,
+                "telefono2" => $request->telefono2,
+                "correos" => $request->correos,
+                "direccion" => $request->direccion,
+                "tipo_licencia" => $request->tipo_licencia,
+                "periodo" => $request->periodo,
+                "producto" => $request->producto,
+                "sis_distribuidoresid" => $request->sis_distribuidoresid,
+                "vendedor" => $request->vendedor,
+                "contador_identificacion" => $request->contador_identificacion,
+                "contador_nombres" => $request->contador_nombres,
+                "contador_correo" => $request->contador_correo,
+                "contador_celular" => $request->contador_celular,
+                "contador_direccion" => $request->contador_direccion,
+                "modulopractico" => $request->modulopractico,
+                "modulocontrol" => $request->modulocontrol,
+                "modulocontable" => $request->modulocontable,
+            ];
+
+            $productos = $instancia->buscar_producto($licencia);
+            $vendedor = $instancia->obtener_vendedor_default($licencia->sis_distribuidoresid);
+            $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
+            $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
+            $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
+            $respuesta->facturado = true;
+            $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+            $respuesta->autorizado = true;
+            
+
+            $renovacion = new RenovacionLicencias();
+            $renovacion->uuid = uniqid();
+            $renovacion->secuencia = $factura->secuencia;
+            $renovacion->datos = json_encode([
+                "datos_cliente" => $datos_cliente,
+                "licencia" => $licencia,
+                "factura" => $factura,
+            ]);
+            $renovacion->distribuidoresid = $vendedor->distribuidoresid;
+            $renovacion->save();
+            $respuesta->cobros_generado = true;
+            $respuesta->enlace_pago = route('pagos.registrar', $renovacion->uuid);
+
+            $instancia->notificar_renovacion_correo([
+                "to" => $datos_cliente->correos,
+                "from" => "Sistema de renovación",
+                "subject" => "Renovación del sistema contable Perseo",
+                "pdfBase64" => $autorizada->pdf,
+                "cliente" => $datos_cliente->nombres,
+                "comprobante" => $renovacion->uuid,
+                "secuencia" => $factura->secuencia,
+            ]);
+
+            if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
+                WhatsappRenovacionesController::enviar_archivo_mensaje([
+                    "phone" => $datos_cliente->telefono2,
+                    "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que se ha generado la factura de la renovación de tu plan.\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
+                    "filename" => "factura_{$factura->secuencia}.pdf",
+                    "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
+                    "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                ], 5, false);
+            }
+            return response()->json($respuesta, 200);
+        } catch (\Throwable $th) {
+            $respuesta->error = $th->getMessage();
+            return response()->json($respuesta, 500);
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*           Funciones para renovacion para renovacions de licencias          */
+    /* -------------------------------------------------------------------------- */
+
     private function obtener_licencias(array $das = null)
     {
         $url = "https://perseo.app/api/proximas_caducar/";
@@ -151,7 +259,7 @@ class FacturasLicenciasRenovarController extends Controller
                 return (object)$item;
             })
             ->filter(function ($item) {
-                return $item->producto != 9 && $item->producto != 10 && $item->producto != 12;
+                return $item->producto != 9 && $item->producto != 10;
             })
             ->filter(function ($item) use ($das) {
                 if ($das == null) return true;
@@ -494,7 +602,7 @@ class FacturasLicenciasRenovarController extends Controller
 
             Mail::to($correo["to"])->queue(new NotaficacionRenovacion($correo));
         } catch (\Throwable $th) {
-            echo "Error enviar corre: ".$th->getMessage() . "\n";
+            echo "Error enviar corre: " . $th->getMessage() . "\n";
         } finally {
             unlink($temporaryFilePath);
         }

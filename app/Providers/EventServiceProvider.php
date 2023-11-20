@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\NotificacionNuevoVentaCobro;
 use App\Events\NuevoRegistroSopEsp;
+use App\Events\RegistrarCobro;
+use App\Listeners\ListenerRegistroCobro;
+use App\Listeners\NotificacionVentaCobroListener;
 use App\Listeners\NotificarRgistroSopEspListner;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -21,6 +25,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         NuevoRegistroSopEsp::class => [
             NotificarRgistroSopEspListner::class,
+        ],
+        RegistrarCobro::class =>[
+            ListenerRegistroCobro::class,
+        ],
+        NotificacionNuevoVentaCobro::class => [
+            NotificacionVentaCobroListener::class,
         ],
     ];
 

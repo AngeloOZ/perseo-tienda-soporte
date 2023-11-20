@@ -29,7 +29,7 @@
                                     <div class="col-12 col-md-2">
                                         <label>Estado:</label>
                                         <select class="form-control select" id="filtroEstado">
-                                            <option value="" selected>Todos</option>
+                                            <option value="todos" selected>Todos</option>
                                             <option value="3">En progreso</option>
                                             <option value="4">Finalizado</option>
                                         </select>

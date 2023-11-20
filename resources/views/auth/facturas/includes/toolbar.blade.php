@@ -41,7 +41,7 @@
             @endif
             @if (isset($liberable) && $liberable && Auth::user()->liberador == 1)
                 @if ($factura->facturado == 1 && $factura->estado_pago >= 1)
-                    <a href="{{ route('facturas.ver.liberar', $factura->facturaid) }}" class="btn btn-info btn-icon"
+                    <a href="{{ route('liberarlicencias', $factura->facturaid) }}" class="btn btn-info btn-icon"
                         data-toggle="tooltip" title="Ver productos a liberar"><i class="la la-rocket"></i></a>
                 @endif
             @endif

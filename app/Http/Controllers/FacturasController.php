@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NotificacionNuevoVentaCobro;
 use App\Mail\NuevaCompraEmail;
 use App\Models\Cupones;
 use App\Models\Factura;
@@ -680,7 +681,12 @@ class FacturasController extends Controller
                 $factura->fecha_actualizado = now();
             }
 
+
             if ($factura->update($datos)) {
+                if ($factura->estado_pago > 0 && $factura->facturado != 0) {
+                    NotificacionNuevoVentaCobro::dispatch($factura);
+                }
+
                 flash("Comprobante de pago registrado")->success();
                 $log = new Log();
                 $log->usuario = Auth::user()->nombres;
@@ -752,67 +758,21 @@ class FacturasController extends Controller
         }
         return back();
     }
-
-
     /* -------------------------------------------------------------------------- */
     /*                      funciones para liberar productos                      */
     /* -------------------------------------------------------------------------- */
-
-    private function validar_lincecias($ruc)
-    {
-        try {
-            if (!$ruc) {
-                return json_decode(json_encode([]));
-            }
-
-            $url = "https://perseo.app/api/consultar_licencia_web";
-
-            $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
-                ->withOptions(["verify" => false])
-                ->post($url, ['identificacion' => $ruc])
-                ->json();
-
-            return json_decode(json_encode($resultado));
-        } catch (\Throwable $th) {
-            return json_decode(json_encode([]));
-        }
-    }
 
     public function vista_liberar_producto(Factura $factura, $ruc = null)
     {
         try {
             $licencias =  $this->validar_lincecias($ruc);
+            $vendedorSIS = $this->obtenerVendedorSIS($factura);
+            $promocion = $this->obtenerPromocion($factura);
             $productos_contadores = [62, 63, 64, 65];
-            $vendedorSIS = null;
-            $promocion = 0;
             $contador = [
                 "esContador" => false,
                 "error" => false,
             ];
-
-            if ($factura->cuponid) {
-                $cupon = Cupones::where('cuponid', $factura->cuponid)->first();
-                if ($cupon->tipo == 2) {
-                    $promocion = 1;
-                }
-            }
-
-            if ($factura->liberado == 0) {
-                $url = "https://perseo.app/api/vendedores_consulta";
-
-                $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
-                    ->withOptions(["verify" => false])
-                    ->post($url, ['identificacion' => substr(Auth::user()->identificacion, 0, 10)])
-                    ->json();
-
-                $vendedorSIS = $resultado["vendedor"][0];
-
-                if ($vendedorSIS == null) {
-                    flash("Usuario no registrado en el licenciador como vendedor")->warning();
-                    return back();
-                }
-                $vendedorSIS = json_decode(json_encode($vendedorSIS));
-            }
 
             $productos = json_decode($factura->productos);
             $productos_liberables = [];
@@ -1486,6 +1446,64 @@ class FacturasController extends Controller
             Mail::to($vendedor->correo)->queue(new NuevaCompraEmail($array));
         } catch (\Throwable $th) {
             flash("No se pudo enviar el correo de notificación")->warning();
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                  Funciones para refactorizacion liberacion                 */
+    /* -------------------------------------------------------------------------- */
+
+    private function obtenerPromocion($factura)
+    {
+        $promocion = 0;
+        if ($factura->cuponid) {
+            $cupon = Cupones::where('cuponid', $factura->cuponid)->first();
+            if ($cupon && $cupon->tipo == 2) {
+                $promocion = 1;
+            }
+        }
+        return $promocion;
+    }
+
+    private function obtenerVendedorSIS($factura)
+    {
+        if ($factura->liberado == 0) {
+            $url = "https://perseo.app/api/vendedores_consulta";
+
+            $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
+                ->withOptions(["verify" => false])
+                ->post($url, ['identificacion' => substr(Auth::user()->identificacion, 0, 10)])
+                ->json();
+
+            $vendedorSIS = $resultado["vendedor"][0];
+
+            if ($vendedorSIS == null) {
+                flash("Usuario no registrado en el licenciador como vendedor")->warning();
+                return back();
+            }
+            $vendedorSIS = json_decode(json_encode($vendedorSIS));
+            return $vendedorSIS;
+        }
+        return null;
+    }
+
+    private function validar_lincecias($ruc)
+    {
+        try {
+            if (!$ruc) {
+                return json_decode(json_encode([]));
+            }
+
+            $url = "https://perseo.app/api/consultar_licencia_web";
+
+            $resultado = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false, 'usuario' => 'Perseo', "clave" => "Perseo1232*"])
+                ->withOptions(["verify" => false])
+                ->post($url, ['identificacion' => $ruc])
+                ->json();
+
+            return json_decode(json_encode($resultado));
+        } catch (\Throwable $th) {
+            return json_decode(json_encode([]));
         }
     }
 }

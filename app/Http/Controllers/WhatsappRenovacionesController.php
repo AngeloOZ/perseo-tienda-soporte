@@ -148,9 +148,9 @@ class WhatsappRenovacionesController extends Controller
         }
     }
 
-    private function init_config()
+    private function init_config($dasArgs = null)
     {
-        $das = Auth::user()->distribuidoresid;
+        $das = $dasArgs != null ? $dasArgs : Auth::user()->distribuidoresid;
         switch ($das) {
             case 1:
                 $this->APIWhatsapp = "{$this->URL_BASE}:8089/api/renovacionesalfa2";
@@ -217,11 +217,15 @@ class WhatsappRenovacionesController extends Controller
         }
     }
 
-    public static function enviar_mensaje($data)
+    public static function enviar_mensaje($data, $cron = true)
     {
         $data = (object)$data;
         $instancia = new self();
-        $instancia->init_config_cron($data->distribuidor);
+        if ($cron) {
+            $instancia->init_config_cron($data->distribuidor);
+        } else {
+            $instancia->init_config();
+        }
         $instancia->validar_existe_token();
 
         try {
@@ -255,11 +259,15 @@ class WhatsappRenovacionesController extends Controller
         }
     }
 
-    public static function enviar_archivo_mensaje($data, $timeout = 5)
+    public static function enviar_archivo_mensaje($data, $timeout = 5, $cron = true)
     {
         $data = (object)$data;
         $instancia = new self();
-        $instancia->init_config_cron($data->distribuidor);
+        if ($cron) {
+            $instancia->init_config_cron($data->distribuidor);
+        } else {
+            $instancia->init_config($data->distribuidor);
+        }
         $instancia->validar_existe_token();
 
         try {
@@ -290,7 +298,7 @@ class WhatsappRenovacionesController extends Controller
             if (isset($res['status']) && $res['status'] == 'success') {
                 return true;
             }
-            
+
             $errorMessage = isset($res['message']) ? $res['message'] : '';
             echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;

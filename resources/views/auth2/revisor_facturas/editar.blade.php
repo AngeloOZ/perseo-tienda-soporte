@@ -1,6 +1,7 @@
 @php
+    $tienePagoTarjeta = isset($factura->pago_tarjeta);    
     $detallePagos = json_decode($factura->detalle_pagos);
-    $noRegistrado = !isset($detallePagos->cobros_id_perseo);
+    $noRegistrado = !isset($detallePagos->cobros_id_perseo) && !$tienePagoTarjeta;
 @endphp
 @extends('auth2.layouts.app')
 

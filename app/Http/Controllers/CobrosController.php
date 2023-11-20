@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\RegistrarCobro;
 use App\Mail\NotificarPago;
 use App\Models\Cobros;
 use App\Models\Factura;
+use App\Models\Log;
 use App\Models\RenovacionLicencias;
 use App\Models\User;
 use GuzzleHttp\Client;
@@ -141,6 +143,15 @@ class CobrosController extends Controller
             $this->notificar_pago_correo($cobro);
 
             flash("Cobro registrado correctamente")->success();
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros";
+            $log->operacion = "registrar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             return redirect()->route('cobros.listado.vendedor');
         } catch (\Throwable $th) {
             flash("Error al registrar el cobro")->error();
@@ -198,6 +209,15 @@ class CobrosController extends Controller
 
             $cobro->save();
             flash("Cobro actualizado correctamente")->success();
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros";
+            $log->operacion = "actualizar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             return back();
         } catch (\Throwable $th) {
             flash("Error al registrar el cobro")->error();
@@ -310,6 +330,15 @@ class CobrosController extends Controller
             );
 
             $cobro->update($request->all());
+
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros - Revisor";
+            $log->operacion = "actualizar";
+            $log->fecha = now();
+            $log->detalle = json_encode($cobro);
+            $log->save();
+
             flash("Cobro actualizado correctamente")->success();
             return back();
         } catch (\Throwable $th) {
@@ -347,129 +376,22 @@ class CobrosController extends Controller
         $esFactura = isset($request->facturaid) ? true : false;
 
         try {
-            if ($esFactura) {
-                $factura = Factura::findOrFail($request->facturaid, ['facturaid', 'facturaid_perseo', 'secuencia_perseo', 'total_venta', 'detalle_pagos', 'usuariosid', 'estado_pago']);
-                $datos_cobro = json_decode($factura->detalle_pagos);
-                $datos_cobro->forma_pago = $request->forma_pago;
-                $datos_cobro->monto = $request->monto;
-                $datos_cobro->fecha = date("Ymd", strtotime($request->fecha));
 
-                $facturaid = $factura->facturaid_perseo;
-            } else {
-                $cobro = Cobros::findOrFail($request->cobrosid, ['banco_destino', 'numero_comprobante', 'renovacionid', 'estado', 'cobros_id_perseo']);
-                $renovaciones = RenovacionLicencias::findOrFail($cobro->renovacionid, ['renovacionid', 'datos']);
+            RegistrarCobro::dispatch($request, $esFactura);
 
-                $datos = json_decode($renovaciones->datos);
-
-                $facturaid = $datos->factura->facturaid;
-                $datos_cobro = (object)[
-                    'numero_comprobante' => $cobro->numero_comprobante,
-                    'banco_destino' => $cobro->banco_destino,
-                    'banco_origen' => $cobro->banco_origen,
-                    'forma_pago' => $request->forma_pago,
-                    'monto' => $request->monto,
-                    'fecha' => date("Ymd", strtotime($request->fecha)),
-                ];
-            }
-
-            $factura_perseo = $this->obtener_factura_perseo($facturaid);
-            $cobro_registrado = $this->registro_del_cobro($factura_perseo, $datos_cobro);
-            $datos_cobro->cobros_id_perseo = $cobro_registrado->cobrosid_nuevo;
-            $datos_cobro->cobros_cod_perseo = $cobro_registrado->codigo_nuevo;
-
-            if ($esFactura) {
-                $factura->update(['detalle_pagos' => json_encode($datos_cobro), 'estado_pago' => 2]);
-            } else {
-                $data = [
-                    'estado' => 2,
-                    'cobros_id_perseo' => json_encode([
-                        'cobros_id_perseo' => $datos_cobro->cobros_id_perseo,
-                        'cobros_cod_perseo' => $datos_cobro->cobros_cod_perseo,
-                        'forma_pago' => $datos_cobro->forma_pago,
-                        'monto' => $datos_cobro->monto,
-                    ]),
-                ];
-                Cobros::where('cobrosid', $request->cobrosid)->update($data);
-            }
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Cobros - Revisor";
+            $log->operacion = "registro sistema";
+            $log->fecha = now();
+            $log->detalle = json_encode($request->all());
+            $log->save();
 
             flash("Cobro registrado correctamente")->success();
             return back();
         } catch (\Throwable $th) {
             flash("Error al registrar el cobro: " . $th->getMessage())->error();
             return back();
-        }
-    }
-
-    private function obtener_factura_perseo($facturaid)
-    {
-        try {
-            $url = Auth::user()->api;
-
-            $body = [
-                "api_key" => Auth::user()->token,
-                "facturaid" => $facturaid,
-            ];
-
-            $factura = $this->client->post($url . "/facturas_consulta", ["json" => $body]);
-            $factura = json_decode($factura->getBody()->getContents());
-
-            return $factura->facturas[0];
-        } catch (\Throwable $th) {
-            throw $th;
-        }
-    }
-
-    private function registro_del_cobro($factura, $datos_cobro)
-    {
-        try {
-            $fecha = date('Ymd');
-
-            $cobro = [
-                'api_key' => Auth::user()->token,
-                'registros' => [
-                    0 => [
-                        'cobros' => [
-                            'clientesid' => $factura->clientesid,
-                            'cobroscodigo' => '1', // Default
-                            'cobradoresid' => Auth::user()->vendedoresid,
-                            'tipo' => 'AB', // Default
-                            'movimientos_conceptosid' => 3, //Default 
-                            'forma_pago_empresaid' => $datos_cobro->forma_pago,
-                            'concepto' => $factura->concepto,
-                            'fechaemision' => $datos_cobro->fecha,
-                            'fecharecepcion' => $datos_cobro->fecha,
-                            'fechavencimiento' => $datos_cobro->fecha,
-                            'importe' => floatval($datos_cobro->monto),
-                            'cajasid' => Auth::user()->cajasid,
-                            'bancosid' => $datos_cobro->banco_destino,
-                            'usuariocreacion' => Auth::user()->identificacion,
-                            'usuarioid' => Auth::user()->vendedoresid,
-                            'detalles' => [
-                                0 => [
-                                    'bancoid' => 0, // Solo si es cheque o TC
-                                    'cajasid' => $datos_cobro->banco_destino,
-                                    'comprobante' => $datos_cobro->numero_comprobante,
-                                    'importe' => floatval($datos_cobro->monto),
-                                    'documentosid' => $factura->facturasid,
-                                    'formapago' => $datos_cobro->forma_pago,
-                                    'saldo' => 0, // Default
-                                    'fechaemision' => $fecha,
-                                    'fecharecepcion' => $fecha,
-                                    'fechavence' => $fecha,
-                                    'secuencia' => $factura->secuencial,
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-            ];
-
-            $request = $this->client->post(Auth::user()->api . "/cobros_crear", ["json" => $cobro]);
-            $response = json_decode($request->getBody()->getContents());
-            $response_cobro = $response->cobros[0];
-            return $response_cobro;
-        } catch (\Throwable $th) {
-            throw new \Exception("el servicio API fallo");
         }
     }
 
