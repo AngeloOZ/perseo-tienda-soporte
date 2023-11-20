@@ -41,7 +41,7 @@ Route::group(['middleware' => 'tecnico', 'prefix' => 'cotizaciones'], function (
 
         Route::get('/crear/{prospecto}', [cotizarController::class, 'crearPlantilla'])->name('cotizarPlantilla1.index');
         Route::post('/guardar', [cotizarController::class, 'guardarPlantilla'])->name('descargarPlantilla.index');
-        
+
         Route::get('/editar/{cotizacion}', [cotizarController::class, 'editarCotizaciones'])->name('cotizarPlantilla.editar');
         Route::put('/actualizar/{cotizacion}', [cotizarController::class, 'actualizarCotizaciones'])->name('actualizarCotizacion.index');
         Route::post('/recuperar-precio', [cotizarController::class, 'recuperarPrecio'])->name('recuperarPrecio');

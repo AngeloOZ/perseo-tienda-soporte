@@ -56,8 +56,8 @@ class cotizarController extends Controller
             $cotizaciones->nombre_cliente = $request->nombre_cliente;
             $cotizaciones->plantillasid = $request->tipo_plantilla;
             $cotizaciones->detalle_pago = $request->forma_pagoid;
-            $cotizaciones->usuariocreacion = Auth::guard('tecnico')->user()->nombres;
-            $cotizaciones->asesorid = Auth::guard('tecnico')->user()->tecnicosid;
+            $cotizaciones->usuariocreacion = $this->obtenerDatosUsuarioLoggeado()->nombres;
+            $cotizaciones->asesorid = $this->obtenerDatosUsuarioLoggeado()->id;
             $cotizaciones->fechacreacion = now();
 
             $array = $request->arrayDetalles;
@@ -92,7 +92,7 @@ class cotizarController extends Controller
 
             $cotizaciones->save();
             $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+            $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $historial->pantalla = "Cotizar";
             $historial->operacion = "Crear";
             $historial->fecha = now();
@@ -192,8 +192,8 @@ class cotizarController extends Controller
                 $template = new TemplateProcessor('word/pcControl.docx');
                 $fileName = 'Perseo PC Control';
             }
-            $template->setValue('nombre_firma', Auth::guard('tecnico')->user()->nombres);
-            $template->setValue('celular_firma', Auth::guard('tecnico')->user()->celular);
+            $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
+            $template->setValue('celular_firma', Auth::guard('tecnico')->user()->telefono);
             $template->setValue('correo_firma', Auth::guard('tecnico')->user()->correo);
             $template->setValue('fecha', $fechaP);
             $template->setValue('valor_mantenimiento', $valor_mantenimiento);
@@ -217,7 +217,7 @@ class cotizarController extends Controller
             $actualizar->plantillasid = $request->tipo_plantilla;
             $actualizar->detalle_pago = $request->forma_pagoid;
             $actualizar->fechamodificacion = now();
-            $actualizar->usuariomodificacion = Auth::guard('tecnico')->user()->nombres;
+            $actualizar->usuariomodificacion = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $actualizar->detalle_cotizacion = json_encode($data);
 
             $actualizar->subtotal = number_format($totalneto, 2, '.', '');
@@ -226,7 +226,7 @@ class cotizarController extends Controller
 
             if ($actualizar->save()) {
                 $historial = new Log();
-                $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+                $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
                 $historial->pantalla = "Cotizar";
                 $historial->operacion = "Modificar";
                 $historial->fecha = now();
@@ -249,7 +249,7 @@ class cotizarController extends Controller
             $actualizar->plantillasid = $request->tipo_plantilla;
             $actualizar->detalle_pago = $request->forma_pagoid;
             $actualizar->fechamodificacion = now();
-            $actualizar->usuariomodificacion = Auth::guard('tecnico')->user()->nombres;
+            $actualizar->usuariomodificacion = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $array = $request->arrayDetalles;
 
             for ($i = 0; $i < count($array); $i++) {
@@ -279,7 +279,7 @@ class cotizarController extends Controller
 
             if ($actualizar->save()) {
                 $historial = new Log();
-                $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+                $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
                 $historial->pantalla = "Cotizar";
                 $historial->operacion = "Modificar";
                 $historial->fecha = now();
@@ -305,9 +305,27 @@ class cotizarController extends Controller
 
             $info = Cotizaciones::select('cotizaciones.cotizacionesid', 'cotizaciones.fecha', 'plantillasdescarga.detalle as plantilla', 'cotizaciones.detalle_pago', 'cotizaciones.nombre_cliente as prospectosnombres', 'cotizaciones.subtotal', 'cotizaciones.iva', 'cotizaciones.total', 'cotizaciones.usuariocreacion')
                 ->join('plantillasdescarga', 'plantillasdescarga.plantillaDescargaid', 'cotizaciones.plantillasid')
-                // ->join('prospectos', 'prospectos.prospectosid', 'cotizaciones.prospectosid')
-                // ->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
-                // ->where('tecnicos.distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
+                ->when(in_array($this->obtenerDatosUsuarioLoggeado()->rol, [1, 5]), function ($q) {
+                    $usuario = $this->obtenerDatosUsuarioLoggeado();
+                    if ($usuario->esTecnico) {
+                        return $q->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
+                            ->where('tecnicos.tecnicosid', $usuario->id);
+                    } else {
+                        return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
+                            ->where('usuarios.usuariosid', $usuario->id);
+                    }
+                })
+                ->when(in_array($this->obtenerDatosUsuarioLoggeado()->rol, [7]), function ($q) {
+                    $usuario = $this->obtenerDatosUsuarioLoggeado();
+
+                    if ($usuario->esTecnico) {
+                        return $q->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
+                            ->where('tecnicos.distribuidoresid', $usuario->distribuidoresid);
+                    } else {
+                        return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
+                            ->where('usuarios.distribuidoresid', $usuario->distribuidoresid);
+                    }
+                })
                 ->get();
 
             return DataTables::of($info)
@@ -329,7 +347,7 @@ class cotizarController extends Controller
         try {
             $eliminar = Cotizaciones::where('cotizacionesid', $cotizaciones)->first();
             $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+            $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $historial->pantalla = "Cotizar";
             $historial->operacion = "Eliminar";
             $historial->fecha = now();
@@ -377,7 +395,6 @@ class cotizarController extends Controller
             [
                 'detalle' => ['required'],
                 'precio' => ['required'],
-
             ],
             [
                 'detalle.required' => 'Ingrese detalles',
@@ -389,13 +406,13 @@ class cotizarController extends Controller
         $detalles->detalle = $request->detalle;
         $detalles->precio =  number_format(floatval($request->precio), 2, '.', '');
         $detalles->fechacreacion = now();
-        $detalles->usuariocreacion = Auth::guard('tecnico')->user()->nombres;
+        $detalles->usuariocreacion = $this->obtenerDatosUsuarioLoggeado()->nombres;
 
 
 
         if ($detalles->save()) {
             $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+            $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $historial->pantalla = "Cotizar";
             $historial->operacion = "Crear Detalle ";
             $historial->fecha = now();
@@ -431,10 +448,10 @@ class cotizarController extends Controller
         $actualizar->detalle = $request->detalle;
         $actualizar->precio =  number_format(floatval($request->precio), 2, '.', '');
         $actualizar->fechamodificacion = now();
-        $actualizar->usuariomodificacion = Auth::guard('tecnico')->user()->nombres;
+        $actualizar->usuariomodificacion = $this->obtenerDatosUsuarioLoggeado()->nombres;
         if ($actualizar->save()) {
             $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+            $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $historial->pantalla = "Cotizar";
             $historial->operacion = "Modificar Detalle";
             $historial->fecha = now();
@@ -453,7 +470,7 @@ class cotizarController extends Controller
         try {
             $eliminar = CotizacionesDetalle::where('detallesid', $detalles)->first();
             $historial = new Log();
-            $historial->usuario = Auth::guard('tecnico')->user()->nombres;
+            $historial->usuario = $this->obtenerDatosUsuarioLoggeado()->nombres;
             $historial->pantalla = "Cotizar";
             $historial->operacion = "Eliminar Detalle";
             $historial->fecha = now();
@@ -467,5 +484,34 @@ class cotizarController extends Controller
             flash('Ocurrió un error vuelva a intentarlo')->warning();
         }
         return redirect()->route('detalles.listado');
+    }
+
+    function obtenerDatosUsuarioLoggeado()
+    {
+        if (Auth::guard('tecnico')->check()) {
+            $usuario = Auth::guard('tecnico')->user();
+            return (object)[
+                'id' => $usuario->tecnicosid,
+                'nombres' => $usuario->nombres,
+                'identificacion' => $usuario->identificacion,
+                'telefono' => $usuario->telefono,
+                'correo' => $usuario->correo,
+                'esTecnico' => true,
+                'distribuidoresid' => $usuario->distribuidoresid,
+                'rol' => $usuario->rol,
+            ];
+        } else {
+            $usuario = Auth::user();
+            return (object)[
+                'id' => $usuario->usuariosid,
+                'nombres' => $usuario->nombres,
+                'identificacion' => $usuario->identificacion,
+                'telefono' => $usuario->telefono,
+                'correo' => $usuario->correo,
+                'esTecnico' => false,
+                'distribuidoresid' => $usuario->distribuidoresid,
+                'rol' => $usuario->rol,
+            ];
+        }
     }
 }

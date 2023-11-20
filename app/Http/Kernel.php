@@ -65,5 +65,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'tecnico' => \App\Http\Middleware\Tecnico::class,
         'cliente' => \App\Http\Middleware\Cliente::class,
+        'auth_or_tecnico' => \App\Http\Middleware\AuthOrTecnicoMiddleware::class,
     ];
 }
