@@ -279,8 +279,7 @@
                                                                 Esperamos que estés teniendo un
                                                                 excelente día. Queremos informarte con mucha alegría que
                                                                 hemos generado la factura adjunta de la renovación de tu
-                                                                plan,
-                                                                cuyo vencimiento está programado dentro de 5 días. 🔄💼
+                                                                plan. 🎉
                                                                 <br><br>
                                                                 ¡Agradecemos tu confianza en nosotros y estamos aquí
                                                                 para cualquier cosa que necesites! 🤝🌟💙
@@ -291,6 +290,7 @@
                                                                 <a href="{{ route('pagos.registrar', $array['comprobante']) }}"
                                                                     target="_blank"
                                                                     rel="noopener noreferrer">{{ route('pagos.registrar', $array['comprobante']) }}</a>
+                                                                <br><br>
                                                             </div>
                                                         </td>
                                                     </tr>
