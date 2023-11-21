@@ -100,6 +100,7 @@ class FacturasLicenciasRenovarController extends Controller
                         "factura" => $factura,
                     ]);
                     $renovacion->distribuidoresid = $vendedor->distribuidoresid;
+                    $renovacion->origen = 1;
                     $renovacion->save();
 
                     $instancia->notificar_renovacion_correo([
@@ -207,7 +208,9 @@ class FacturasLicenciasRenovarController extends Controller
                 "factura" => $factura,
             ]);
             $renovacion->distribuidoresid = $vendedor->distribuidoresid;
+            $renovacion->origen = 2;
             $renovacion->save();
+
             $respuesta->cobros_generado = true;
             $respuesta->enlace_pago = route('pagos.registrar', $renovacion->uuid);
 
