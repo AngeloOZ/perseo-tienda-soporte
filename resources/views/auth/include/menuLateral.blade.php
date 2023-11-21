@@ -58,7 +58,8 @@
                         </a>
                     </li>
                 @endif
-                @if (in_array(Auth::user()->rol, [1]))
+                {{-- REVIEW: revisar deprecado --}}
+                {{-- @if (in_array(Auth::user()->rol, [1]))
                     @if (Auth::user()->usuariosid === 12)
                         <li class="menu-item {{ areActiveRoutes(['comisiones.listado_tecnicos']) }} "
                             aria-haspopup="true">
@@ -80,7 +81,7 @@
                             </a>
                         </li>
                     @endif
-                @endif
+                @endif --}}
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                         <a href="{{ route('bitrix.list') }}" class="menu-link">
