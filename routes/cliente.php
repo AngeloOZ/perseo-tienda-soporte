@@ -26,7 +26,7 @@ Route::prefix('cliente')->group(function () {
 
 
 
-Route::group(['middleware' => 'tecnico', 'prefix' => 'cotizaciones'], function () {
+Route::group(['middleware' => 'auth', 'prefix' => 'cotizaciones'], function () {
     Route::prefix('detalles')->group(function () {
         Route::get('/listado', [cotizarController::class, 'listado'])->name('detalles.listado');
         Route::get('/crear', [cotizarController::class, 'crear'])->name('detalles.crear');

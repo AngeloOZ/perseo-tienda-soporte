@@ -2,7 +2,7 @@
         $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
         $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
     @endphp
-    @extends('soporte.auth.layouts.app')
+    @extends('auth.layouts.app')
     @section('contenido')
         <div class="content d-flex flex-column flex-column-fluid" id="kt_content">
             <div class="d-flex flex-column-fluid">

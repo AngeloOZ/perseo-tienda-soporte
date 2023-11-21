@@ -154,7 +154,7 @@
                     </li>
                 @endif
 
-                @if (in_array(Auth::user()->rol, [0]))
+                @if (in_array(Auth::user()->rol, [1, 2]))
                     <li class="menu-item menu-item-submenu {{ areActiveRoutesMenu(['detalles.listado', 'listadoCotizaciones.listado', 'cotizarPlantilla1.index', 'temas.index']) }}"
                         aria-haspopup="true" data-menu-toggle="hover">
                         <a href="javascript:;" class="menu-link menu-toggle">

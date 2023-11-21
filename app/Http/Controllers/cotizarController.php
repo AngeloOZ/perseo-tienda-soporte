@@ -305,26 +305,16 @@ class cotizarController extends Controller
 
             $info = Cotizaciones::select('cotizaciones.cotizacionesid', 'cotizaciones.fecha', 'plantillasdescarga.detalle as plantilla', 'cotizaciones.detalle_pago', 'cotizaciones.nombre_cliente as prospectosnombres', 'cotizaciones.subtotal', 'cotizaciones.iva', 'cotizaciones.total', 'cotizaciones.usuariocreacion')
                 ->join('plantillasdescarga', 'plantillasdescarga.plantillaDescargaid', 'cotizaciones.plantillasid')
-                ->when(in_array($this->obtenerDatosUsuarioLoggeado()->rol, [1, 5]), function ($q) {
+                ->when($this->obtenerDatosUsuarioLoggeado()->rol, function ($q) {
                     $usuario = $this->obtenerDatosUsuarioLoggeado();
-                    if ($usuario->esTecnico) {
-                        return $q->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
-                            ->where('tecnicos.tecnicosid', $usuario->id);
-                    } else {
+                    
+                    if (in_array($usuario->rol, [1])) {
                         return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
                             ->where('usuarios.usuariosid', $usuario->id);
                     }
-                })
-                ->when(in_array($this->obtenerDatosUsuarioLoggeado()->rol, [7]), function ($q) {
-                    $usuario = $this->obtenerDatosUsuarioLoggeado();
-
-                    if ($usuario->esTecnico) {
-                        return $q->join('tecnicos', 'tecnicos.tecnicosid', 'cotizaciones.asesorid')
-                            ->where('tecnicos.distribuidoresid', $usuario->distribuidoresid);
-                    } else {
-                        return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
-                            ->where('usuarios.distribuidoresid', $usuario->distribuidoresid);
-                    }
+  
+                    return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
+                        ->where('usuarios.distribuidoresid', $usuario->distribuidoresid);
                 })
                 ->get();
 

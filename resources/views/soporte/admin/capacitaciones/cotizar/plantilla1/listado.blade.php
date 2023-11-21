@@ -1,4 +1,4 @@
-@extends('soporte.auth.layouts.app')
+@extends('auth.layouts.app')
 @section('contenido')
     <style>
         #kt_datatable td {
