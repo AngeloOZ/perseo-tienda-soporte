@@ -155,8 +155,8 @@
             btnAutorizar?.addEventListener('click', disabledButton)
         }
     </script>
-
     @yield('scriptMenu')
+    @yield('scriptFecha')
     @yield('script')
 </body>
 
