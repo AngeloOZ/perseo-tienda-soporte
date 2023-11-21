@@ -193,8 +193,8 @@ class cotizarController extends Controller
                 $fileName = 'Perseo PC Control';
             }
             $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
-            $template->setValue('celular_firma', Auth::guard('tecnico')->user()->telefono);
-            $template->setValue('correo_firma', Auth::guard('tecnico')->user()->correo);
+            $template->setValue('celular_firma', $this->obtenerDatosUsuarioLoggeado()->telefono);
+            $template->setValue('correo_firma', $this->obtenerDatosUsuarioLoggeado()->correo);
             $template->setValue('fecha', $fechaP);
             $template->setValue('valor_mantenimiento', $valor_mantenimiento);
             $template->setValue('name', $request->nombre_cliente);
