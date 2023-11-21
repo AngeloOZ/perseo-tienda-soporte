@@ -390,7 +390,7 @@ class CobrosController extends Controller
             flash("Cobro registrado correctamente")->success();
             return back();
         } catch (\Throwable $th) {
-            flash("Error al registrar el cobro: " . $th->getMessage())->error();
+            flash("Error: " . $th->getMessage())->error();
             return back();
         }
     }

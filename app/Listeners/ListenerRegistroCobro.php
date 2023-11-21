@@ -6,6 +6,7 @@ use App\Events\RegistrarCobro;
 use App\Models\Cobros;
 use App\Models\Factura;
 use App\Models\RenovacionLicencias;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
@@ -37,7 +38,7 @@ class ListenerRegistroCobro
 
         if ($esFactura) {
             $factura = Factura::findOrFail($request->facturaid, ['facturaid', 'facturaid_perseo', 'secuencia_perseo', 'total_venta', 'detalle_pagos', 'usuariosid', 'estado_pago']);
-            
+
             $datos_cobro = json_decode($factura->detalle_pagos);
             $datos_cobro->forma_pago = $request->forma_pago;
             $datos_cobro->monto = $request->monto;
@@ -46,7 +47,7 @@ class ListenerRegistroCobro
             $facturaid = $factura->facturaid_perseo;
         } else {
             $cobro = Cobros::findOrFail($request->cobrosid, ['banco_destino', 'numero_comprobante', 'renovacionid', 'estado', 'cobros_id_perseo']);
-            
+
             $renovaciones = RenovacionLicencias::findOrFail($cobro->renovacionid, ['renovacionid', 'datos']);
 
             $datos = json_decode($renovaciones->datos);
@@ -149,10 +150,23 @@ class ListenerRegistroCobro
 
             $request = $this->client->post(Auth::user()->api . "/cobros_crear", ["json" => $cobro]);
             $response = json_decode($request->getBody()->getContents());
+
+            // if ($response->error) {
+            //     throw new Exception($response->error);
+            // }
+
             $response_cobro = $response->cobros[0];
             return $response_cobro;
-        } catch (\Throwable $th) {
-            throw $th;
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $responseBody = $e->getResponse()->getBody(true);
+            $errorDetails = json_decode($responseBody);
+            $mensaje = $errorDetails->fault->detail ?? $errorDetails->fault->faultstring ?? "Error al registrar el cobro en el sistema";
+            throw new Exception($mensaje, 400);
+        } catch (\GuzzleHttp\Exception\ServerException $e) {
+            // Esto capturará errores HTTP como 500
+            throw new Exception("Error de la API del sistema", 500);
+        } catch (\Exception $e) {
+            throw new Exception($e->getMessage(), 500);
         }
     }
 }
