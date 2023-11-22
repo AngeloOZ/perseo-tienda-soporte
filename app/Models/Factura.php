@@ -12,4 +12,10 @@ class Factura extends Model
     protected $primaryKey = 'facturaid';
     public $timestamps = false;
     protected $guarded = [];
+
+    // protected $casts = [
+    //     'detalle_pagos' => 'object',
+    // ];
+
+
 }

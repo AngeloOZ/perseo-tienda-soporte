@@ -26,6 +26,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['facturas.listado']) }} " aria-haspopup="true">
                         <a href="{{ route('facturas.listado') }}" class="menu-link">
@@ -34,6 +35,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['cupones.listado']) }} " aria-haspopup="true">
                         <a href="{{ route('cupones.listado') }}" class="menu-link">
@@ -42,6 +44,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['cobros.listado.vendedor']) }} " aria-haspopup="true">
                         <a href="{{ route('cobros.listado.vendedor') }}" class="menu-link">
@@ -50,6 +53,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['demos.listado']) }} " aria-haspopup="true">
                         <a href="{{ route('demos.listado') }}" class="menu-link">
@@ -58,6 +62,7 @@
                         </a>
                     </li>
                 @endif
+
                 {{-- REVIEW: Funcionalidad no aprobada --}}
                 {{-- @if (in_array(Auth::user()->rol, [1]))
                     @if (Auth::user()->usuariosid === 12)
@@ -82,6 +87,7 @@
                         </li>
                     @endif
                 @endif --}}
+
                 @if (in_array(Auth::user()->rol, [1]))
                     <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                         <a href="{{ route('bitrix.list') }}" class="menu-link">
@@ -90,6 +96,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['facturas.revisor']) }} " aria-haspopup="true">
                         <a href="{{ route('facturas.revisor') }}" class="menu-link">
@@ -98,6 +105,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['facturas.porpagar']) }} " aria-haspopup="true">
                         <a href="{{ route('facturas.porpagar') }}" class="menu-link">
@@ -106,6 +114,7 @@
                         </a>
                     </li>
                 @endif
+
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['cobros.listado.revisor']) }} " aria-haspopup="true">
                         <a href="{{ route('cobros.listado.revisor') }}" class="menu-link">
@@ -114,43 +123,21 @@
                         </a>
                     </li>
                 @endif
+
+                @if (in_array(Auth::user()->usuariosid, [28]))
+                    <li class="menu-item {{ areActiveRoutes(['pagos.lotes.list']) }} " aria-haspopup="true">
+                        <a href="{{ route('pagos.lotes.list') }}" class="menu-link">
+                            <i class="menu-icon fas fa-database"></i>
+                            <span class="menu-text">Cobros por lotes</span>
+                        </a>
+                    </li>
+                @endif
+
                 @if (in_array(Auth::user()->rol, [2]))
                     <li class="menu-item {{ areActiveRoutes(['bitrix.list']) }} " aria-haspopup="true">
                         <a href="{{ route('bitrix.list') }}" class="menu-link">
                             <i class="menu-icon fas fa-chart-area"></i>
                             <span class="menu-text">Estadisticas</span>
-                        </a>
-                    </li>
-                @endif
-                @if (in_array(Auth::user()->rol, [2]))
-                    <li class="menu-item {{ areActiveRoutes(['facturas.whatsapp.config']) }} " aria-haspopup="true">
-                        <a href="{{ route('facturas.whatsapp.config') }}" class="menu-link">
-                            <i class="menu-icon fab fa-whatsapp"></i>
-                            <span class="menu-text">Configurar Whatsapp</span>
-                        </a>
-                    </li>
-                @endif
-                @if (in_array(Auth::user()->rol, [3]))
-                    <li class="menu-item {{ areActiveRoutes(['productos.listado']) }} " aria-haspopup="true">
-                        <a href="{{ route('productos.listado') }}" class="menu-link">
-                            <i class="menu-icon fas fa-cubes"></i>
-                            <span class="menu-text">Listado de productos</span>
-                        </a>
-                    </li>
-                @endif
-                @if (in_array(Auth::user()->rol, [4]))
-                    <li class="menu-item {{ areActiveRoutes(['firma.revisor']) }} " aria-haspopup="true">
-                        <a href="{{ route('firma.revisor') }}" class="menu-link">
-                            <i class="menu-icon fa fa-key"></i>
-                            <span class="menu-text">Listado de firmas</span>
-                        </a>
-                    </li>
-                @endif
-                @if (in_array(Auth::user()->rol, [4]))
-                    <li class="menu-item {{ areActiveRoutes(['firma.revisor_correo']) }} " aria-haspopup="true">
-                        <a href="{{ route('firma.revisor_correo') }}" class="menu-link">
-                            <i class="menu-icon fa fa-key"></i>
-                            <span class="menu-text">Firmas enviadas al correo</span>
                         </a>
                     </li>
                 @endif
@@ -200,6 +187,42 @@
                                 </li>
                             </ul>
                         </div>
+                    </li>
+                @endif
+
+                @if (in_array(Auth::user()->rol, [2]))
+                    <li class="menu-item {{ areActiveRoutes(['facturas.whatsapp.config']) }} " aria-haspopup="true">
+                        <a href="{{ route('facturas.whatsapp.config') }}" class="menu-link">
+                            <i class="menu-icon fab fa-whatsapp"></i>
+                            <span class="menu-text">Configurar Whatsapp</span>
+                        </a>
+                    </li>
+                @endif
+
+                @if (in_array(Auth::user()->rol, [3]))
+                    <li class="menu-item {{ areActiveRoutes(['productos.listado']) }} " aria-haspopup="true">
+                        <a href="{{ route('productos.listado') }}" class="menu-link">
+                            <i class="menu-icon fas fa-cubes"></i>
+                            <span class="menu-text">Listado de productos</span>
+                        </a>
+                    </li>
+                @endif
+
+                @if (in_array(Auth::user()->rol, [4]))
+                    <li class="menu-item {{ areActiveRoutes(['firma.revisor']) }} " aria-haspopup="true">
+                        <a href="{{ route('firma.revisor') }}" class="menu-link">
+                            <i class="menu-icon fa fa-key"></i>
+                            <span class="menu-text">Listado de firmas</span>
+                        </a>
+                    </li>
+                @endif
+
+                @if (in_array(Auth::user()->rol, [4]))
+                    <li class="menu-item {{ areActiveRoutes(['firma.revisor_correo']) }} " aria-haspopup="true">
+                        <a href="{{ route('firma.revisor_correo') }}" class="menu-link">
+                            <i class="menu-icon fa fa-key"></i>
+                            <span class="menu-text">Firmas enviadas al correo</span>
+                        </a>
                     </li>
                 @endif
             </ul>
