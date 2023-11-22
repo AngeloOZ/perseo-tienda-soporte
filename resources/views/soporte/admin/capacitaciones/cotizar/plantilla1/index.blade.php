@@ -24,15 +24,13 @@
                                                     title="Listado Cotizaciones"><i style="color:#000000"
                                                         class="la la-long-arrow-left "></i></a> --}}
 
-                                                <button type="submit" class="btn btn-primary btn-icon"
-                                                    style="border-radius: 0px; " data-toggle="tooltip" title="Guardar"
-                                                    value="guardar" name="botonDescargaCrear"><i style="color:#ffffff"
-                                                        class="la la-save"></i>
-                                                </button>
+                                                <button type="button" class="btn btn-success btn-icon" title="Agregar fila"
+                                                    onclick="agregarFila()"><i style="color:#ffffff"
+                                                        class="la la-plus "></i></button>
 
-                                                <a href="{{ route('detalles.crear') }}" class="btn  btn-secondary btn-icon"
+                                                {{-- <a href="{{ route('detalles.crear') }}" class="btn  btn-secondary btn-icon"
                                                     data-toggle="tooltip" title="Ingresar Detalles"><i
-                                                        class="la la-align-center "></i></a>
+                                                        class="la la-align-center "></i></a> --}}
 
                                                 <a type="button" class="btn btn-danger btn-icon" title="Limpiar"
                                                     onclick="limpiarCampos()"><i
@@ -40,9 +38,12 @@
                                                 la la-trash "></i>
                                                 </a>
 
-                                                <button type="button" class="btn btn-success btn-icon" title="Agregar fila"
-                                                    onclick="agregarFila()"><i style="color:#ffffff"
-                                                        class="la la-plus "></i></button>
+                                                <button type="submit" class="btn btn-primary btn-icon"
+                                                    style="border-radius: 0px; " data-toggle="tooltip" title="Guardar"
+                                                    value="guardar" name="botonDescargaCrear"><i style="color:#ffffff"
+                                                        class="la la-save"></i>
+                                                </button>
+
                                             </div>
                                         </div>
                                     </div>
@@ -62,7 +63,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    
+
                                     <div class="form-group row">
                                         <div class="col-lg-6">
                                             <label>Cédula/RUC <span class="text-danger">*</span></label>
@@ -268,8 +269,8 @@
             });
 
             inicializarValidacion();
-
             handleBlurOnRucInput();
+            inicializarProductos();
         });
 
         function inicializarValidacion() {
@@ -313,13 +314,12 @@
             $("#fecha").val("");
             $("#prospectosid").val("").trigger('change');
             $("#clientesid").val("").trigger('change');
-            $(".valoresSelect, .recuperarArray").val('').trigger('change');
             $("#forma_pagoid").val("").trigger('change');
             $("#tipo_plantilla").val("").trigger('change');
+            // $(".valoresSelect, .recuperarArray").val('').trigger('change');
         }
 
         function agregarFila() {
-
             table.row.add({
                 detalle: ` <td><select class="form-control select2 valoresSelect" name="detallesid"><option value="">Escoja un detalle </option>
                     @foreach ($detalle as $detalleL)
@@ -344,6 +344,7 @@
                     }
                 }
             });
+
             $('.cantidadT').TouchSpin({
                 verticalbuttons: true,
                 verticalupclass: 'btn btn-sm btn-secondary',
@@ -355,6 +356,7 @@
                 maxboostedstep: 10,
                 forcestepdivisibility: 'none'
             });
+
             $('.descuentoT').TouchSpin({
                 verticalbuttons: true,
                 verticalupclass: 'btn btn-sm btn-secondary',
@@ -368,8 +370,8 @@
                 forcestepdivisibility: 'none',
                 prefix: "%",
             });
-            inicializarValidacion();
 
+            inicializarValidacion();
         }
 
         $("form").submit(function(e) {
@@ -508,6 +510,74 @@
                 }
 
             }
+        }
+
+        function agregarFilaInicio(idDetalle) {
+            table.row.add({
+                detalle: ` <td><select disabled class="form-control select2 valoresSelect" name="detallesid" data-detalle-id="${idDetalle}"><option value="">Escoja un detalle </option>
+                    @foreach ($detalle as $detalleL)
+                        <option value="{{ $detalleL->detallesid }}"
+                            {{ collect(old('detallesid'))->contains($detalleL->detallesid) ? 'selected' : '' }}>
+                            {{ $detalleL->detalle }}
+                        </option>
+                    @endforeach </select> <span class="text-danger d-none" name="mensajeDetalle">Escoja un detalle</span> </td> `,
+                cantidad: `<td> <input readonly value="1" type="text" class="form-control input-sm cantidad cantidadT" onkeypress="return validarNumero(event)"> <span class="text-danger d-none" name="mensajeCantidad">Ingrese cantidad</span></td>`,
+                descuento: `<td> <input readonly value="100" type="text" class="form-control descuento descuentoT input-sm validarDigitos"> <span class="text-danger d-none" name="mensajeDescuento">Ingrese descuento</span></td>`,
+                eliminar: `<td> <button type="button" class="btn btn-sm btn-danger botonEliminar" name="botonEliminar" disabled onclick="">-</button></td>`
+            }).draw(false);
+
+            $('.select2').select2({
+                width: '100%',
+                language: {
+                    noResults: function() {
+                        return "No hay resultado";
+                    },
+                    searching: function() {
+                        return "Buscando..";
+                    }
+                }
+            });
+
+            $('.cantidadT').TouchSpin({
+                verticalbuttons: true,
+                verticalupclass: 'btn btn-sm btn-secondary',
+                verticaldownclass: 'btn  btn-sm btn-secondary',
+                min: 1,
+                max: 100,
+                step: 1,
+                boostat: 5,
+                maxboostedstep: 10,
+                forcestepdivisibility: 'none'
+            });
+
+            $('.descuentoT').TouchSpin({
+                verticalbuttons: true,
+                verticalupclass: 'btn btn-sm btn-secondary',
+                verticaldownclass: 'btn  btn-sm btn-secondary',
+                min: 0,
+                max: 100,
+                step: 1,
+                decimals: 2,
+                boostat: 5,
+                maxboostedstep: 10,
+                forcestepdivisibility: 'none',
+                prefix: "%",
+            });
+
+            setTimeout(function() {
+                var ultimoSelect = $('select.valoresSelect[data-detalle-id="' + idDetalle + '"]:last');
+                ultimoSelect.val(idDetalle).trigger('change');
+            }, 0);
+
+            inicializarValidacion();
+        }
+
+        function inicializarProductos() {
+            agregarFilaInicio(48);
+            agregarFilaInicio(49);
+            agregarFilaInicio(45);
+            agregarFilaInicio(50);
+            agregarFilaInicio(51);
         }
 
         /* -------------------------------------------------------------------------- */
