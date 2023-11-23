@@ -194,7 +194,6 @@ class cotizarController extends Controller
                 $fileName = 'Perseo_pc_control_';
             }
             $fileName .= $nombre_cliente;
-
             $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
             $template->setValue('celular_firma', $this->obtenerDatosUsuarioLoggeado()->telefono);
             $template->setValue('correo_firma', $this->obtenerDatosUsuarioLoggeado()->correo);
