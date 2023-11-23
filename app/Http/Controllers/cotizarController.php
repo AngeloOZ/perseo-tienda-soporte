@@ -239,7 +239,6 @@ class cotizarController extends Controller
             } else {
                 flash('Ocurrió un error, vuelva a intentarlo')->error();
             }
-
             return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
         } elseif ($request->botonDescargaCrear == "guardar") {
             $totalneto = 0;
