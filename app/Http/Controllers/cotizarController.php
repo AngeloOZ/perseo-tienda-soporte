@@ -239,28 +239,8 @@ class cotizarController extends Controller
             } else {
                 flash('Ocurrió un error, vuelva a intentarlo')->error();
             }
-            try {
-                if (strtoupper(substr(PHP_OS, 0, 3)) === 'LIN') {
-                    $tempDir = sys_get_temp_dir();
-                    $tempPdfPath = $tempDir . DIRECTORY_SEPARATOR . $fileName . '.pdf';
-                    $comando = "libreoffice --headless --convert-to pdf  $fileName.docx --outdir $tempDir";
-                    $output = [];
-                    $return_var = 0;
-                    exec($comando, $output, $return_var);
 
-                    if ($return_var === 0) {
-                        unlink($fileName . '.docx');
-                        return response()->download($tempPdfPath)->deleteFileAfterSend(true);
-                    } else {
-                        return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
-                    }
-                } else {
-                    return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
-                }
-            } catch (\Exception $e) {
-                flash('Ocurrió un error, vuelva a intentarlo')->error();
-                return back();
-            }
+            return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
         } elseif ($request->botonDescargaCrear == "guardar") {
             $totalneto = 0;
             $totalprecio = 0;
