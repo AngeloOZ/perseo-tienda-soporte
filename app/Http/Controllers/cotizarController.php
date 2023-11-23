@@ -181,17 +181,19 @@ class cotizarController extends Controller
             }
 
             $porcentajeTarjetaContado = ($totaliva * 10) / 100;
+            $nombre_cliente = str_replace(" ", "_", strtolower($request->nombre_cliente));
             if ($request->tipo_plantilla == 1) {
                 $template = new TemplateProcessor('word/pcContable.docx');
-                $fileName = 'Perseo PC Contable';
+                $fileName = 'Perseo_pc_contable_';
             } elseif ($request->tipo_plantilla == 2) {
                 $template = new TemplateProcessor('word/pcPractico.docx');
-                $fileName = 'Perseo PC Practico';
+                $fileName = 'Perseo_pc_practico_';
                 $valor_mantenimiento = 80;
             } elseif ($request->tipo_plantilla == 3) {
                 $template = new TemplateProcessor('word/pcControl.docx');
-                $fileName = 'Perseo PC Control';
+                $fileName = 'Perseo_pc_control_';
             }
+            $fileName .= $nombre_cliente;
             $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
             $template->setValue('celular_firma', $this->obtenerDatosUsuarioLoggeado()->telefono);
             $template->setValue('correo_firma', $this->obtenerDatosUsuarioLoggeado()->correo);
