@@ -181,17 +181,20 @@ class cotizarController extends Controller
             }
 
             $porcentajeTarjetaContado = ($totaliva * 10) / 100;
+            $nombre_cliente = str_replace(" ", "_", strtolower($request->nombre_cliente));
             if ($request->tipo_plantilla == 1) {
                 $template = new TemplateProcessor('word/pcContable.docx');
-                $fileName = 'Perseo PC Contable';
+                $fileName = 'Perseo_pc_contable_';
             } elseif ($request->tipo_plantilla == 2) {
                 $template = new TemplateProcessor('word/pcPractico.docx');
-                $fileName = 'Perseo PC Practico';
+                $fileName = 'Perseo_pc_practico_';
                 $valor_mantenimiento = 80;
             } elseif ($request->tipo_plantilla == 3) {
                 $template = new TemplateProcessor('word/pcControl.docx');
-                $fileName = 'Perseo PC Control';
+                $fileName = 'Perseo_pc_control_';
             }
+            $fileName .= $nombre_cliente;
+
             $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
             $template->setValue('celular_firma', $this->obtenerDatosUsuarioLoggeado()->telefono);
             $template->setValue('correo_firma', $this->obtenerDatosUsuarioLoggeado()->correo);
@@ -236,7 +239,28 @@ class cotizarController extends Controller
             } else {
                 flash('Ocurrió un error, vuelva a intentarlo')->error();
             }
-            return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
+            try {
+                if (strtoupper(substr(PHP_OS, 0, 3)) === 'LIN') {
+                    $tempDir = sys_get_temp_dir();
+                    $tempPdfPath = $tempDir . DIRECTORY_SEPARATOR . $fileName . '.pdf';
+                    $comando = "libreoffice --headless --convert-to pdf  $fileName.docx --outdir $tempDir";
+                    $output = [];
+                    $return_var = 0;
+                    exec($comando, $output, $return_var);
+
+                    if ($return_var === 0) {
+                        unlink($fileName . '.docx');
+                        return response()->download($tempPdfPath)->deleteFileAfterSend(true);
+                    } else {
+                        return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
+                    }
+                } else {
+                    return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
+                }
+            } catch (\Exception $e) {
+                flash('Ocurrió un error, vuelva a intentarlo')->error();
+                return back();
+            }
         } elseif ($request->botonDescargaCrear == "guardar") {
             $totalneto = 0;
             $totalprecio = 0;
@@ -307,12 +331,12 @@ class cotizarController extends Controller
                 ->join('plantillasdescarga', 'plantillasdescarga.plantillaDescargaid', 'cotizaciones.plantillasid')
                 ->when($this->obtenerDatosUsuarioLoggeado()->rol, function ($q) {
                     $usuario = $this->obtenerDatosUsuarioLoggeado();
-                    
+
                     if (in_array($usuario->rol, [1])) {
                         return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
                             ->where('usuarios.usuariosid', $usuario->id);
                     }
-  
+
                     return $q->join('usuarios', 'usuarios.usuariosid', 'cotizaciones.asesorid')
                         ->where('usuarios.distribuidoresid', $usuario->distribuidoresid);
                 })
@@ -365,7 +389,14 @@ class cotizarController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('action', function ($detalles) {
-                    return '<a class="btn btn-sm btn-clean btn-icon" href="' . route('detalles.editar', $detalles->detallesid) . '" title="Editar"> <i class="la la-edit"></i> </a>' . '<a class="btn btn-sm btn-clean btn-icon confirm-delete" href="javascript:void(0)" data-href="' . route('detalles.eliminar', $detalles->detallesid) . '" title="Eliminar"> <i class="la la-trash"></i> </a>';
+                    $listadoDetalles = [45, 46, 47, 48, 49, 50, 51];
+                    $botones = '<a class="btn btn-sm btn-clean btn-icon" href="' . route('detalles.editar', $detalles->detallesid) . '" title="Editar"> <i class="la la-edit"></i> </a>';
+
+                    if (Auth::user()->rol == 2 && !in_array($detalles->detallesid, $listadoDetalles)) {
+                        $botones .= '<a class="btn btn-sm btn-clean btn-icon confirm-delete" href="javascript:void(0)" data-href="' . route('detalles.eliminar', $detalles->detallesid) . '" title="Eliminar"> <i class="la la-trash"></i> </a>';
+                    }
+
+                    return $botones;
                 })
                 ->rawColumns(['action'])
                 ->make(true);
