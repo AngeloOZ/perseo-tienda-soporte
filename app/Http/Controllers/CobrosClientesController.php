@@ -245,7 +245,10 @@ class CobrosClientesController extends Controller
                 'origen' => json_decode($results['origen']->getBody()->getContents())->bancoc,
             ];
         } catch (\Throwable $th) {
-            dd($th->getMessage());
+            return (object)[
+                'destino' => [],
+                'origen' => [],
+            ];
         }
     }
 }

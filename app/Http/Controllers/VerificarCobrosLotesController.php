@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cobros;
 use App\Models\Factura;
 use App\Services\RegistroCobrosSistema;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,9 +69,9 @@ class VerificarCobrosLotesController extends Controller
                 'numero_comprobante' => $request->numero_comprobante,
                 'banco_destino' => $request->banco_destino,
                 'banco_origen' => $request->banco_origen,
-                'forma_pago' => $request->forma_pago == 'transferencia' ? 6 : 5,
+                'forma_pago' => $request->tipo == 'transferencia' ? 6 : 5,
                 'monto' => $request->monto,
-                'fecha' => date("Ymd", strtotime($request->fecha)),
+                'fecha' => DateTime::createFromFormat('d/m/Y', $request->fecha)->format('Ymd'),
             ];
 
             $factura = $this->serviceRegistroCobros->obtener_factura_perseo($request->facturaid);
@@ -80,8 +81,8 @@ class VerificarCobrosLotesController extends Controller
                 $data = [
                     'estado' => 2,
                     'cobros_id_perseo' => json_encode([
-                        'cobros_id_perseo' => $datos_cobro->cobros_id_perseo,
-                        'cobros_cod_perseo' => $datos_cobro->cobros_cod_perseo,
+                        'cobros_id_perseo' => $cobro_registrado->cobrosid_nuevo,
+                        'cobros_cod_perseo' => $cobro_registrado->codigo_nuevo,
                         'forma_pago' => $datos_cobro->forma_pago,
                         'monto' => $datos_cobro->monto,
                     ]),
@@ -131,7 +132,7 @@ class VerificarCobrosLotesController extends Controller
             ->where('facturado', 1)
             ->where('estado_pago', 1)
             ->whereNotNull('detalle_pagos')
-            ->where('distribuidoresid', 1)
+            ->where('distribuidoresid', Auth::user()->distribuidoresid)
             ->whereRaw('JSON_UNQUOTE(JSON_EXTRACT(detalle_pagos, "$.cobros_id_perseo")) IS NULL')
             ->get();
 
@@ -151,7 +152,7 @@ class VerificarCobrosLotesController extends Controller
         });
 
         $cobros = Cobros::select('cobros.cobrosid', 'cobros.banco_origen', 'cobros.banco_destino', 'cobros.numero_comprobante', 'cobros.estado', 'cobros.fecha_actualizacion', 'renovacion_licencias.renovacionid', 'renovacion_licencias.datos')
-            ->where('cobros.distribuidoresid', 1)
+            ->where('cobros.distribuidoresid', Auth::user()->distribuidoresid)
             ->where('cobros.estado', 1)
             ->whereNotNull('cobros.renovacionid')
             ->join('renovacion_licencias', 'cobros.renovacionid', '=', 'renovacion_licencias.renovacionid')

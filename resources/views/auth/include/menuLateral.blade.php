@@ -124,7 +124,7 @@
                     </li>
                 @endif
 
-                @if (in_array(Auth::user()->usuariosid, [28]))
+                @if (in_array(Auth::user()->usuariosid, [28, 101]))
                     <li class="menu-item {{ areActiveRoutes(['pagos.lotes.list']) }} " aria-haspopup="true">
                         <a href="{{ route('pagos.lotes.list') }}" class="menu-link">
                             <i class="menu-icon fas fa-database"></i>

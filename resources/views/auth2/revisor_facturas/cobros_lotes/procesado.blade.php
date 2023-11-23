@@ -87,20 +87,19 @@
             $btnIniciar = document.getElementById('btnIniciarRegistro');
             $progressBar = document.getElementById('progressBar');
 
-
             $btnIniciar.addEventListener('click', iniciarRegistroCobros);
 
 
             async function iniciarRegistroCobros() {
                 this.classList.add('d-none');
                 $progressBar.classList.remove('d-none');
-                let numeroProcesados = 1;
+                let numeroProcesados = 0;
 
                 for (const cobro of cobros) {
-                    const result = await registrarCobro(cobro);
-                    numeroProcesados++;
-                    actualizarEstadoCobro(cobro.facturaid, result);
                     actualizarValorProgressBar(numeroProcesados * 100 / cobros.length);
+                    const result = await registrarCobro(cobro);
+                    actualizarEstadoCobro(cobro.facturaid, result.data, result.error);
+                    numeroProcesados++;
                 }
 
                 $progressBar.classList.add('d-none');
@@ -112,18 +111,35 @@
                         _token: '{{ csrf_token() }}',
                         ...cobro,
                     }
+
                     const {
                         data: peticion
                     } = await axios.post("{{ route('cobros.registro.lotes') }}", body);
 
-                    return peticion.data.codigo_nuevo;
+                    return {
+                        data: peticion.data.codigo_nuevo,
+                        error: null
+                    }
                 } catch (error) {
-                    console.error(error);
-                    return null;
+                    const response = {
+                        data: null,
+                        error: error.message
+                    }
+
+                    if (error.response) {
+                        // El servidor respondió con un estado fuera del rango 2xx
+                        response.error = error.response.data.message;
+                    } else if (error.request) {
+                        // La petición fue hecha pero no se recibió respuesta
+                        response.error = error.request;
+                    }
+
+                    console.log(response);
+                    return response;
                 }
             }
 
-            function actualizarEstadoCobro(facturaId, codigoCobro = null) {
+            function actualizarEstadoCobro(facturaId, codigoCobro = null, messageError = null) {
                 const $fila = document.querySelector(`tr[data-id-factura="${facturaId}"]`);
                 const $numeroCobro = $fila.querySelector('.numero-cobro');
                 const $badge = $fila.querySelector('td:last-child span');
@@ -131,6 +147,13 @@
                 $badge.classList.remove('badge-warning');
                 $badge.classList.add(codigoCobro ? 'badge-success' : 'badge-danger');
                 $badge.textContent = codigoCobro ? 'Registrado' : 'No registrado';
+
+                if (messageError) {
+                    $badge.setAttribute('data-toggle', 'tooltip');
+                    $badge.setAttribute('data-placement', 'top');
+                    $badge.setAttribute('title', messageError);
+                }
+
                 $numeroCobro.textContent = codigoCobro;
             }
 
