@@ -238,6 +238,30 @@ class cotizarController extends Controller
             } else {
                 flash('Ocurrió un error, vuelva a intentarlo')->error();
             }
+
+            // Validar SO Linux
+            $so = strtoupper(PHP_OS);
+            if (str_contains($so, 'LINUX') === true) {
+                // Comando para ejecutar el script de Python
+                $python = 'python3';
+                $BasePath = base_path();
+
+                // Path files
+                $pathWordInput = "$BasePath/public/$fileName.docx";
+                $pathPDFOutput = "$BasePath/public/";
+
+                // Comando para ejecutar el script de Python
+                $command = escapeshellcmd("$python $BasePath/scripts/convert_to_pdf.py $pathWordInput $pathPDFOutput");
+
+                $output = shell_exec($command);
+
+                if (str_contains($output, 'Error')) {
+                    return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
+                } else {
+                    unlink($pathWordInput);
+                    return response()->download($fileName . '.pdf')->deleteFileAfterSend(true);
+                }
+            }
             return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
         } elseif ($request->botonDescargaCrear == "guardar") {
             $totalneto = 0;
