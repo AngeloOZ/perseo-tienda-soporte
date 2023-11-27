@@ -117,7 +117,7 @@ class cotizarController extends Controller
 
     public function actualizarCotizaciones(Request $request, $cotizaciones)
     {
-        if ($request->botonDescargaCrear == "descargar") {
+        if (str_contains($request->botonDescargaCrear, "descargar")) {
             $totalprecio = 0;
             $descuentototal = 0;
             $totalneto = 0;
@@ -241,7 +241,7 @@ class cotizarController extends Controller
 
             // Validar SO Linux
             $so = strtoupper(PHP_OS);
-            if (str_contains($so, 'LINUX') === true) {
+            if (str_contains($so, 'LINUX') === true && str_contains($request->botonDescargaCrear, 'pdf')) {
                 // Comando para ejecutar el script de Python
                 $python = 'python3';
                 $BasePath = base_path();

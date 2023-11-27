@@ -25,21 +25,26 @@
                                                         class="btn btn-secondary btn-icon" data-toggle="tooltip"
                                                         title="Listado Cotizaciones"><i style="color:#000000"
                                                             class="la la-long-arrow-left "></i></a>
-                                                    <a>
-                                                        <button type="submit" class="btn btn-icon"
-                                                            style="border-radius: 0px;  background-color:#d6d9dd"
-                                                            data-toggle="tooltip" title="Word" value="descargar"
-                                                            name="botonDescargaCrear"><i class="la la-file-word"
-                                                                style="color:#000000"></i>
-                                                        </button>
-                                                    </a>
-                                                    <a>
-                                                        <button type="submit" class="btn btn-primary btn-icon"
-                                                            style="border-radius: 0px; " data-toggle="tooltip"
-                                                            title="Guardar" value="guardar" name="botonDescargaCrear"><i
-                                                                style="color:#ffffff" class="la la-save"></i>
-                                                        </button>
-                                                    </a>
+
+                                                    <button type="submit" class="btn btn-icon"
+                                                        style="border-radius: 0px;  background-color:#d6d9dd"
+                                                        data-toggle="tooltip" title="Word" value="descargar_word"
+                                                        name="botonDescargaCrear"><i class="la la-file-word"
+                                                            style="color:#000000"></i>
+                                                    </button>
+
+                                                    <button type="submit" class="btn btn-icon btn-danger"
+                                                        style="border-radius: 0px;"
+                                                        data-toggle="tooltip" title="PDF" value="descargar_pdf"
+                                                        name="botonDescargaCrear"><i class="la la-file-pdf"></i>
+                                                    </button>
+
+                                                    <button type="submit" class="btn btn-primary btn-icon"
+                                                        style="border-radius: 0px; " data-toggle="tooltip" title="Guardar"
+                                                        value="guardar" name="botonDescargaCrear"><i style="color:#ffffff"
+                                                            class="la la-save"></i>
+                                                    </button>
+
                                                     <a href="{{ route('cotizarPlantilla1.index', 0) }}"
                                                         class="btn btn-warning btn-icon" data-toggle="tooltip"
                                                         title="Nueva Cotizacion"><i style="color:#ffffff"
@@ -205,7 +210,7 @@
                                                     <tbody>
                                                         @php
                                                             $decodificar = json_decode($cotizaciones->detalle_cotizacion);
-                                                            
+
                                                         @endphp
                                                         @foreach ($decodificar as $dec)
                                                             <tr>
