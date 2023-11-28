@@ -29,30 +29,30 @@ use Illuminate\Support\Facades\Mail;
 
 class FacturasController extends Controller
 {
-    private function listarProductos2($listado)
+    private function consultar_productos($categoria, $das)
     {
-        $nuevoListado = [];
-        foreach ($listado as $key => $item) {
-            $producto = Producto::find($item->id_producto_local);
-            $nuevoProducto = [
-                "productosid" => $producto->productosid,
-                "descripcion" => $producto->descripcion,
-                "contenido" => $producto->contenido,
-                "categoria" => $item->categoria,
-                "precioiva" => $item->precioiva,
-                "precio" => $item->precio,
-                "iva" => $item->iva,
-                "costo" => $item->costo,
-                "descuento" => $item->descuento,
-                "preciobase" => $item->preciobase,
-                "precioivabase" => $item->precioivabase,
-                "productos_homologados_id" => $item->productos_homologados_id,
-            ];
-            $temp = json_encode($nuevoProducto);
-            $nuevoProducto = json_decode($temp);
-            $nuevoListado = [...$nuevoListado, $nuevoProducto];
-        }
-        return $nuevoListado;
+        $tableName = ProductoHomologado::getTableName();
+
+        $productos = ProductoHomologado::join('productos', "$tableName.id_producto_local", '=', 'productos.productosid')
+            ->where("$tableName.categoria", $categoria)
+            ->where("$tableName.distribuidoresid", $das)
+            ->where("$tableName.estado", 1)
+            ->select(
+                'productos.productosid',
+                'productos.descripcion',
+                'productos.contenido',
+                "$tableName.categoria",
+                "$tableName.precioiva",
+                "$tableName.precio",
+                "$tableName.iva",
+                "$tableName.costo",
+                "$tableName.descuento",
+                "$tableName.preciobase",
+                "$tableName.precioivabase",
+                "$tableName.productos_homologados_id",
+            )
+            ->get();
+        return $productos;
     }
 
     public function listar_productos($referido)
@@ -82,20 +82,13 @@ class FacturasController extends Controller
             }
         }
 
-        $facturito = ProductoHomologado::all()->where('categoria', 1)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-        $firmas = ProductoHomologado::all()->where('categoria', 2)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-        $perseoPC = ProductoHomologado::all()->where('categoria', 3)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-        $contafacil = ProductoHomologado::all()->where('categoria', 4)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-        $perseoWEB = ProductoHomologado::all()->where('categoria', 5)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-        $whapi = ProductoHomologado::all()->where('categoria', 6)->where('distribuidoresid', $vendedor->distribuidoresid)->where('estado', 1);
-
         $productosList = [
-            "contafacil" => $this->listarProductos2([...$contafacil]),
-            "facturito" => $this->listarProductos2([...$facturito]),
-            "firmas" => $this->listarProductos2([...$firmas]),
-            "perseo_pc" => $this->listarProductos2([...$perseoPC]),
-            "perseo_web" => $this->listarProductos2([...$perseoWEB]),
-            "whapi" => $this->listarProductos2([...$whapi]),
+            'contafacil' => $this->consultar_productos(4, $vendedor->distribuidoresid),
+            'facturito' => $this->consultar_productos(1, $vendedor->distribuidoresid),
+            'firmas' => $this->consultar_productos(2, $vendedor->distribuidoresid),
+            'perseo_pc' => $this->consultar_productos(3, $vendedor->distribuidoresid),
+            'perseo_web' => $this->consultar_productos(5, $vendedor->distribuidoresid),
+            'whapi' => $this->consultar_productos(6, $vendedor->distribuidoresid),
         ];
 
         return view('tienda.tienda', ["productos" => $productosList, "vendedor" => $vendedor, "cupon" => $stateCupon]);

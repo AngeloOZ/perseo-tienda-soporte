@@ -12,4 +12,9 @@ class ProductoHomologado extends Model
     protected $primaryKey = 'productos_homologados_id';
     public $timestamps = false;
     protected $guarded = [];
+
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
+    }
 }
