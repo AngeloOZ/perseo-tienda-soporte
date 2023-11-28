@@ -1,6 +1,8 @@
     @php
+        $defaults = App\Constants\ProductosCotizacionesDetalles::DETALLES_DEFAULT;
         $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
         $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
+        $detalleSinDefault = $detalle->whereNotIn('detallesid', $defaults);
     @endphp
     @extends('auth.layouts.app')
     @section('contenido')
@@ -34,9 +36,9 @@
                                                     </button>
 
                                                     <button type="submit" class="btn btn-icon btn-danger"
-                                                        style="border-radius: 0px;"
-                                                        data-toggle="tooltip" title="PDF" value="descargar_pdf"
-                                                        name="botonDescargaCrear"><i class="la la-file-pdf"></i>
+                                                        style="border-radius: 0px;" data-toggle="tooltip" title="PDF"
+                                                        value="descargar_pdf" name="botonDescargaCrear"><i
+                                                            class="la la-file-pdf"></i>
                                                     </button>
 
                                                     <button type="submit" class="btn btn-primary btn-icon"
@@ -97,7 +99,8 @@
                                                     name="nombre_cliente" id="nombre_cliente" autocomplete="off"
                                                     value="{{ old('nombre_cliente', $cotizaciones->nombre_cliente) }}">
                                                 @if ($errors->has('nombre_cliente'))
-                                                    <span class="text-danger">{{ $errors->first('nombre_cliente') }}</span>
+                                                    <span
+                                                        class="text-danger">{{ $errors->first('nombre_cliente') }}</span>
                                                 @endif
                                             </div>
                                         </div>
@@ -210,24 +213,26 @@
                                                     <tbody>
                                                         @php
                                                             $decodificar = json_decode($cotizaciones->detalle_cotizacion);
-
                                                         @endphp
                                                         @foreach ($decodificar as $dec)
+                                                            @php
+                                                                $detallesCustom = in_array($dec->detalle, $defaults) ? $detalle : $detalleSinDefault;
+                                                            @endphp
                                                             <tr>
                                                                 <td>
                                                                     <select class="form-control select2 valoresSelect"
-                                                                        name="detallesid">
+                                                                        name="detallesid"
+                                                                        {{ in_array($dec->detalle, $defaults) ? 'disabled' : '' }}>
                                                                         <option value="">
                                                                             Escoja un detalle
                                                                         </option>
-                                                                        @foreach ($detalle as $detalleL)
+                                                                        @foreach ($detallesCustom as $detalleL)
                                                                             <option value="{{ $detalleL->detallesid }}"
                                                                                 style="font-size: 2px;"
                                                                                 {{ $detalleL->detallesid == $dec->detalle ? 'selected' : '' }}>
                                                                                 {{ $detalleL->detalle }}
                                                                             </option>
                                                                         @endforeach
-
                                                                     </select>
                                                                     <span class="text-danger d-none"
                                                                         name="mensajeDetalle">Escoja
@@ -235,6 +240,7 @@
                                                                 </td>
                                                                 <td>
                                                                     <input type="text"
+                                                                        {{ in_array($dec->detalle, $defaults) ? 'readonly' : '' }}
                                                                         class="form-control input-sm cantidad cantidadF"
                                                                         onkeypress="return validarNumero(event)"
                                                                         value="{{ $dec->cantidad }}">
@@ -244,14 +250,16 @@
                                                                 </td>
                                                                 <td>
                                                                     <input type="text"
+                                                                        {{ in_array($dec->detalle, $defaults) ? 'readonly' : '' }}
                                                                         class="form-control descuento input-sm validarDigitos descuentoF"
                                                                         value="{{ $dec->descuento }}">
                                                                     <span class="text-danger d-none"
                                                                         name="mensajeDescuento">Ingrese descuento</span>
                                                                 </td>
                                                                 <td>
-                                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                                        name="botonEliminar"
+                                                                    <button type="button"
+                                                                        {{ in_array($dec->detalle, $defaults) ? 'disabled' : '' }}
+                                                                        class="btn btn-sm btn-danger" name="botonEliminar"
                                                                         onclick="eliminarFila(this)">-</button>
 
                                                                 </td>
@@ -383,7 +391,7 @@
             function agregarFila() {
                 table.row.add({
                     detalle: ` <td><select class="form-control select2 valoresSelect" name="detallesid"><option value="">Escoja un detalle </option>
-                    @foreach ($detalle as $detalleL)
+                    @foreach ($detalleSinDefault as $detalleL)
                         <option value="{{ $detalleL->detallesid }}"
                             {{ collect(old('detallesid'))->contains($detalleL->detallesid) ? 'selected' : '' }}>
                             {{ $detalleL->detalle }}

@@ -1,6 +1,8 @@
 @php
+    $defaults = App\Constants\ProductosCotizacionesDetalles::DETALLES_DEFAULT;
     $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
     $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
+    $detalleSinDefault = $detalle->whereNotIn('detallesid', $defaults);
 @endphp
 @extends('auth.layouts.app')
 @section('contenido')
@@ -161,7 +163,7 @@
                                                                 <option value="">
                                                                     Escoja un detalle
                                                                 </option>
-                                                                @foreach ($detalle as $detalleL)
+                                                                @foreach ($detalleSinDefault as $detalleL)
                                                                     <option value="{{ $detalleL->detallesid }}"
                                                                         style="font-size: 2px;"
                                                                         {{ collect(old('detallesid'))->contains($detalleL->detallesid) ? 'selected' : '' }}>
@@ -322,7 +324,7 @@
         function agregarFila() {
             table.row.add({
                 detalle: ` <td><select class="form-control select2 valoresSelect" name="detallesid"><option value="">Escoja un detalle </option>
-                    @foreach ($detalle as $detalleL)
+                    @foreach ($detalleSinDefault as $detalleL)
                         <option value="{{ $detalleL->detallesid }}"
                             {{ collect(old('detallesid'))->contains($detalleL->detallesid) ? 'selected' : '' }}>
                             {{ $detalleL->detalle }}
@@ -573,11 +575,11 @@
         }
 
         function inicializarProductos() {
-            agregarFilaInicio(48);
-            agregarFilaInicio(49);
-            agregarFilaInicio(45);
-            agregarFilaInicio(50);
-            agregarFilaInicio(51);
+            const productos = @json($defaults);
+
+            for (const producto of productos) {
+                agregarFilaInicio(producto);
+            }
         }
 
         /* -------------------------------------------------------------------------- */
