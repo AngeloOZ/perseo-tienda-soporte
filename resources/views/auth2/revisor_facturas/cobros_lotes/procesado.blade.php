@@ -24,6 +24,17 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-5">
+                                    <div class="form-group mr-3">
+                                        <label for="">Banco de destino</label>
+                                        <select name="banco_destino" class="form-control" disabled>
+                                            @foreach ($bancosDestino as $banco)
+                                                <option value="{{ $banco->bancoid }}"
+                                                    {{ $banco->bancoid == $banco_destino ? 'selected' : '' }}>
+                                                    {{ $banco->descripcion }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                     <div class="text-right">
                                         <button id="btnIniciarRegistro" class="btn btn-primary">Iniciar registro de
                                             cobros</button>
@@ -128,7 +139,7 @@
 
                     if (error.response) {
                         // El servidor respondió con un estado fuera del rango 2xx
-                        response.error = error.response.data.message;
+                        response.error = error.response.data.message || "Error interno del servidor";
                     } else if (error.request) {
                         // La petición fue hecha pero no se recibió respuesta
                         response.error = error.request;

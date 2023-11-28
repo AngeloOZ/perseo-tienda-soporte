@@ -13,6 +13,7 @@ use App\Http\Controllers\LiberarLicenciasController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
 use App\Http\Controllers\usuariosController;
+use App\Http\Controllers\VerificarCobrosLotesController;
 use App\Http\Controllers\WhatsappRenovacionesController;
 use App\Models\SoporteEspecial;
 use Illuminate\Support\Facades\Route;
@@ -118,6 +119,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/editar-factura/{factura}', [FacturasController::class, 'editar_revisor'])->name('facturas.revisor_editar');
         Route::get('/liberar-producto-manual/{factura}', [FacturasController::class, 'liberar_producto_manual'])->name('facturas.liberar_producto_manual');
 
+        Route::prefix('cobros-lotes')->group(function () {
+            Route::get('listado', [VerificarCobrosLotesController::class, 'listar_cobros_lotes'])->name('pagos.lotes.list');
+            Route::post('listado', [VerificarCobrosLotesController::class, 'procesar_cobro_lotes'])->name('pagos.lotes.post');
+            Route::post('registro/lotes', [VerificarCobrosLotesController::class, 'registrar_cobro_sistema'])->name('cobros.registro.lotes');
+            Route::get('descargar/plantilla', [VerificarCobrosLotesController::class, 'descargar_plantilla'])->name('cobros.descargar_plantilla');
+        });
+
         Route::prefix('whatsapp')->group(function () {
             Route::get('/configuracion', [WhatsappRenovacionesController::class, 'index'])->name('facturas.whatsapp.config');
             Route::post('/iniciar', [WhatsappRenovacionesController::class, 'iniciar_whatsapp'])->name('facturas.whatsapp.iniciar');
@@ -168,7 +176,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/editar-revisor/{cobro}', [CobrosController::class, 'editar_revisor'])->name('cobros.editar_revisor');
         Route::post('/filtrado-listado-revisor', [CobrosController::class, 'filtrado_listado_revisor'])->name('cobros.listado.revisor_ajax');
         Route::put('/actualizar-revisor/{cobro}', [CobrosController::class, 'actualizar_revisor'])->name('cobros.actualizar_revisor');
-
         Route::post('/registrar-cobro-sistema', [CobrosController::class, 'registrar_cobro_sistema'])->name('cobros.registrar.sistema');
     });
 

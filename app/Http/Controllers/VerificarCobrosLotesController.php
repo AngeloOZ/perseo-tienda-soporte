@@ -27,24 +27,27 @@ class VerificarCobrosLotesController extends Controller
         return view('auth2.revisor_facturas.cobros_lotes.index', [
             'cobros' => $cobrosCollect,
             'bancos' => $bancos,
-            'procesado' => false
         ]);
     }
 
     public function procesar_cobro_lotes(Request $request)
     {
         try {
+            if (!$request->hasFile('csv')) throw new \Exception('No se ha cargado el archivo CSV', 400);
+
+            if (!$request->banco_destino) throw new \Exception('No se ha seleccionado el banco destino', 400);
+
             $cobrosCollect = $this->obtener_cobros_restantes();
             $bancos = $this->cobrosClientesController->obtener_bancos(Auth::user());
             $listadoTransacciones = $this->procesar_csv($request->file('csv')->getRealPath());
 
-
-            $cobrosCollect = $cobrosCollect->map(function ($cobro) use ($listadoTransacciones) {
+            $cobrosCollect = $cobrosCollect->map(function ($cobro) use ($listadoTransacciones, $request) {
                 $transaccion = $listadoTransacciones->firstWhere('documento', $cobro->numero_comprobante);
                 if ($transaccion) {
                     $esTransferencia = str_contains(strtolower($transaccion->concepto), 'transferencia');
                     $cobro->monto = $transaccion->monto;
                     $cobro->fecha = $transaccion->fecha;
+                    $cobro->banco_destino = intval($request->banco_destino);
                     $cobro->tipo = $esTransferencia ? 'transferencia' : 'deposito';
                     return $cobro;
                 }
@@ -53,10 +56,10 @@ class VerificarCobrosLotesController extends Controller
             return view('auth2.revisor_facturas.cobros_lotes.procesado',  [
                 'cobros' => $cobrosCollect,
                 'bancos' => $bancos,
-                'procesado' => true
+                'banco_destino' => $request->banco_destino,
             ]);
         } catch (\Throwable $th) {
-            flash('Error al procesar el archivo CSV')->error();
+            flash('Error: ' . $th->getMessage())->error();
             return redirect()->route('pagos.lotes.list');
         }
     }
@@ -80,6 +83,7 @@ class VerificarCobrosLotesController extends Controller
             if ($request->origen == "renovacion") {
                 $data = [
                     'estado' => 2,
+                    'banco_destino' => $datos_cobro->banco_destino,
                     'cobros_id_perseo' => json_encode([
                         'cobros_id_perseo' => $cobro_registrado->cobrosid_nuevo,
                         'cobros_cod_perseo' => $cobro_registrado->codigo_nuevo,
@@ -101,6 +105,17 @@ class VerificarCobrosLotesController extends Controller
             $message->message = $th->getMessage();
             $message->status = $th->getCode() ?? 500;
             return response()->json($message, $message->status);
+        }
+    }
+
+    public function descargar_plantilla()
+    {
+        try {
+            $path = public_path('templates/cobros_lotes.csv');
+            return response()->download($path);
+        } catch (\Throwable $th) {
+            flash('Error al descargar la plantilla')->error();
+            return redirect()->route('pagos.lotes.list');
         }
     }
 

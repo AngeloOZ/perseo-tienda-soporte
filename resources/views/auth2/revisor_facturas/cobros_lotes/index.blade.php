@@ -24,14 +24,29 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-5">
-                                    <form action="{{ route('pagos.lotes.post') }}" method="post" enctype="multipart/form-data">
+                                    <form action="{{ route('pagos.lotes.post') }}" method="post"
+                                        enctype="multipart/form-data">
                                         @csrf
                                         <div class="d-flex">
+                                            <div class="form-group mr-3">
+                                                <label for="">Banco de destino</label>
+                                                <select name="banco_destino" class="form-control">
+                                                    <option value="" disabled selected>Seleccione</option>
+                                                    @foreach ($bancosDestino as $banco)
+                                                        <option value="{{ $banco->bancoid }}">{{ $banco->descripcion }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
                                             <div class="form-group">
                                                 <label for="">Plantilla CSV</label>
                                                 <input type="file" class="form-control" name="csv" accept=".csv">
                                             </div>
                                             <button class="btn btn-primary align-self-center ml-3">Subir archivo</button>
+                                            <a href="{{ route('cobros.descargar_plantilla') }}"
+                                                class="btn btn-success align-self-center ml-3"> <i
+                                                    class="flaticon2-infographic"></i> Descargar
+                                                plantilla</a>
                                         </div>
                                     </form>
                                 </div>
