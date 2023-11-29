@@ -90,7 +90,7 @@ class FacturasController extends Controller
             ],
             [
                 "id" => 'firmas',
-                "titulo" => "Firmas",
+                "titulo" => "Firma electrónica",
                 "productos" => $this->consultar_productos(2, $vendedor->distribuidoresid),
             ],
             [
@@ -110,7 +110,7 @@ class FacturasController extends Controller
             ],
             [
                 "id" => 'whapi',
-                "titulo" => "WHAPI",
+                "titulo" => "Whapi",
                 'productos' => $this->consultar_productos(6, $vendedor->distribuidoresid),
             ],
             [
