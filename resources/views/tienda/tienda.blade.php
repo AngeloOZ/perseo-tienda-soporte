@@ -14,83 +14,21 @@
                             <div class="row">
                                 <div class="col-12 col-sm-4 col-lg-2">
                                     <ul class="nav flex-column nav-pills">
-                                        @if (count($productos['contafacil']))
+                                        @foreach ($productos as $key => $item)
                                             <li class="nav-item mb-2">
-                                                <a class="nav-link active" id="contafacil-tab-5" data-toggle="tab"
-                                                    href="#contafacil">
+                                                <a class="nav-link {{ $key === 0 ? 'active' : '' }}"
+                                                    id="{{ $item['id'] }}-tab-5" data-toggle="tab"
+                                                    href="#{{ $item['id'] }}">
                                                     <div
                                                         class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Contafácil</div>
+                                                        <div class="font-size-lg font-weight-bold">{{ $item['titulo'] }}
+                                                        </div>
                                                         <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['contafacil']) }}</div>
+                                                            {{ count($item['productos']) }}</div>
                                                     </div>
                                                 </a>
                                             </li>
-                                        @endif
-                                        @if (count($productos['facturito']))
-                                            <li class="nav-item mb-2">
-                                                <a class="nav-link " id="facturito-tab-5" data-toggle="tab"
-                                                    href="#facturito">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Facturito</div>
-                                                        <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['facturito']) }}</div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        @endif
-                                        @if (count($productos['firmas']))
-                                            <li class="nav-item mb-2">
-                                                <a class="nav-link" id="firmas-tab-5" data-toggle="tab" href="#firmas">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Firma Electrónica</div>
-                                                        <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['firmas']) }}</div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        @endif
-                                        @if (count($productos['perseo_pc']))
-                                            <li class="nav-item mb-2">
-                                                <a class="nav-link" id="perseo_pc-tab-5" data-toggle="tab"
-                                                    href="#perseo_pc">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Perseo PC</div>
-                                                        <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['perseo_pc']) }}</div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        @endif
-
-                                        @if (count($productos['perseo_web']))
-                                            <li class="nav-item mb-2">
-                                                <a class="nav-link" id="perseo_web-tab-5" data-toggle="tab"
-                                                    href="#perseo_web">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Perseo WEB</div>
-                                                        <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['perseo_web']) }}</div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        @endif
-                                        @if (count($productos['whapi']))
-                                            <li class="nav-item mb-2">
-                                                <a class="nav-link" id="whapi-tab-5" data-toggle="tab" href="#whapi">
-                                                    <div
-                                                        class="d-flex justify-content-between align-items-center w-100 mx-3">
-                                                        <div class="font-size-lg font-weight-bold">Whapi</div>
-                                                        <div class="ml-auto font-weight-bold">
-                                                            {{ count($productos['whapi']) }}</div>
-                                                    </div>
-                                                </a>
-                                            </li>
-                                        @endif
+                                        @endforeach
                                     </ul>
                                 </div>
                                 <div class="col-12 col-sm-8 col-lg-10">

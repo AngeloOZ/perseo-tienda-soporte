@@ -82,14 +82,45 @@ class FacturasController extends Controller
             }
         }
 
-        $productosList = [
-            'contafacil' => $this->consultar_productos(4, $vendedor->distribuidoresid),
-            'facturito' => $this->consultar_productos(1, $vendedor->distribuidoresid),
-            'firmas' => $this->consultar_productos(2, $vendedor->distribuidoresid),
-            'perseo_pc' => $this->consultar_productos(3, $vendedor->distribuidoresid),
-            'perseo_web' => $this->consultar_productos(5, $vendedor->distribuidoresid),
-            'whapi' => $this->consultar_productos(6, $vendedor->distribuidoresid),
-        ];
+        $productosList = collect([
+            [
+                "id" => 'facturito',
+                "titulo" => "Facturito",
+                "productos" => $this->consultar_productos(1, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'firmas',
+                "titulo" => "Firmas",
+                "productos" => $this->consultar_productos(2, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'perseo_pc',
+                "titulo" => "Perseo PC",
+                'productos' => $this->consultar_productos(3, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'contafacil',
+                "titulo" => "Contafácil",
+                "productos" => $this->consultar_productos(4, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'perseo_web',
+                "titulo" => "Perseo Web",
+                'productos' => $this->consultar_productos(5, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'whapi',
+                "titulo" => "WHAPI",
+                'productos' => $this->consultar_productos(6, $vendedor->distribuidoresid),
+            ],
+            [
+                "id" => 'punto_venta',
+                "titulo" => "Punto de venta",
+                'productos' => $this->consultar_productos(7, $vendedor->distribuidoresid),
+            ],
+        ])->filter(function ($item) {
+            return count($item["productos"]) > 0;
+        })->sortBy('titulo')->values()->toArray();
 
         return view('tienda.tienda', ["productos" => $productosList, "vendedor" => $vendedor, "cupon" => $stateCupon]);
     }
