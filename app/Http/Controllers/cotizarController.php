@@ -182,17 +182,43 @@ class cotizarController extends Controller
 
             $porcentajeTarjetaContado = ($totaliva * 10) / 100;
             $nombre_cliente = str_replace(" ", "_", strtolower($request->nombre_cliente));
-            if ($request->tipo_plantilla == 1) {
-                $template = new TemplateProcessor('word/pcContable.docx');
-                $fileName = 'Perseo_pc_contable_';
-            } elseif ($request->tipo_plantilla == 2) {
-                $template = new TemplateProcessor('word/pcPractico.docx');
-                $fileName = 'Perseo_pc_practico_';
-                $valor_mantenimiento = 80;
-            } elseif ($request->tipo_plantilla == 3) {
-                $template = new TemplateProcessor('word/pcControl.docx');
-                $fileName = 'Perseo_pc_control_';
+
+            $pathTemplate = '';
+
+            switch ($request->tipo_plantilla) {
+                case 1:
+                    $pathTemplate = 'word/pcContable.docx';
+                    $fileName = 'Perseo_pc_contable_';
+                    break;
+                case 2:
+                    $pathTemplate = 'word/pcPractico.docx';
+                    $fileName = 'Perseo_pc_practico_';
+                    $valor_mantenimiento = 80;
+                    break;
+                case 3:
+                    $pathTemplate = 'word/pcControl.docx';
+                    $fileName = 'Perseo_pc_control_';
+                    break;
+                case 4:
+                    $pathTemplate = 'word/webComercial.docx';
+                    $fileName = 'Perseo_web_comercial_';
+                    break;
+                case 5:
+                    $pathTemplate = 'word/webFacturacion.docx';
+                    $fileName = 'Perseo_web_facturacion_';
+                    break;
+                case 6:
+                    $pathTemplate = 'word/webServicios.docx';
+                    $fileName = 'Perseo_web_servicios_';
+                    break;
             }
+
+            if (!file_exists($pathTemplate)) {
+                flash('No se encontró la plantilla seleccionada')->error();
+                return back();
+            }
+            $template = new TemplateProcessor($pathTemplate);
+
             $fileName .= $nombre_cliente;
             $template->setValue('nombre_firma', $this->obtenerDatosUsuarioLoggeado()->nombres);
             $template->setValue('celular_firma', $this->obtenerDatosUsuarioLoggeado()->telefono);
