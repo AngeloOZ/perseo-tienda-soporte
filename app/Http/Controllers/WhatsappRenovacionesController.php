@@ -232,8 +232,8 @@ class WhatsappRenovacionesController extends Controller
             $data = (object)$data;
 
             $phone = str_replace(" ", "", $data->phone);
-            if (str_starts_with($data->phone, "0")) {
-                $phone = "593" . substr($data->phone, 1);
+            if (str_starts_with($phone, "0")) {
+                $phone = "593" . substr($phone, 1);
             }
 
             $solicitud = [
@@ -272,8 +272,8 @@ class WhatsappRenovacionesController extends Controller
 
         try {
             $phone = str_replace(" ", "", $data->phone);
-            if (str_starts_with($data->phone, "0")) {
-                $phone = "593" . substr($data->phone, 1);
+            if (str_starts_with($phone, "0")) {
+                $phone = "593" . substr($phone, 1);
             }
 
             $solicitud = [
@@ -300,10 +300,10 @@ class WhatsappRenovacionesController extends Controller
             }
 
             $errorMessage = isset($res['message']) ? $res['message'] : '';
-            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
+            echo "Error_respo enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
-            echo "Error enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";
+            echo "Error_catch enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";
             return false;
         }
     }

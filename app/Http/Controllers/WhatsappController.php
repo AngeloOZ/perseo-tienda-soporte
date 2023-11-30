@@ -195,8 +195,8 @@ class WhatsappController extends Controller
             $mensaje = str_replace('<br>', "\n", $mensaje);
             $mensaje = "Hola {$data->nombre} buen día, reciba un cordial saludo del *equipo de soporte*.\n\n" . $mensaje . "\n\n*Nota:* Este número es solo para comunicados, por favor no responder.";
 
-            if (str_starts_with($data->numero, "0")) {
-                $numero = "593" . substr($data->numero, 1);
+            if (str_starts_with($numero, "0")) {
+                $numero = "593" . substr($numero, 1);
             }
 
             $solicitud = [
@@ -228,11 +228,11 @@ class WhatsappController extends Controller
         $this->init_config();
         try {
             $data = json_decode(json_encode($data));
-            $numero = $data->numero;
+            $numero = str_replace(" ", "", $data->numero);
             $mensaje = $data->mensaje;
 
-            if (str_starts_with($data->numero, "0")) {
-                $numero = "593" . substr($data->numero, 1);
+            if (str_starts_with($numero, "0")) {
+                $numero = "593" . substr($numero, 1);
             }
 
             $solicitud = [
