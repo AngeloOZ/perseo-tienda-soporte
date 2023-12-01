@@ -1,8 +1,10 @@
 @php
+
     $defaults = App\Constants\ProductosCotizacionesDetalles::DETALLES_DEFAULT;
     $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
     $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
     $detalleSinDefault = $detalle->whereNotIn('detallesid', $defaults);
+
 @endphp
 @extends('auth.layouts.app')
 @section('contenido')
@@ -21,18 +23,10 @@
                                     <div class="card-toolbar">
                                         <div class="btn-toolbar justify-content-between" role="toolbar" aria-label="">
                                             <div class="btn-group" role="group" aria-label="">
-                                                {{-- <a href="{{ route('listadoCotizaciones.listado') }}"
-                                                    class="btn btn-secondary btn-icon" data-toggle="tooltip"
-                                                    title="Listado Cotizaciones"><i style="color:#000000"
-                                                        class="la la-long-arrow-left "></i></a> --}}
 
                                                 <button type="button" class="btn btn-success btn-icon" title="Agregar fila"
                                                     onclick="agregarFila()"><i style="color:#ffffff"
                                                         class="la la-plus "></i></button>
-
-                                                {{-- <a href="{{ route('detalles.crear') }}" class="btn  btn-secondary btn-icon"
-                                                    data-toggle="tooltip" title="Ingresar Detalles"><i
-                                                        class="la la-align-center "></i></a> --}}
 
                                                 <a type="button" class="btn btn-danger btn-icon" title="Limpiar"
                                                     onclick="limpiarCampos()"><i

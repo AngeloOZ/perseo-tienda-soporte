@@ -4,5 +4,5 @@ namespace App\Constants;
 
 class ProductosCotizacionesDetalles
 {
-    const DETALLES_DEFAULT = [48, 49, 45, 50, 51];
+    const DETALLES_DEFAULT = [45, 48, 49, 50, 51];
 }

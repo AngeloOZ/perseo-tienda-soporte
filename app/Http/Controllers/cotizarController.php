@@ -111,6 +111,7 @@ class cotizarController extends Controller
     public function editarCotizaciones($cotizaciones)
     {
         $cotizaciones = Cotizaciones::where('cotizacionesid', $cotizaciones)->first();
+
         $cotizaciones->fecha = date("d-m-Y", strtotime($cotizaciones->fecha));
         return view('soporte.admin.capacitaciones.cotizar.plantilla1.indexEditar', compact('cotizaciones'));
     }

@@ -3,6 +3,12 @@
         $detalle = App\Models\CotizacionesDetalle::select('detallesid', 'detalle')->get();
         $plantilla = App\Models\PlantillaDescarga::select('plantillaDescargaid', 'detalle')->get();
         $detalleSinDefault = $detalle->whereNotIn('detallesid', $defaults);
+
+        // revertir orden
+        $decodificar = collect(json_decode($cotizaciones->detalle_cotizacion))
+            ->sortBy('descuento', SORT_REGULAR)
+            ->values();
+        // dd($decodificar);
     @endphp
     @extends('auth.layouts.app')
     @section('contenido')
@@ -201,7 +207,7 @@
                                             <div class="col-lg-12 mt-5" style="width:100%">
                                                 <table
                                                     class="table table-sm table-bordered table-head-custom table-hover text-center display responsive no-wrap"
-                                                    id="kt_datatable" style="width:100%">
+                                                    id="kt_datatable_detalle" style="width:100%">
                                                     <thead>
                                                         <tr>
                                                             <th data-priority="1" width="50">Detalle</th>
@@ -211,13 +217,11 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        @php
-                                                            $decodificar = json_decode($cotizaciones->detalle_cotizacion);
-                                                        @endphp
                                                         @foreach ($decodificar as $dec)
                                                             @php
                                                                 $detallesCustom = in_array($dec->detalle, $defaults) ? $detalle : $detalleSinDefault;
                                                             @endphp
+                                                            {{-- @dump($dec->detalle) --}}
                                                             <tr>
                                                                 <td>
                                                                     <select class="form-control select2 valoresSelect"
@@ -261,7 +265,6 @@
                                                                         {{ in_array($dec->detalle, $defaults) ? 'disabled' : '' }}
                                                                         class="btn btn-sm btn-danger" name="botonEliminar"
                                                                         onclick="eliminarFila(this)">-</button>
-
                                                                 </td>
                                                             </tr>
                                                         @endforeach
@@ -349,13 +352,15 @@
                 });
             }
 
-            var table = $('#kt_datatable').DataTable({
-
+            var table = $('#kt_datatable_detalle').DataTable({
                 paging: false,
                 searching: false,
                 bInfo: false,
                 responsive: true,
                 processing: true,
+                order: [
+                    [2, 'asc']
+                ],
                 columns: [{
                         data: 'detalle',
                         orderable: false,
