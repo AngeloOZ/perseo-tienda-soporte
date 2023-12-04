@@ -165,6 +165,9 @@ class FacturasLicenciasRenovarController extends Controller
             'error' => null,
         ];
 
+        // TODO: temporal hasta arreglar
+        return response()->json($respuesta, 401);
+
         try {
             $instancia = new self();
 
@@ -197,7 +200,7 @@ class FacturasLicenciasRenovarController extends Controller
             $respuesta->facturado = true;
             $autorizada = $instancia->autorizar_factura($factura, $vendedor);
             $respuesta->autorizado = true;
-            
+
 
             $renovacion = new RenovacionLicencias();
             $renovacion->uuid = uniqid();
