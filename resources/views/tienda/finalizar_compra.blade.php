@@ -1,7 +1,11 @@
 @extends('tienda.layouts.app')
-@section('titulo', 'Resumen compra')
+@section('titulo', 'Finalizar compra')
 @section('descripcion', 'Productos listos para la compra')
 @section('imagen', asset('assets/media/firmas.jpg'))
+
+@section('navidad')
+    <script src="https://app.embed.im/snow.js" defer></script>
+@endsection
 
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid w-100 mx-auto p-0">

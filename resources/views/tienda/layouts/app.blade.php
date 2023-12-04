@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title> Tienda </title>
+    <title> @yield('titulo',"Tienda") </title>
     <meta name="description" content="Capacitaciones" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
@@ -25,6 +25,7 @@
     <meta property="og:description" content="@yield('descripcion')" />
     <meta property="og:image" content="@yield('imagen')" />
 
+    @yield('navidad')
 </head>
 <style>
     @media (min-width: 992px) {
