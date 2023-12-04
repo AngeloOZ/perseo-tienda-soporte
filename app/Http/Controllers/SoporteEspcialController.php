@@ -393,10 +393,7 @@ class SoporteEspcialController extends Controller
             if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;
                 $this->notificar_asignacion($soporte->tecnicoid, $soporte->tipo);
-                // $this->notificar_nuevo_registro($soporte, $factura, "NOTIFICACION: Nuevo plan convertido");
-            } else {
-                // $this->notificar_nuevo_registro($soporte, $factura);
-            }
+            } 
 
             $soporte->save();
             $factura->capacitacionid = $soporte->soporteid;

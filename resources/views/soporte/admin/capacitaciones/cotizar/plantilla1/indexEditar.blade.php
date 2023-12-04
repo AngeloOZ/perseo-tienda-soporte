@@ -528,13 +528,13 @@
                                     var valorneto = precioFinal - descuentoFinal;
 
 
-                                    totalneto = round(valorneto) + totalneto;
+                                    totalneto = Math.round(valorneto) + totalneto;
 
                                     var iva = (totalneto * 12) / 100;
                                     var totaliva = totalneto + iva;
-                                    $("#subtotal").val(round(totalneto));
-                                    $("#iva").val(round(iva));
-                                    $("#total").val(round(totaliva));
+                                    $("#subtotal").val(Math.round(totalneto));
+                                    $("#iva").val(Math.round(iva));
+                                    $("#total").val(Math.round(totaliva));
                                 })
 
 
