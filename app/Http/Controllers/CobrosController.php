@@ -348,6 +348,94 @@ class CobrosController extends Controller
     }
 
     /* -------------------------------------------------------------------------- */
+    /*                       Funciones para la API de cobros                      */
+    /* -------------------------------------------------------------------------- */
+
+    public function verificar_estado_cobro(Request $request)
+    {
+        $das = 1;
+        $secuencia = $request->input('secuencia', null);
+        $ruc = $request->input('ruc', null);
+        $vendedorid = $request->input('vendedorid', null);
+
+        $vendedor = User::where('rol', 1)
+            ->where('distribuidoresid', $das)
+            ->where('vendedoresid', $vendedorid)
+            ->first(['usuariosid']);
+
+        $respuesta = (object)[
+            "modulo" => "n/a",
+            "estado" => "Cobro no registrado en la tienda",
+            "comprobantes" => [],
+        ];
+
+        if (!$vendedor) {
+            $respuesta->estado = "Vendedor no registrado en la tienda";
+            return $respuesta;
+        }
+
+        try {
+            $factura = Factura::select('facturaid', 'estado_pago', 'comprobante_pago')
+                ->where('distribuidoresid', $das)
+                ->where('facturado', 1)
+                ->where('usuariosid', $vendedor->usuariosid)
+                ->where('identificacion', $ruc)
+                ->where('secuencia_perseo', 'like', "%$secuencia%")
+                ->latest('facturaid')
+                ->first();
+
+            if ($factura) {
+                $respuesta->modulo = "facturacion";
+                $comprobantes = json_decode($factura->comprobante_pago, true);
+                $respuesta->comprobantes = array_values($comprobantes);
+
+                switch ($factura->estado_pago) {
+                    case 0:
+                        $respuesta->estado = "No pagado";
+                        break;
+                    case 1:
+                        $respuesta->estado = "Pagado no verificado";
+                        break;
+                    case 2:
+                        $respuesta->estado = "Pagado y verificado";
+                        break;
+                }
+            } else {
+                $cobro = Cobros::select('estado', 'comprobante')
+                    ->where('distribuidoresid', $das)
+                    ->where('usuariosid', $vendedor->usuariosid)
+                    ->where('secuencias', 'like', "%$secuencia%")
+                    ->latest('cobrosid')
+                    ->first();
+
+                if ($cobro) {
+                    $respuesta->modulo = "cobros";
+                    switch ($cobro->estado) {
+                        case 1:
+                            $respuesta->estado = "Pagado no verificado";
+                            break;
+                        case 2:
+                            $respuesta->estado = "Pagado y verificado";
+                            break;
+                        case 3:
+                            $respuesta->estado = "Pago rechazado";
+                            break;
+                    }
+
+                    $comprobantes = json_decode($cobro->comprobante, true);
+                    $respuesta->comprobantes = array_values($comprobantes);
+                }
+            }
+
+            return $respuesta;
+        } catch (\Throwable $th) {
+            $respuesta->estado = "error servidor";
+            $respuesta->mensaje = $th->getMessage();
+            return $respuesta;
+        }
+    }
+
+    /* -------------------------------------------------------------------------- */
     /*                  Funciones para registrar cobros en perseo                 */
     /* -------------------------------------------------------------------------- */
 
