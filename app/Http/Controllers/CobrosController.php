@@ -487,25 +487,25 @@ class CobrosController extends Controller
         if ($origen == "facturacion") {
             switch ($estado) {
                 case 0:
-                    return "No pagado";
+                    return "No pagado - Facturación";
                     break;
                 case 1:
-                    return "Pagado no verificado";
+                    return "Pagado no verificado - Facturación";
                     break;
                 case 2:
-                    return "Pagado y verificado";
+                    return "Pagado y verificado - Facturación";
                     break;
             }
         } else {
             switch ($estado) {
                 case 1:
-                    return "Pagado no verificado";
+                    return "Pagado no verificado - Cobros";
                     break;
                 case 2:
-                    return "Pagado y verificado";
+                    return "Pagado y verificado - Cobros";
                     break;
                 case 3:
-                    return "Pago rechazado";
+                    return "Pago rechazado - Cobros";
                     break;
             }
         }
