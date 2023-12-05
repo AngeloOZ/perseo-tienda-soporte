@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Request;
@@ -12,6 +13,12 @@ class WhatsappRenovacionesController extends Controller
     private $APIWhatsapp = '';
     private $bearToken = null;
     private $pathToken = '';
+    private $client = null;
+
+    public function __construct()
+    {
+        $this->client = new Client();
+    }
 
     public function index()
     {
@@ -241,6 +248,15 @@ class WhatsappRenovacionesController extends Controller
                 "message" => $data->message,
                 "isGroup" => false,
             ];
+            // $res = $instancia->client->post($instancia->APIWhatsapp . "/send-message", [
+            //     'headers' => [
+            //         'Content-Type' => 'application/json; charset=UTF-8',
+            //         'Authorization' => "Bearer " . $instancia->bearToken,
+            //     ],
+            //     'json' => $solicitud,
+            //     'verify' => false,
+            //     'timeout' => 10
+            // ]);
 
             $res = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'Authorization' => "Bearer " . $instancia->bearToken])
                 ->withOptions([
@@ -259,15 +275,17 @@ class WhatsappRenovacionesController extends Controller
         }
     }
 
-    public static function enviar_archivo_mensaje($data, $timeout = 5, $cron = true)
+    public static function enviar_archivo_mensaje($data, $timeout = 5, $cron = true, $intentos = 0)
     {
+        $intentos++;
         $data = (object)$data;
         $instancia = new self();
-        if ($cron) {
+
+        if ($cron)
             $instancia->init_config_cron($data->distribuidor);
-        } else {
+        else
             $instancia->init_config($data->distribuidor);
-        }
+
         $instancia->validar_existe_token();
 
         try {
@@ -299,8 +317,12 @@ class WhatsappRenovacionesController extends Controller
                 return true;
             }
 
+            if ($intentos <= 3) {
+                return self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
+            }
+
             $errorMessage = isset($res['message']) ? $res['message'] : '';
-            echo "Error_respo enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
+            echo "Error enviar whatsapp $intentos intentos: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
             echo "Error_catch enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";

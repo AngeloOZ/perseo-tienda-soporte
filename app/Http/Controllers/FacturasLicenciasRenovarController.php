@@ -234,7 +234,7 @@ class FacturasLicenciasRenovarController extends Controller
                     "filename" => "factura_{$factura->secuencia}.pdf",
                     "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
                     "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
-                ], 5, false);
+                ], 10, false);
             }
             return response()->json($respuesta, 200);
         } catch (\Throwable $th) {
