@@ -36,3 +36,10 @@ Route::prefix('v1')->group(function () {
     });
 });
 
+
+Route::prefix('v2')->group(function () {
+
+    Route::group(['prefix' => 'cobros'], function () {
+        Route::post('/verificar-estado', [CobrosController::class, 'verificar_estado_cobro_v2'])->name('api.cobros.verificar-estado');
+    });
+});

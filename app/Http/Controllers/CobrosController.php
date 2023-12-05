@@ -382,7 +382,7 @@ class CobrosController extends Controller
         }
 
         try {
-            $factura = Factura::select('facturaid', 'estado_pago', 'comprobante_pago')
+            $factura = Factura::select('facturaid', 'estado_pago')
                 ->where('distribuidoresid', $das)
                 ->where('facturado', 1)
                 ->where('usuariosid', $vendedor->usuariosid)
@@ -393,20 +393,7 @@ class CobrosController extends Controller
 
             if ($factura) {
                 $respuesta->modulo = "facturacion";
-                $comprobantes = json_decode($factura->comprobante_pago, true);
-                $respuesta->comprobantes = array_values($comprobantes);
-
-                switch ($factura->estado_pago) {
-                    case 0:
-                        $respuesta->estado = "No pagado";
-                        break;
-                    case 1:
-                        $respuesta->estado = "Pagado no verificado";
-                        break;
-                    case 2:
-                        $respuesta->estado = "Pagado y verificado";
-                        break;
-                }
+                $respuesta->estado = $this->obtenerEstado($factura->estado_pago, "facturacion");
             } else {
                 $cobro = Cobros::select('estado', 'comprobante')
                     ->where('distribuidoresid', $das)
@@ -417,20 +404,7 @@ class CobrosController extends Controller
 
                 if ($cobro) {
                     $respuesta->modulo = "cobros";
-                    switch ($cobro->estado) {
-                        case 1:
-                            $respuesta->estado = "Pagado no verificado";
-                            break;
-                        case 2:
-                            $respuesta->estado = "Pagado y verificado";
-                            break;
-                        case 3:
-                            $respuesta->estado = "Pago rechazado";
-                            break;
-                    }
-
-                    $comprobantes = json_decode($cobro->comprobante, true);
-                    $respuesta->comprobantes = array_values($comprobantes);
+                    $respuesta->estado = $this->obtenerEstado($cobro->estado, "cobros");
                 }
             }
 
@@ -444,87 +418,97 @@ class CobrosController extends Controller
 
     public function verificar_estado_cobro_v2(Request $request)
     {
-        $das = 1;
-        $secuencia = $request->input('secuencia', null);
-        $ruc = $request->input('ruc', null);
-        $vendedorid = $request->input('vendedorid', null);
+        $usuario = $request->header('usuario');
+        $clave = $request->header('clave');
 
-        $vendedor = User::where('rol', 1)
-            ->where('distribuidoresid', $das)
-            ->where('vendedoresid', $vendedorid)
-            ->first(['usuariosid', 'distribuidoresid']);
-
-        $respuesta = (object)[
-            "modulo" => "n/a",
-            "estado" => "Cobro no registrado en la tienda",
-            "comprobantes" => [],
-        ];
-
-        if (!$vendedor) {
-            $respuesta->estado = "Vendedor no registrado en la tienda";
-            return $respuesta;
+        if ($usuario != "Perseo" || $clave != "Perseo1232*") {
+            return response()->json(['error' => 'Acceso no autorizado'], 401);
         }
 
-        $das = $vendedor->distribuidoresid;
-
         try {
-            $factura = Factura::select('facturaid', 'estado_pago', 'comprobante_pago')
-                ->where('distribuidoresid', $das)
-                ->where('facturado', 1)
-                ->where('usuariosid', $vendedor->usuariosid)
-                ->where('identificacion', $ruc)
-                ->where('secuencia_perseo', 'like', "%$secuencia%")
-                ->latest('facturaid')
-                ->first();
+            $facturas = collect($request->input('datos', []));
+            $respuestas = $facturas->map(function ($factura) {
+                $vendedor = User::where('rol', 1)
+                    ->where('distribuidoresid', $factura['distribuidor'])
+                    ->where('vendedoresid', $factura['vendedorid'])
+                    ->first(['usuariosid']);
 
-            if ($factura) {
-                $respuesta->modulo = "facturacion";
-                $comprobantes = json_decode($factura->comprobante_pago, true);
-                $respuesta->comprobantes = array_values($comprobantes);
+                $respuesta = (object)[
+                    "secuencia" => $factura['secuencia'],
+                    "modulo" => "n/a",
+                    "estado" => "Cobro no registrado en la tienda",
+                    "comprobantes" => [],
+                ];
 
-                switch ($factura->estado_pago) {
-                    case 0:
-                        $respuesta->estado = "No pagado";
-                        break;
-                    case 1:
-                        $respuesta->estado = "Pagado no verificado";
-                        break;
-                    case 2:
-                        $respuesta->estado = "Pagado y verificado";
-                        break;
+                if (!$vendedor) {
+                    $respuesta->estado = "Vendedor no registrado en la tienda";
+                    return $respuesta;
                 }
-            } else {
-                $cobro = Cobros::select('estado', 'comprobante')
-                    ->where('distribuidoresid', $das)
+
+                $facturaObj = Factura::select('facturaid', 'estado_pago')
+                    ->where('distribuidoresid', $factura['distribuidor'])
+                    ->where('facturado', 1)
                     ->where('usuariosid', $vendedor->usuariosid)
-                    ->where('secuencias', 'like', "%$secuencia%")
+                    ->where('identificacion', $factura['ruc'])
+                    ->where('secuencia_perseo', 'like', "%{$factura['secuencia']}%")
+                    ->latest('facturaid')
+                    ->first();
+
+                if ($facturaObj) {
+                    $respuesta->modulo = "facturacion";
+                    $respuesta->estado = $this->obtenerEstado($facturaObj->estado_pago, "facturacion");
+                    return $respuesta;
+                }
+
+                $cobro = Cobros::select('estado', 'comprobante')
+                    ->where('distribuidoresid', $factura['distribuidor'])
+                    ->where('usuariosid', $vendedor->usuariosid)
+                    ->where('secuencias', 'like', "%{$factura['secuencia']}%")
                     ->latest('cobrosid')
                     ->first();
 
                 if ($cobro) {
                     $respuesta->modulo = "cobros";
-                    switch ($cobro->estado) {
-                        case 1:
-                            $respuesta->estado = "Pagado no verificado";
-                            break;
-                        case 2:
-                            $respuesta->estado = "Pagado y verificado";
-                            break;
-                        case 3:
-                            $respuesta->estado = "Pago rechazado";
-                            break;
-                    }
-
-                    $comprobantes = json_decode($cobro->comprobante, true);
-                    $respuesta->comprobantes = array_values($comprobantes);
+                    $respuesta->estado = $this->obtenerEstado($cobro->estado, "cobros");
+                    $respuesta->comprobantes = array_values(json_decode($cobro->comprobante, true));
+                    return $respuesta;
                 }
-            }
 
-            return $respuesta;
+                return $respuesta;
+            });
+
+            return response()->json($respuestas);
         } catch (\Throwable $th) {
-            $respuesta->estado = "error servidor";
-            $respuesta->mensaje = $th->getMessage();
-            return $respuesta;
+            return response()->json(['error' => 'No se pudo procesar los datos'], 500);
+        }
+    }
+
+    private function obtenerEstado($estado, $origen)
+    {
+        if ($origen == "facturacion") {
+            switch ($estado) {
+                case 0:
+                    return "No pagado";
+                    break;
+                case 1:
+                    return "Pagado no verificado";
+                    break;
+                case 2:
+                    return "Pagado y verificado";
+                    break;
+            }
+        } else {
+            switch ($estado) {
+                case 1:
+                    return "Pagado no verificado";
+                    break;
+                case 2:
+                    return "Pagado y verificado";
+                    break;
+                case 3:
+                    return "Pago rechazado";
+                    break;
+            }
         }
     }
 
