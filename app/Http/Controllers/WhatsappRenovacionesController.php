@@ -317,11 +317,12 @@ class WhatsappRenovacionesController extends Controller
                 return true;
             }
 
-            if ($intentos <= 3) {
+            $errorMessage = isset($res['message']) ? $res['message'] : '';
+
+            if ($intentos <= 3 && !str_contains($errorMessage, 'não existe')) {
                 return self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
             }
 
-            $errorMessage = isset($res['message']) ? $res['message'] : '';
             echo "Error enviar whatsapp $intentos intentos: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
