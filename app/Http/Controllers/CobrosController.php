@@ -356,9 +356,9 @@ class CobrosController extends Controller
         $usuario = $request->header('usuario');
         $clave = $request->header('clave');
 
-        if ($usuario != "Perseo" || $clave != "Perseo1232*") {
-            return response()->json(['error' => 'Acceso no autorizado'], 401);
-        }
+        // if ($usuario != "Perseo" || $clave != "Perseo1232*") {
+        //     return response()->json(['error' => 'Acceso no autorizado'], 401);
+        // }
 
         $secuencia = $request->input('secuencia', null);
         $ruc = $request->input('ruc', null);
