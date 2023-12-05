@@ -460,7 +460,7 @@ class CobrosController extends Controller
                     return $respuesta;
                 }
 
-                $cobro = Cobros::select('estado', 'comprobante')
+                $cobro = Cobros::select('estado')
                     ->where('distribuidoresid', $factura['distribuidor'])
                     ->where('usuariosid', $vendedor->usuariosid)
                     ->where('secuencias', 'like', "%{$factura['secuencia']}%")
@@ -470,7 +470,6 @@ class CobrosController extends Controller
                 if ($cobro) {
                     $respuesta->modulo = "cobros";
                     $respuesta->estado = $this->obtenerEstado($cobro->estado, "cobros");
-                    $respuesta->comprobantes = array_values(json_decode($cobro->comprobante, true));
                     return $respuesta;
                 }
 
