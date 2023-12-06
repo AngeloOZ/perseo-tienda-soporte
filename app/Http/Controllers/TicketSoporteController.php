@@ -197,6 +197,14 @@ class TicketSoporteController extends Controller
                 }
             }
 
+            if ($estado == 1 &&  Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR) {
+                $ticket->fecha_contactado = null;
+            }
+
+            if ($estado == 2 && $ticket->estado == 1 && $ticket->fecha_contactado == null) {
+                $ticket->fecha_contactado = now();
+            }
+
             if ($estado >= 3) {
                 $tiempo = $this->obtener_tiempo_activo_ticket($ticket);
                 $ticket->tiempo_activo = $tiempo;
@@ -205,11 +213,10 @@ class TicketSoporteController extends Controller
             }
 
             // 4 => estado cerrado
-            if ($estado == 4) {
-                if ($estado != $ticket->estado) {
-                    $this->enviar_correo_calificacion($ticket, $estado);
-                }
+            if ($estado == 4 && $estado != $ticket->estado) {
+                $this->enviar_correo_calificacion($ticket, $estado);
             }
+
 
             // 5 => estado sin respuesta
             // 6 => estado problema general
@@ -224,6 +231,7 @@ class TicketSoporteController extends Controller
                     $ticket->fecha_cierre = null;
                     $ticket->tiempo_activo = null;
                     $ticket->tecnicosid = null;
+                    $ticket->fecha_contactado = null;
                 }
                 $ticket->distribuidor = $request->distribuidor;
             }
@@ -763,7 +771,7 @@ class TicketSoporteController extends Controller
             $searchValue = $request->search['value'] ?? "";
 
 
-            $data = collect(Ticket::select('ticketid', 'numero_ticket', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'fecha_creado', 'fecha_asignacion', 'fecha_cierre', 'tiempo_activo', 'producto', 'distribuidor', 'tecnicosid')
+            $data = collect(Ticket::select('ticketid', 'numero_ticket', 'ruc', 'razon_social', 'correo', 'whatsapp', 'estado', 'fecha_creado', 'fecha_asignacion', 'fecha_contactado', 'fecha_cierre', 'tiempo_activo', 'producto', 'distribuidor', 'tecnicosid')
                 ->when($request->asignados, function ($query, $asignados) {
                     if ($asignados == "si") {
                         return $query->whereNotNull('tecnicosid');
@@ -816,6 +824,24 @@ class TicketSoporteController extends Controller
                     } else {
                         return $ticket->tiempo_activo;
                     }
+                })
+                ->editColumn('tiempo_contactado', function ($ticket) {
+                    if ($ticket->fecha_asignacion == null) {
+                        return "00:00:00";
+                    }
+
+                    $fecha = $ticket->fecha_contactado ?? date('Y-m-d H:i:s');
+                    $fechaAsignacion = DateTime::createFromFormat('Y-m-d H:i:s', $ticket->fecha_asignacion);
+                    $fechaContactado = DateTime::createFromFormat("Y-m-d H:i:s", $fecha);
+
+                    $interval = $fechaContactado->diff($fechaAsignacion);
+
+                    // Total de horas, minutos y segundos
+                    $horas = $interval->days * 24 + $interval->h;
+                    $minutos = $interval->i;
+                    $segundos = $interval->s;
+
+                    return sprintf("%02d:%02d:%02d", $horas, $minutos, $segundos);
                 })
                 ->editColumn('estado', function ($ticket) {
                     switch ($ticket->estado) {

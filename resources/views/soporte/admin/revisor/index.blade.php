@@ -45,7 +45,8 @@
                                     <div class="row mb-8">
                                         <div class="col-lg-4 mb-4">
                                             <label>Distribuidores:</label>
-                                            <select class="form-control datatable-input" id="filtroDistribuidor" {{ $disabled }}>
+                                            <select class="form-control datatable-input" id="filtroDistribuidor"
+                                                {{ $disabled }}>
                                                 @if ($isVisible)
                                                     <option value="" selected>Todos</option>
                                                 @endif
@@ -165,6 +166,7 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
+
             var table = $('#kt_datatable').DataTable({
                 dom: "<'row'<'col-sm-12 col-md-6'f><'col-sm-12 col-md-6'l>>" +
                     "<'row'<'col-sm-12'tr>>" +
@@ -240,6 +242,11 @@
                         searchable: false,
                     },
                     {
+                        data: 'tiempo_contactado',
+                        name: 'tiempo_contactado',
+                        searchable: false,
+                    },
+                    {
                         data: 'tiempo_activo',
                         name: 'tiempo_activo',
                         searchable: false,
@@ -253,6 +260,10 @@
                     },
                 ],
             });
+
+            setInterval(() => {
+                table.ajax.reload();
+            }, (1000 * 30));
 
             //Clic en boton buscar
             $('#kt_search').on('click', function(e) {

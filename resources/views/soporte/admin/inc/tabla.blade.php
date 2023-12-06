@@ -10,6 +10,9 @@
             <th>Whatsapp</th>
             <th>Estado</th>
             <th>Fecha ingreso</th>
+            @if (Auth::guard('tecnico')->user()->rol == 7)
+                <th>Tiempo contactado</th>
+            @endif
             <th>Tiempo activo</th>
             <th class="no-exportar">Acciones</th>
         </tr>
