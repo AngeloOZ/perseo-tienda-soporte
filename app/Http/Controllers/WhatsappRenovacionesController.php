@@ -323,7 +323,7 @@ class WhatsappRenovacionesController extends Controller
                 return self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
             }
 
-            echo "Error enviar whatsapp $intentos intentos: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
+            echo "Error enviar sms: $intentos intentos: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
             return false;
         } catch (\Throwable $th) {
             echo "Error_catch enviar whatsapp: {$phone} - {$data->filename} DAS {$data->distribuidor}: {$th->getMessage()}\n";
