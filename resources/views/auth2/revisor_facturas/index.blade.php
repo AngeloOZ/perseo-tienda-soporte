@@ -80,6 +80,11 @@
                                             <th>Estado del producto</th>
                                             <th>Estado del pago</th>
                                             <th>Origen</th>
+                                            <th>Vendedor</th>
+                                            <th>Fecha creada</th>
+                                            <th>Fecha modificada</th>
+                                            <th>% Descuento</th>
+                                            <th>Total factura</th>
                                             <th class="no-export">Acciones</th>
                                         </tr>
                                     </thead>
@@ -186,6 +191,36 @@
                         name: 'origen',
                     },
                     {
+                        data: 'vendedor',
+                        name: 'vendedor',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'fecha_creacion',
+                        name: 'fecha_creacion',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'fecha_actualizado',
+                        name: 'fecha_actualizado',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'descuento',
+                        name: 'descuento',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'total',
+                        name: 'total',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -290,7 +325,7 @@
 
             $('#kt_reset').on('click', function() {
                 resetearEstadoFiltro();
-                $("#filtroEstadoPagado").val("");
+                $("#filtroEstadoPagado").val("3");
                 $("#filtroEstadoLiberado").val("");
                 initDateMonth();
                 table.draw();

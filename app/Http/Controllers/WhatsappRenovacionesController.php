@@ -277,6 +277,7 @@ class WhatsappRenovacionesController extends Controller
 
     public static function enviar_archivo_mensaje($data, $timeout = 5, $cron = true, $intentos = 0)
     {
+        if ($intentos > 2) return false;
         $intentos++;
         $data = (object)$data;
         $instancia = new self();
@@ -319,8 +320,9 @@ class WhatsappRenovacionesController extends Controller
 
             $errorMessage = isset($res['message']) ? $res['message'] : '';
 
-            if ($intentos <= 3 && !str_contains($errorMessage, 'não existe')) {
-                return self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
+            if ($intentos <= 2 && !str_contains($errorMessage, 'não existe')) {
+                $result = self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
+                return $result;
             }
 
             echo "Error enviar whatsapp $intentos intentos: {$phone} - {$data->filename} DAS {$data->distribuidor}: response API {$errorMessage}\n";
