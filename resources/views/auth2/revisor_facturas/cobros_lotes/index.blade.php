@@ -70,10 +70,10 @@
                                                 <td>{{ $cobro->secuencia }}</td>
                                                 <td>{{ $cobro->fecha }}</td>
                                                 <td>
-                                                    {{ $bancosOrigen->where('bancocid', $cobro->banco_destino)->first()->descripcion }}
+                                                    {{ $bancosOrigen->where('bancocid', $cobro->banco_destino)->first()->descripcion ?? "Sin asignar" }}
                                                 </td>
                                                 <td>
-                                                    {{ $bancosDestino->where('bancoid', $cobro->banco_destino)->first()->descripcion }}
+                                                    {{ $bancosDestino->where('bancoid', $cobro->banco_destino)->first()->descripcion ?? "Sin asignar" }}
                                                 </td>
                                                 <td>{{ $cobro->numero_comprobante }}</td>
                                                 <td>{{ $cobro->monto }}</td>
