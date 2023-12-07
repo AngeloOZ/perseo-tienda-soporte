@@ -1001,7 +1001,7 @@ class FacturasController extends Controller
     public function filtrado_listado_revisor(Request $request)
     {
         if ($request->ajax()) {
-            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor', 'facturas.fecha_creacion', 'facturas.fecha_actualizado', 'facturas.origen', 'facturas.total_venta as total', 'cupones.descuento as descuento')
+            $data = Factura::select('facturas.facturaid', 'facturas.identificacion', 'facturas.nombre', 'facturas.concepto', 'facturas.telefono', 'facturas.secuencia_perseo', 'facturas.facturado', 'facturas.autorizado', 'facturas.productos', 'facturas.fecha_creacion', 'facturas.estado_pago', 'facturas.liberado', 'usuarios.nombres as vendedor', 'facturas.fecha_creacion', 'facturas.fecha_actualizado', 'facturas.origen', 'facturas.total_venta as total', 'cupones.descuento as descuento')
                 ->join('usuarios', 'usuarios.usuariosid', '=', 'facturas.usuariosid')
                 ->leftJoin('cupones', 'cupones.cuponid', '=', 'facturas.cuponid')
                 ->where('facturas.distribuidoresid', '=', Auth::user()->distribuidoresid)
@@ -1036,6 +1036,8 @@ class FacturasController extends Controller
                 })
                 ->get();
 
+            $listadoProductos = Producto::select('productosid', 'descripcion')->get();
+
             return DataTables::of($data)
                 ->editColumn('fecha_creacion', function ($fecha) {
                     $date = new DateTime($fecha->fecha_creacion);
@@ -1045,7 +1047,17 @@ class FacturasController extends Controller
                     $date = new DateTime($fecha->fecha_actualizado);
                     return $date->format('d-m-Y');
                 })
-                ->editColumn('descuento', function($factura){
+                ->editColumn('productos', function ($factura) use ($listadoProductos) {
+                    $prodcutos = json_decode($factura->productos);
+                    $items = "";
+
+                    foreach ($prodcutos as $item) {
+                        $nombre = $listadoProductos->where('productosid', $item->productoid)->first()->descripcion;
+                        $items .= $nombre . " (" . $item->cantidad . ") <br />";
+                    }
+                    return $items;
+                })
+                ->editColumn('descuento', function ($factura) {
                     return $factura->descuento ?? 0 . "%";
                 })
                 ->editColumn('estado', function ($estado) {
@@ -1073,7 +1085,7 @@ class FacturasController extends Controller
 
                     return $botones;
                 })
-                ->rawColumns(['action', 'estado', 'fecha_creacion', 'liberado'])
+                ->rawColumns(['action', 'estado', 'fecha_creacion', 'liberado', 'productos'])
                 ->make(true);
         }
     }

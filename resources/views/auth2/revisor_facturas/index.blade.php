@@ -83,6 +83,7 @@
                                             <th>Vendedor</th>
                                             <th>Fecha creada</th>
                                             <th>Fecha modificada</th>
+                                            <th>Productos</th>
                                             <th>% Descuento</th>
                                             <th>Total factura</th>
                                             <th class="no-export">Acciones</th>
@@ -205,6 +206,12 @@
                     {
                         data: 'fecha_actualizado',
                         name: 'fecha_actualizado',
+                        searchable: false,
+                        visible: false,
+                    },
+                    {
+                        data: 'productos',
+                        name: 'productos',
                         searchable: false,
                         visible: false,
                     },
