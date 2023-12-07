@@ -197,11 +197,18 @@ class TicketSoporteController extends Controller
                 }
             }
 
-            if ($estado == 1 &&  Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR) {
+            if (
+                $estado == 1 &&
+                Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR
+            ) {
                 $ticket->fecha_contactado = null;
             }
 
-            if ($estado == 2 && $ticket->estado == 1 && $ticket->fecha_contactado == null) {
+            if (
+                $ticket->fecha_contactado == null &&
+                $ticket->estado != $estado &&
+                $estado == 2
+            ) {
                 $ticket->fecha_contactado = now();
             }
 
@@ -209,6 +216,7 @@ class TicketSoporteController extends Controller
                 $tiempo = $this->obtener_tiempo_activo_ticket($ticket);
                 $ticket->tiempo_activo = $tiempo;
                 $ticket->fecha_cierre = now();
+                $ticket->fecha_contactado  = $ticket->fecha_contactado ?? now();
                 $this->liberar_tecnico($ticket);
             }
 
@@ -802,9 +810,8 @@ class TicketSoporteController extends Controller
                 ->when($request->producto, function ($query, $producto) {
                     return $query->where('producto', $producto);
                 })
-                // REVIEW: Experimental
                 ->when(!empty($searchValue), function ($query) use ($searchValue) {
-                    $searchValue = '%' . $searchValue . '%';  // Preparar el valor para la búsqueda con LIKE
+                    $searchValue = '%' . $searchValue . '%';
                     return $query->where(function ($query) use ($searchValue) {
                         $query->where('numero_ticket', 'like', $searchValue)
                             ->orWhere('ruc', 'like', $searchValue)
