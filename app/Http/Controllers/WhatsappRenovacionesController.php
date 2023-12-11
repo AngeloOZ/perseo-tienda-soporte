@@ -319,7 +319,11 @@ class WhatsappRenovacionesController extends Controller
 
             $errorMessage = isset($res['message']) ? $res['message'] : '';
 
-            if ($intentos <= 2 && !str_contains($errorMessage, 'não existe')) {
+            if (
+                $intentos <= 2 &&
+                !str_contains($errorMessage, 'não existe') &&
+                !str_contains($errorMessage, "não está ativa.")
+            ) {
                 return self::enviar_archivo_mensaje($data, $timeout + 3, $cron, $intentos);
             }
 
