@@ -1,3 +1,9 @@
+@php
+    use App\Constants\ConstantesTecnicos;
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
+    $listaEstados = ConstantesTecnicos::obtenerEstadosTicketsSelect([2, 3, 4]);
+@endphp
+
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Editar ticket')
 
@@ -22,7 +28,7 @@
                                                     <a href="{{ route('soporte.listado.revidor.desarrollo') }}"
                                                         class="btn btn-secondary btn-icon" data-toggle="tooltip"
                                                         title="Volver"><i class="la la-long-arrow-left"></i></a>
-                                                    @if ($ticket->estado == 3)
+                                                    @if ($ticket->estado == $estados['desarrollo']->id)
                                                         <button type="submit" class="btn btn-success btn-icon"
                                                             data-toggle="tooltip" title="Guardar"><i class="la la-save"></i>
                                                         </button>
@@ -69,22 +75,20 @@
                                                             ticket<span>
                                                     </label>
                                                     <select class="form-control select2"
-                                                        {{ $ticket->estado != 3 ? 'disabled' : '' }} name="estado">
-                                                        <option value="2"
-                                                            {{ $ticket->estado == '2' ? 'Selected' : '' }}>En
-                                                            progreso</option>
-                                                        <option value="3"
-                                                            {{ $ticket->estado == '3' ? 'Selected' : '' }}>
-                                                            Desarrollo</option>
-                                                        <option value="4"
-                                                            {{ $ticket->estado == '4' ? 'Selected' : '' }}>
-                                                            Cerrado</option>
+                                                        {{ $ticket->estado != $estados['desarrollo']->id ? 'disabled' : '' }}
+                                                        name="estado">
+                                                        @foreach ($listaEstados as $estado)
+                                                            <option value="{{ $estado->id }}"
+                                                                {{ $ticket->estado == $estado->id ? 'Selected' : '' }}>
+                                                                {{ $estado->nombre }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
 
                                                 <div class="col-12 mb-3 col-md-6 mb-md-0">
                                                     <label>Técnico asignado</label>
-                                                    <input type="text" class="form-control" readonly value="{{ $tecnicoAsignado->nombres }}" />
+                                                    <input type="text" class="form-control" readonly
+                                                        value="{{ $tecnicoAsignado->nombres }}" />
                                                 </div>
                                             </div>
                                             @include('soporte.admin.inc.datos_ticket')

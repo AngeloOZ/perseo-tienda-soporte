@@ -1,3 +1,8 @@
+@php
+    use App\Constants\ConstantesTecnicos;
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
+    $listaEstados = ConstantesTecnicos::obtenerEstadosTicketsSelect();
+@endphp
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Editar ticket')
 
@@ -79,31 +84,19 @@
                                                             ticket<span>
                                                     </label>
                                                     <select class="form-control select2" name="estado">
-                                                        <option value="1"
-                                                            {{ $ticket->estado == '1' ? 'Selected' : '' }}>
-                                                            Abierto</option>
-                                                        <option value="2"
-                                                            {{ $ticket->estado == '2' ? 'Selected' : '' }}>En
-                                                            progreso</option>
-                                                        <option value="3"
-                                                            {{ $ticket->estado == '3' ? 'Selected' : '' }}>
-                                                            Desarrollo</option>
-                                                        <option value="4"
-                                                            {{ $ticket->estado == '4' ? 'Selected' : '' }}>
-                                                            Cerrado</option>
-                                                        <option value="5"
-                                                            {{ $ticket->estado == '5' ? 'Selected' : '' }}>
-                                                            Cerrado (Sin respuesta)</option>
-                                                        <option value="6"
-                                                            {{ $ticket->estado == '6' ? 'Selected' : '' }}>
-                                                            Cerrado (Problema general)</option>
+
+                                                        @foreach ($listaEstados as $estado)
+                                                            <option value="{{ $estado->id }}"
+                                                                {{ $estado->id == $ticket->estado ? 'selected' : '' }}>
+                                                                {{ $estado->nombre }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-12 mb-3 col-md-6 mb-md-0">
                                                     <label><span class="font-size-h6 font-weight-bold">Técnico<span>
                                                     </label>
                                                     <select class="form-control select2" name="tecnicosid"
-                                                        {{ $ticket->estado >= 4 ? 'disabled' : '' }}>
+                                                        {{ $ticket->estado >= $estados['cerrado']->id ? 'disabled' : '' }}>
                                                         <option value="">Sin asignar</option>
                                                         @foreach ($tecnicos as $tecnico)
                                                             <option value="{{ $tecnico->tecnicosid }}"
