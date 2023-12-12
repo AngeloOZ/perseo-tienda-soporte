@@ -23,6 +23,13 @@ use Yajra\DataTables\Facades\DataTables;
 
 class TicketSoporteController extends Controller
 {
+    private $estadosTickets = null;
+
+    public function __construct()
+    {
+        $this->estadosTickets = ConstantesTecnicos::obtenerEstadosTickets();
+    }
+
     public function obtener_registro_actividades($id)
     {
         try {
@@ -56,7 +63,7 @@ class TicketSoporteController extends Controller
         }
 
         foreach ($tickets as $ticket) {
-            if ($ticket->estado <= 2) {
+            if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                 return $message = json_encode(["status" => 400, "message" => "El ruc $ticket->ruc tiene un ticket abierto, creado el $ticket->fecha_creado"]);
             }
 
@@ -114,7 +121,7 @@ class TicketSoporteController extends Controller
             $ticket->producto = $request->producto;
             $ticket->distribuidor = $this->obtener_distribuidor_ticket($request->distribuidor);
             $ticket->numero_ticket = uniqid();
-            $ticket->estado = 1;
+            $ticket->estado = $this->estadosTickets['abierto']->id;
 
             if ($ticket->save()) {
                 $this->asignacion_tickets();
@@ -147,6 +154,7 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket(Ticket $ticket)
     {
+        dd($this->estadosTickets);
         $desarrolladores = Tecnicos::where('rol', ConstantesTecnicos::ROL_DESARROLLO)->get();
         $supervisores = Tecnicos::where('rol', ConstantesTecnicos::ROL_ADMINISTRADOR)
             ->where('distribuidoresid', Auth::guard('tecnico')->user()->distribuidoresid)
@@ -198,7 +206,7 @@ class TicketSoporteController extends Controller
             }
 
             if (
-                $estado == 1 &&
+                $estado == $this->estadosTickets['abierto']->id &&
                 Auth::guard('tecnico')->user()->rol == ConstantesTecnicos::ROL_ADMINISTRADOR
             ) {
                 $ticket->fecha_contactado = null;
@@ -207,12 +215,12 @@ class TicketSoporteController extends Controller
             if (
                 $ticket->fecha_contactado == null &&
                 $ticket->estado != $estado &&
-                $estado == 2
+                $estado == $this->estadosTickets['en_progreso']->id
             ) {
                 $ticket->fecha_contactado = now();
             }
 
-            if ($estado >= 3) {
+            if ($estado >= $this->estadosTickets['desarrollo']->id) {
                 $tiempo = $this->obtener_tiempo_activo_ticket($ticket);
                 $ticket->tiempo_activo = $tiempo;
                 $ticket->fecha_cierre = now();
@@ -221,14 +229,17 @@ class TicketSoporteController extends Controller
             }
 
             // 4 => estado cerrado
-            if ($estado == 4 && $estado != $ticket->estado) {
+            if ($estado == $this->estadosTickets['cerrado']->id && $estado != $ticket->estado) {
                 $this->enviar_correo_calificacion($ticket, $estado);
             }
 
-
-            // 5 => estado sin respuesta
-            // 6 => estado problema general
-            if (in_array($estado, [3, 5, 6])) {
+            $cerrdadoSinRespues = [
+                $this->estadosTickets['desarrollo']->id,
+                $this->estadosTickets['cerrado_sr']->id,
+                $this->estadosTickets['cerrado_pg']->id,
+                $this->estadosTickets['cerrado_vt']->id,
+            ];
+            if (in_array($estado, $cerrdadoSinRespues)) {
                 $ticket->calificado = 1;
             }
 
@@ -540,18 +551,15 @@ class TicketSoporteController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         return $this->obtener_tiempo_activo_ticket($ticket);
                     } else {
                         return $ticket->tiempo_activo;
                     }
                 })
                 ->editColumn('estado', function ($ticket) {
-                    if ($ticket->estado == 1) {
-                        return '<a class="bg-primary text-white rounded p-1">Abierto</a>';
-                    } else if ($ticket->estado == 2) {
-                        return '<a class="bg-info text-white rounded p-1">En progreso</a>';
-                    }
+                    $estado = ConstantesTecnicos::obtenerEstadoTicket($ticket->estado);
+                    return "<a class='$estado->color text-white rounded p-1'>$estado->nombre</a>";
                 })
                 ->editColumn('action', function ($ticket) {
                     $botones = '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('soporte.editar', $ticket->ticketid) . '"  title="Editar"> <i class="la la-edit"></i> </a>';
@@ -573,7 +581,7 @@ class TicketSoporteController extends Controller
     public function filtrado_listado_de_tickets_desarrollo(Request $request)
     {
         if ($request->ajax()) {
-            $data = Ticket::where('estado', '3')
+            $data = Ticket::where('estado', '=', $this->estadosTickets['desarrollo']->id)
                 ->when($request->tecnico, function ($query, $tecnico) {
                     return $query->where('ticket_tienda.tecnicosid', $tecnico);
                 })
@@ -591,7 +599,7 @@ class TicketSoporteController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         return $this->obtener_tiempo_activo_ticket($ticket);
                     } else {
                         return $ticket->tiempo_activo;
@@ -616,21 +624,15 @@ class TicketSoporteController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         return $this->obtener_tiempo_activo_ticket($ticket);
                     } else {
                         return $ticket->tiempo_activo;
                     }
                 })
                 ->editColumn('estado', function ($ticket) {
-                    switch ($ticket->estado) {
-                        case 4:
-                            return '<a class="bg-danger text-white rounded p-1">Cerrado</a>';
-                        case 5:
-                            return '<a class="bg-warning text-white rounded p-1">Sin respuesta</a>';
-                        case 6:
-                            return '<a class="bg-danger text-white rounded p-1">Problema general</a>';
-                    }
+                    $estado = ConstantesTecnicos::obtenerEstadoTicket($ticket->estado);
+                    return "<a class='$estado->color text-white rounded p-1'>$estado->nombre</a>";
                 })
                 ->editColumn('action', function ($ticket) {
                     $botones = '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('soporte.editar', $ticket->ticketid) . '"  title="Editar"> <i class="la la-eye"></i> </a>';
@@ -734,7 +736,7 @@ class TicketSoporteController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         return $this->obtener_tiempo_activo_ticket($ticket);
                     } else {
                         return $ticket->tiempo_activo;
@@ -826,7 +828,7 @@ class TicketSoporteController extends Controller
 
             return DataTables::of($data)
                 ->editColumn('tiempo_activo', function ($ticket) {
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         return $this->obtener_tiempo_activo_ticket($ticket);
                     } else {
                         return $ticket->tiempo_activo;
@@ -851,35 +853,17 @@ class TicketSoporteController extends Controller
                     return sprintf("%02d:%02d:%02d", $horas, $minutos, $segundos);
                 })
                 ->editColumn('estado', function ($ticket) {
-                    switch ($ticket->estado) {
-                        case 1:
-                            return '<a class="bg-primary text-white rounded p-1">Abierto</a>';
-                            break;
-                        case 2:
-                            return '<a class="bg-info text-white rounded p-1">En progreso</a>';
-                            break;
-                        case 3:
-                            return '<a class="bg-success text-white rounded p-1">Desarrollo</a>';
-                            break;
-                        case 4:
-                            return '<a class="bg-danger text-white rounded p-1">Cerrado</a>';
-                            break;
-                        case 5:
-                            return '<a class="bg-info text-white rounded p-1">Sin respuesta</a>';
-                            break;
-                        case 6:
-                            return '<a class="bg-danger text-white rounded p-1">Problema general</a>';
-                            break;
-                    }
+                    $estado = ConstantesTecnicos::obtenerEstadoTicket($ticket->estado);
+                    return "<a class='$estado->color text-white rounded p-1'>$estado->nombre</a>";
                 })
                 ->editColumn('action', function ($ticket) {
                     $botones = '<a class="btn btn-icon btn-light btn-hover-success btn-sm mr-2" href="' . route('soporte.editar.revisor', $ticket->ticketid) . '"  title="Editar"> <i class="la la-edit"></i> </a>';
 
-                    if ($ticket->estado >= 3 && $ticket->calificado == 0) {
+                    if ($ticket->estado >= $this->estadosTickets['desarrollo']->id && $ticket->calificado == 0) {
                         $botones = $botones . '<a class="btn btn-icon btn-light btn-hover-info btn-sm mr-2" href="' . route('soporte.calificar_ticket', $ticket->ticketid) . '" target="_blank"  title="Enlace calificar"> <i class="la la-external-link-alt"></i> </a>';
                     }
 
-                    if ($ticket->estado <= 2) {
+                    if ($ticket->estado <= $this->estadosTickets['en_progreso']->id) {
                         $botones = $botones . '<a class="btn btn-sm btn-light btn-icon btn-hover-danger confirm-delete" href="javascript:void(0)" data-href="' . route('soporte.eliminar_ticket', $ticket->ticketid) . '" title="Eliminar"> <i class="la la-trash"></i> </a>';
                     }
 
@@ -1055,21 +1039,7 @@ class TicketSoporteController extends Controller
         }
 
         foreach ($ticketsPorEstado as $key => $item) {
-            $estado = "abierto";
-            switch ($item->estado) {
-                case 2:
-                    $estado = "En progreso";
-                    break;
-                case 3:
-                    $estado = "Desarrollo";
-                    break;
-                case 4:
-                    $estado = "Cerrado";
-                    break;
-                case 5:
-                    $estado = "Sin respuesta";
-                    break;
-            }
+            $estado = ConstantesTecnicos::obtenerEstadoTicket($item->estado)->nombre ?? "Sn";
             array_push($data["estados"]["labels"], strtoupper($estado));
             array_push($data["estados"]["values"], $item->cantidad);
         }

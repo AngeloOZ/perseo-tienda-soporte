@@ -1,6 +1,10 @@
 @extends('soporte.auth.layouts.app')
 @section('title_page', 'Listado de tickets')
 @php
+    use App\Constants\ConstantesTecnicos;
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
+    $listaEstados = ConstantesTecnicos::obtenerEstadosTicketsSelect();
+
     $disabled = 'disabled';
     $isVisible = false;
     $selected = 'pc';
@@ -82,12 +86,9 @@
                                             <label>Estado:</label>
                                             <select class="form-control datatable-input" id="filtroEstado">
                                                 <option value="">Todos</option>
-                                                <option value="1" selected>Abierto</option>
-                                                <option value="2">En progreso</option>
-                                                <option value="3">En desarrollo</option>
-                                                <option value="4">Cerrado</option>
-                                                <option value="5">Sin respuesta</option>
-                                                <option value="6">Problema general</option>
+                                                @foreach ($listaEstados as $estado)
+                                                    <option value="{{ $estado->id }}">{{ $estado->nombre }}</option>
+                                                @endforeach
                                             </select>
                                         </div>
 
@@ -105,7 +106,8 @@
                                                 {{ $disabled }}>
                                                 <option value="" {{ $selected == '' ? 'selected' : '' }}>Todos
                                                 </option>
-                                                <option value="pc" {{ $selected == 'pc' ? 'selected' : '' }}>PC</option>
+                                                <option value="pc" {{ $selected == 'pc' ? 'selected' : '' }}>PC
+                                                </option>
                                                 <option value="web">Web</option>
                                                 <option value="facturito">Facturito</option>
                                                 <option value="contafacil">Contafacil</option>

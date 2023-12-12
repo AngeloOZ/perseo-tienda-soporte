@@ -1,5 +1,6 @@
 @php
-    if(count($actividades) == 0){
+    use App\Constants\ConstantesTecnicos;
+    if (count($actividades) == 0) {
         $actividades = App\Models\ActividadTicket::where('ticketid', $ticket->ticketid)->get();
     }
 
@@ -10,6 +11,8 @@
         }
         return date('d-m-Y', strtotime($fecha));
     }
+
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
 @endphp
 <!--begin::Header-->
 <div class="">
@@ -68,7 +71,7 @@
             </div>
         </div>
     @endforeach
-    @if ($ticket->estado >= 3)
+    @if ($ticket->estado >= $estados['desarrollo']->id)
         <div class="timeline-item align-items-start">
             <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg">
                 {{ get_date_time($ticket->fecha_modificado, true) }}</div>

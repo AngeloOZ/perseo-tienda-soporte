@@ -1,5 +1,9 @@
-@extends('soporte.layout.app')
+@php
+    use App\Constants\ConstantesTecnicos;
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
+@endphp
 
+@extends('soporte.layout.app')
 @section('titulo', 'Calificar Soporte')
 @section('descripcion', 'Ayudanos a mejorar nuestro servicio, calificandonos')
 {{-- @section('imagen', asset('assets/media/tienda.jpg')) --}}
@@ -14,14 +18,14 @@
                                 {{ $ticket->numero_ticket }}</strong></h1>
                     </div>
                     <div class="card-body py-2 mb-12">
-                        @if ($ticket->estado >= 3 && $ticket->calificado == 1)
+                        @if ($ticket->estado >= $estados['desarrollo']->id && $ticket->calificado == 1)
                             <div class="d-flex flex-column align-items-center justify-content-between"
                                 style="min-height: 350px">
                                 <h1 class="mb-5 font-size-h1">Ticket: <strong>N° {{ $ticket->numero_ticket }}</strong></h1>
                                 <li class="far fa-check-circle text-success icon-10x "></li>
                                 <p class="font-size-h4 text-center mt-8 max-w-500px">Usted ya ha calificado este soporte</p>
                             </div>
-                        @elseif ($ticket->estado >= 3)
+                        @elseif ($ticket->estado >= $estados['desarrollo']->id)
                             @include('soporte.ticket.encuesta_pregunta')
                         @else
                             <div class="d-flex flex-column align-items-center justify-content-between"
@@ -58,7 +62,7 @@
                     throw new Error("Respuestas en blanco");
                 }
 
-                if (calificaciones.some(item => item <= 2 && item > 0)) { 
+                if (calificaciones.some(item => item <= 2 && item > 0)) {
                     if ($('#ctnComentario').hasClass('d-none')) {
                         $('#ctnComentario').removeClass('d-none');
                         $('#idComentario').focus();

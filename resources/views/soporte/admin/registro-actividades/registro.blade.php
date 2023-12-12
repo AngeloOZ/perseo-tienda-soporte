@@ -1,4 +1,7 @@
 @php
+    use App\Constants\ConstantesTecnicos;
+    $estados = ConstantesTecnicos::obtenerEstadosTickets();
+
     function get_date_time($fecha, $getHora = false)
     {
         if ($getHora) {
@@ -9,10 +12,11 @@
 @endphp
 
 <style>
-    :root{
+    :root {
         --color-1: #3699FF;
         --color-2: #FFF;
     }
+
     .loader-activity {
         width: 175px;
         height: 80px;
@@ -109,7 +113,7 @@
             <span class="loader-activity"></span>
         </div>
     </div>
-    @if ($ticket->estado >= 3)
+    @if ($ticket->estado >= $estados['desarrollo']->id)
         <div class="timeline-item align-items-start">
             <div class="timeline-label font-weight-bolder text-dark-75 font-size-lg">
                 {{ get_date_time($ticket->fecha_modificado, true) }}</div>
