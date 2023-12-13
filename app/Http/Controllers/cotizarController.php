@@ -184,32 +184,33 @@ class cotizarController extends Controller
             $porcentajeTarjetaContado = ($totaliva * 10) / 100;
             $nombre_cliente = str_replace(" ", "_", strtolower($request->nombre_cliente));
 
-            $pathTemplate = '';
+
+            $pathTemplate = $this->obtenerPlantillaDistribuidor();
 
             switch ($request->tipo_plantilla) {
                 case 1:
-                    $pathTemplate = 'word/pcContable.docx';
+                    $pathTemplate .= 'pcContable.docx';
                     $fileName = 'Perseo_pc_contable_';
                     break;
                 case 2:
-                    $pathTemplate = 'word/pcPractico.docx';
+                    $pathTemplate .= 'pcPractico.docx';
                     $fileName = 'Perseo_pc_practico_';
                     $valor_mantenimiento = 80;
                     break;
                 case 3:
-                    $pathTemplate = 'word/pcControl.docx';
+                    $pathTemplate .= 'pcControl.docx';
                     $fileName = 'Perseo_pc_control_';
                     break;
                 case 4:
-                    $pathTemplate = 'word/webComercial.docx';
+                    $pathTemplate .= 'webComercial.docx';
                     $fileName = 'Perseo_web_comercial_';
                     break;
                 case 5:
-                    $pathTemplate = 'word/webFacturacion.docx';
+                    $pathTemplate .= 'webFacturacion.docx';
                     $fileName = 'Perseo_web_facturacion_';
                     break;
                 case 6:
-                    $pathTemplate = 'word/webServicios.docx';
+                    $pathTemplate .= 'webServicios.docx';
                     $fileName = 'Perseo_web_servicios_';
                     break;
             }
@@ -562,6 +563,22 @@ class cotizarController extends Controller
                 'distribuidoresid' => $usuario->distribuidoresid,
                 'rol' => $usuario->rol,
             ];
+        }
+    }
+
+    private function obtenerPlantillaDistribuidor()
+    {
+        $usuario = $this->obtenerDatosUsuarioLoggeado();
+        $path = 'word/';
+        switch ($usuario->distribuidoresid) {
+            case 1:
+                return $path . 'alfa/';
+            case 2:
+                return $path . 'matriz/';
+            case 3:
+                return $path . 'delta/';
+            case 4:
+                return $path . 'omega/';
         }
     }
 }
