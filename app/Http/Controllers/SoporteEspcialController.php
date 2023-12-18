@@ -514,7 +514,7 @@ class SoporteEspcialController extends Controller
             ->first();
 
         if ($soporteAnterior) {
-            $mensaje = $this->validar_soportes_anteriores($soporteAnterior);
+            $mensaje = $this->validar_soportes_anteriores($soporteAnterior, $request);
 
             if ($mensaje != null) {
                 flash($mensaje)->warning();
@@ -874,43 +874,6 @@ class SoporteEspcialController extends Controller
         } catch (\Throwable $th) {
             //throw $th;
             return false;
-        }
-    }
-
-    private function notificar_nuevo_registro($soporte, $factura, $subject = "Notificación de nueva implementacion")
-    {
-        try {
-            $productos = json_decode($factura->productos);
-            $listProduct = [];
-
-            foreach ($productos as $producto) {
-                $productoAux = Producto::find($producto->productoid, ["descripcion"]);
-                array_push($listProduct, $productoAux->descripcion);
-            }
-
-            $vendedor = User::firstWhere('usuariosid', $factura->usuariosid);
-
-            // $nombreRevisor = "Katherine Sarabia";
-            // $mailRevisor = "katherine.sarabia@perseo.ec";
-
-            $nombreRevisor = "Test Notification";
-            $mailRevisor = "desarrollo@perseo.ec";
-
-            $array = [
-                'from' => "noresponder@perseo.ec",
-                'subject' => $subject,
-                'revisora' => $nombreRevisor,
-                'asesor' => $vendedor->nombres,
-                'ruc' => $soporte->ruc,
-                'razon_social' => $soporte->razon_social,
-                'correo' => $soporte->correo,
-                'whatsapp' => $soporte->whatsapp,
-                'planes' => $listProduct,
-            ];
-
-            Mail::to($mailRevisor)->queue(new NotificacionCapacitacion($array));
-        } catch (\Throwable $th) {
-            flash("No se pudo enviar el correo de notificación")->error();
         }
     }
 
