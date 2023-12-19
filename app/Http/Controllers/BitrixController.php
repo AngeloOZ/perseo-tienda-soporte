@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Auth;
 
 class BitrixController extends Controller
 {
-    private $urlBit = 'https://b24-mh9fll.bitrix24.es/rest/1/8d1mnav2yurzdqk3';
+    // private $urlBit = 'https://b24-mh9fll.bitrix24.es/rest/1/8d1mnav2yurzdqk3';
+    private $urlBit = 'https://b24-mh9fll.bitrix24.es/rest/1/682pyo0670ml6xu9';
 
     private $STATUS_BITRIX = [
         'ASIGNADO_RESPONSABLE' => '1',
