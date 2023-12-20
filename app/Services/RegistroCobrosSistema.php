@@ -54,6 +54,7 @@ class RegistroCobrosSistema
                             'fechavencimiento' => $fechaActual,
                             'importe' => floatval($datos_cobro->monto),
                             'cajasid' => Auth::user()->cajasid,
+                            'centros_costosid' => Auth::user()->centro_costosid,
                             'bancosid' => $datos_cobro->banco_destino,
                             'usuariocreacion' => Auth::user()->identificacion,
                             'usuarioid' => Auth::user()->vendedoresid,
