@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Constants\ConstantesTecnicos;
 use App\Events\NuevoRegistroSopEsp;
-use App\Mail\NotificacionCapacitacion;
 use App\Mail\NotificacionEstadoCapacitacion;
 use App\Mail\NotificacionVendedores;
 use App\Models\Log;

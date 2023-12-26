@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cupones;
 use App\Models\Factura;
 use App\Models\User;
 use DateTime;

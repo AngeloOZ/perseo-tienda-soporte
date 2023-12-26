@@ -12,6 +12,7 @@ use App\Http\Controllers\FirmaController;
 use App\Http\Controllers\LiberarLicenciasController;
 use App\Http\Controllers\ProductosController;
 use App\Http\Controllers\SoporteEspcialController;
+use App\Http\Controllers\TiendaController;
 use App\Http\Controllers\usuariosController;
 use App\Http\Controllers\VerificarCobrosLotesController;
 use App\Http\Controllers\WhatsappRenovacionesController;
@@ -40,10 +41,10 @@ Route::post('/email/datos', [adminController::class, 'verificarEmailCelular'])->
 Route::post('/guardar', [FirmaController::class, 'guardar'])->name('firma.guardar');
 Route::post('/reenviar/correo', [FirmaController::class, 'reenviar_correo'])->name('reenviar.correo');
 
-Route::get('/{referido}/tienda', [FacturasController::class, 'listar_productos'])->name('tienda');
-Route::get('/{referido}/tienda/resumen', [FacturasController::class, 'resumen_compra'])->name('tienda.checkout');
-Route::get('/{referido}/tienda/finalizar-compra/{pago?}', [FacturasController::class, 'finalizar_compra'])->name('tienda.finalizar_compra');
-Route::post('/registrar/compra',  [FacturasController::class, 'registar_compra'])->name('tienda.guardarcompra');
+Route::get('/{referido}/tienda', [TiendaController::class, 'listar_productos'])->name('tienda');
+Route::get('/{referido}/tienda/resumen', [TiendaController::class, 'resumen_compra'])->name('tienda.checkout');
+Route::get('/{referido}/tienda/finalizar-compra/{pago?}', [TiendaController::class, 'finalizar_compra'])->name('tienda.finalizar_compra');
+Route::post('/registrar/compra',  [TiendaController::class, 'registar_compra'])->name('tienda.guardarcompra');
 
 Route::get('/', [usuariosController::class, 'redirect_login']);
 Route::get('/login', [usuariosController::class, 'vista_login'])->name('auth.login');

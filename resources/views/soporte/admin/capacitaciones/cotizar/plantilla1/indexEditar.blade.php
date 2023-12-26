@@ -41,11 +41,11 @@
                                                             style="color:#000000"></i>
                                                     </button>
 
-                                                    <button type="submit" class="btn btn-icon btn-danger"
+                                                    {{-- <button type="submit" class="btn btn-icon btn-danger"
                                                         style="border-radius: 0px;" data-toggle="tooltip" title="PDF"
                                                         value="descargar_pdf" name="botonDescargaCrear"><i
                                                             class="la la-file-pdf"></i>
-                                                    </button>
+                                                    </button> --}}
 
                                                     <button type="submit" class="btn btn-primary btn-icon"
                                                         style="border-radius: 0px; " data-toggle="tooltip" title="Guardar"

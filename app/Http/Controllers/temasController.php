@@ -6,7 +6,6 @@ use App\Models\Log;
 use App\Models\Temas;
 use Illuminate\Http\Request;
 use Yajra\DataTables\DataTables as DataTables;
-use App\Models\ImplentacionesDetalles;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 

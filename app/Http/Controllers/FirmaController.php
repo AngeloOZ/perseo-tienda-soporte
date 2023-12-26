@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Yajra\DataTables\DataTables;
-use Illuminate\Support\Facades\DB;
 use ZipArchive;
 
 

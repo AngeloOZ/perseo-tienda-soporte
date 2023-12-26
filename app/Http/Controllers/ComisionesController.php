@@ -15,24 +15,6 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ComisionesController extends Controller
 {
-
-    private function raw()
-    {
-
-
-        //         UPDATE productos_homologados_distribuidor2
-        // SET 
-        // precio_matriz_nv = (SELECT precio_matriz_nv FROM productos WHERE productos_homologados_distribuidor2.id_producto_local = productos.productosid),
-        // precio_matriz_rnv = (SELECT precio_matriz_rnv FROM productos WHERE productos_homologados_distribuidor2.id_producto_local = productos.productosid)
-        // WHERE distribuidoresid = 1;
-
-        DB::table('productos_homologados_distribuidor2')
-            ->where('distribuidoresid', 1)
-            ->update([
-                'precio_matriz_nv' => DB::raw('(SELECT precio_matriz_nv FROM productos WHERE productos_homologados_distribuidor2.id_producto_local = productos.productosid)'),
-                'precio_matriz_rnv' => DB::raw('(SELECT precio_matriz_rnv FROM productos WHERE productos_homologados_distribuidor2.id_producto_local = productos.productosid)')
-            ]);
-    }
     /* -------------------------------------------------------------------------- */
     /*                 Listado para ver vendedores sus comnisiones                */
     /* -------------------------------------------------------------------------- */

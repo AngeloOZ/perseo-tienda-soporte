@@ -10,7 +10,6 @@ use App\Models\Log;
 use App\Models\RenovacionLicencias;
 use App\Models\User;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;

@@ -7,7 +7,6 @@ use App\Models\Producto;
 use App\Models\ProductoHomologado;
 use App\Models\ProductosLicenciadorRenovacion;
 use App\Models\RenovacionLicencias;
-use App\Models\Tecnicos;
 use App\Models\User;
 use Error;
 use Illuminate\Http\Request;
