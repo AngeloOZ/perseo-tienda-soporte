@@ -4,9 +4,9 @@
 @section('descripcion', 'Encuentra los mejores productos para tu empresa')
 @section('imagen', asset('assets/media/tienda.jpg'))
 
-@section('navidad')
+{{-- @section('navidad')
     <script src="https://app.embed.im/snow.js" defer></script>
-@endsection
+@endsection --}}
 
 @section('contenido')
     <div class="content d-flex flex-column flex-column-fluid">

@@ -14,8 +14,8 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/media/logoP.png') }}">
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
 
-    {{-- TODO: comentar lo siguiente --}}
-    <script src="https://app.embed.im/snow.js" defer></script>
+    {{-- REVIEW: Temporada navideña --}}
+    {{-- <script src="https://app.embed.im/snow.js" defer></script> --}}
 </head>
 
 <body id="kt_body"
@@ -23,16 +23,16 @@
     <div class="d-flex flex-column flex-root">
         <div class="login login-4 login-signin-on d-flex flex-row-fluid" id="kt_login">
             <div class="d-flex flex-center flex-row-fluid bgi-size-cover bgi-position-top bgi-no-repeat"
-                style="background: linear-gradient(to top, #0f0c29, #302b63, #24243e);">
-                {{-- TODO: cambiar aqui --}}
-                {{-- style="background-image: url({{ asset('assets/media/bg-1.jpg') }});"> --}}
+                {{-- REVIEW: Temporada navideña --}}
+                {{-- style="background: linear-gradient(to top, #0f0c29, #302b63, #24243e);"> --}}
+                style="background-image: url({{ asset('assets/media/bg-3.jpg') }});">
                 <div class="login-form text-center p-7 position-relative overflow-hidden">
 
                     <div class="d-flex flex-center mb-15">
                         <a href="#">
-                            {{-- TODO: cambiar aqui --}}
-                            {{-- <img src={{ asset('assets/media/perseologo.png') }} class="max-h-75px" alt="" /> --}}
-                            <img src={{ asset('assets/media/perseologob2.png') }} class="max-h-75px" alt="" />
+                            {{-- REVIEW: Temporada navideña --}}
+                            <img src={{ asset('assets/media/perseologo.png') }} class="max-h-75px" alt="" />
+                            {{-- <img src={{ asset('assets/media/perseologob2.png') }} class="max-h-75px" alt="" /> --}}
                         </a>
                     </div>
 

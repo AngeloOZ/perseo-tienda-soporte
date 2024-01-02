@@ -127,8 +127,8 @@ class cotizarController extends Controller
             $formasPago = [];
             $valorEstaciones = 0;
             $valorMoviles = 0;
-            $cadBuscar = array("ó", "Ó");
-            $cadPoner = array("o", "O");
+            $cadBuscar = array("á", "Á", "é", "É", "í", "Í", "ó", "Ó", "ú", "Ú");
+            $cadPoner = array("a", "A", "e", "E", "i", "I", "o", "O", "u", "U");
 
             $fecha = new \Carbon\Carbon($request->fecha);
             $fechaP =   $fecha->locale('es')->translatedFormat(' d \d\e F \d\e\l Y');
