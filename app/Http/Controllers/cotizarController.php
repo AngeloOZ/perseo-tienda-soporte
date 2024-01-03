@@ -425,11 +425,11 @@ class cotizarController extends Controller
         $pathTemplate = $this->obtenerPlantillaDistribuidor();
         switch ($cotizacion->plantillasid) {
             case 1:
-                $pathTemplate .= 'contratos/pcContable.docx';
+                $pathTemplate .= 'contratos/contrato_pc_contable.docx';
                 $fileName = 'Contrato_Perseo_PC_Contable_';
                 break;
             case 2:
-                $pathTemplate .= 'contratos/pcPractico.docx';
+                $pathTemplate .= 'contratos/contrato_pc_practico.docx';
                 $fileName = 'Contrato_Perseo_PC_Practico_';
                 $valor_mantenimiento = 80;
                 break;
