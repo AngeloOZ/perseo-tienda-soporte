@@ -25,6 +25,10 @@ yarn-error.log
 /public/word/matriz/*.docx
 /public/word/delta/*.docx
 /public/word/omega/*.docx
+/public/word/alfa/contratos/*.docx
+/public/word/matriz/contratos/*.docx
+/public/word/delta/contratos/*.docx
+/public/word/omega/contratos/*.docx
 /public/*.zip
 /public/*.docx
 /public/*.pdf

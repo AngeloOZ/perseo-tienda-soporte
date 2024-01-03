@@ -21,7 +21,7 @@
                 <div class="modal-body">
                     <div class="form-group mb-2">
                         <label for="">Dirección:</label>
-                        <input type="text" name="direccion" required id="direccion" class="form-control" placeholder="Dirección" value="De los araucanos y los siux">
+                        <input type="text" name="direccion" required id="direccion" class="form-control" placeholder="Dirección">
                     </div>
                     <div class="form-group mb-2">
                         <label for="">Fecha:</label>
