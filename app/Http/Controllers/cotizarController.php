@@ -351,10 +351,6 @@ class cotizarController extends Controller
 
     public function generarContrato(Request $request, Cotizaciones $cotizacion)
     {
-
-        // dd($request->all(), $cotizacion);
-
-
         $totalprecio = 0;
         $descuentototal = 0;
         $totalneto = 0;
@@ -453,7 +449,7 @@ class cotizarController extends Controller
         $template->setValue('fecha_contrato', $fechaP);
         $template->setValue('nombre_cli', ucwords(strtolower($cotizacion->nombre_cliente)));
         $template->setValue('identificacion_cli', $cotizacion->identificacion_cliente);
-        $template->setValue('direccion_cli', $cotizacion->direccion);
+        $template->setValue('direccion_cli', $request->direccion);
         $template->setValue('totalnetotexto', $totalEnTexto);
         $template->setValue('totalprecio',  number_format($totalprecio, 2, '.', ''));
         $template->setValue('descuentototal',  number_format($descuentototal, 2, '.', ''));
