@@ -11,6 +11,7 @@ use Yajra\DataTables\DataTables as DataTables;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use NumberFormatter;
 
 class cotizarController extends Controller
 {
@@ -119,6 +120,7 @@ class cotizarController extends Controller
     public function actualizarCotizaciones(Request $request, $cotizaciones)
     {
         if (str_contains($request->botonDescargaCrear, "descargar")) {
+            dd($request->all());
             $totalprecio = 0;
             $descuentototal = 0;
             $totalneto = 0;
@@ -345,6 +347,127 @@ class cotizarController extends Controller
             }
             return back();
         }
+    }
+
+    public function generarContrato(Request $request, Cotizaciones $cotizacion)
+    {
+
+        // dd($request->all(), $cotizacion);
+
+
+        $totalprecio = 0;
+        $descuentototal = 0;
+        $totalneto = 0;
+        $formatotalp = 0;
+        $totalformap = 0;
+        $formasPago = [];
+        $valorEstaciones = 0;
+        $valorMoviles = 0;
+        $cadBuscar = array("á", "Á", "é", "É", "í", "Í", "ó", "Ó", "ú", "Ú");
+        $cadPoner = array("a", "A", "e", "E", "i", "I", "o", "O", "u", "U");
+
+        $detallesCotizacion = json_decode($cotizacion->detalle_cotizacion);
+
+        $fecha = new \Carbon\Carbon($request->fecha);
+        $fechaP =   $fecha->locale('es')->translatedFormat('d \d\í\a\s \d\e\l \m\e\s \d\e F \d\e\l Y');
+
+        $numeroPagos = $cotizacion->detalle_pago;
+
+        foreach ($detallesCotizacion as $key => $detalle) {
+            $consultaDetalle = CotizacionesDetalle::select('detalle', 'precio')->where('detallesid', $detalle->detalle)->first();
+
+            $precioFinal = $consultaDetalle->precio * $detalle->cantidad;
+            $descuentoFinal = ($precioFinal * $detalle->descuento) / 100;
+            $valorneto = $precioFinal  - $descuentoFinal;
+
+            $detalles[$key] = ['detalle' => $consultaDetalle->detalle, 'cantidad' => $detalle->cantidad, 'precio' =>  number_format($precioFinal, 2, '.', ''), 'porcentaje' => number_format($detalle->descuento, 2, '.', ''), 'descuento' =>  number_format($descuentoFinal, 2, '.', ''), 'neto' =>  number_format($valorneto, 2, '.', '')];
+            $totalprecio = floatval($precioFinal) + $totalprecio;
+            $descuentototal = floatval($descuentoFinal) + $descuentototal;
+            $totalneto = floatval($valorneto) + $totalneto;
+
+            similar_text(trim(strtoupper($consultaDetalle->detalle)), 'ESTACIONES DE TRABAJO', $porcentajeEstaciones);
+            $cadenaAplicaciones = str_replace($cadBuscar, $cadPoner, $consultaDetalle->detalle);
+
+            similar_text(trim(strtoupper($cadenaAplicaciones)), 'APLICACION MOVIL', $porcentajeAplicaciones);
+
+            if ($porcentajeEstaciones > 92) {
+                $valorEstaciones = $detalle->cantidad * 20;
+            }
+            if ($porcentajeAplicaciones > 92) {
+                $valorMoviles = $detalle->cantidad * 30;
+            }
+        }
+
+        $valor_mantenimiento =  $valorEstaciones + $valorMoviles;
+        if ($valor_mantenimiento < 150) {
+            $valor_mantenimiento = 150;
+        }
+
+        $iva = ($totalneto * 12) / 100;
+        $totaliva = $totalneto + $iva;
+
+        if ($numeroPagos > 0) {
+            $cuotas = $totaliva / $numeroPagos;
+            $porcentaje = 100 / $numeroPagos;
+        }
+
+        $dias = 0;
+        for ($i = 0; $i < $numeroPagos; $i++) {
+            $texto = $i == 0 ? "ENTRADA" : $dias . " DÍAS";
+            $formasPago[$i] = ['formapago' => $texto, 'porcentajeforma' =>  number_format($porcentaje, 2, '.', ''), 'totalforma' =>  number_format($cuotas, 2, '.', '')];
+            $formatotalp = floatval($porcentaje) + $formatotalp;
+            $totalformap = floatval($cuotas) + $totalformap;
+            $dias += 30;
+        }
+
+        $formatter = new NumberFormatter('es', NumberFormatter::SPELLOUT);
+        $totalEnTexto = strtoupper($formatter->format($totalneto)) . ', ' . number_format(($totalneto - intval($totalneto)), 2, '.', '') * 100 . '/100';
+
+        $porcentajeTarjetaContado = ($totaliva * 10) / 100;
+        $nombre_cliente = str_replace(" ", "_", strtolower($cotizacion->nombre_cliente));
+
+        $pathTemplate = $this->obtenerPlantillaDistribuidor();
+        switch ($cotizacion->plantillasid) {
+            case 1:
+                $pathTemplate .= 'contratos/pcContable.docx';
+                $fileName = 'Contrato_Perseo_PC_Contable_';
+                break;
+            case 2:
+                $pathTemplate .= 'contratos/pcPractico.docx';
+                $fileName = 'Contrato_Perseo_PC_Practico_';
+                $valor_mantenimiento = 80;
+                break;
+            case 3:
+                $pathTemplate .= 'contratos/contrato_pc_control.docx';
+                $fileName = 'Contrato_Perseo_PC_Control_';
+                break;
+        }
+
+        if (!file_exists($pathTemplate)) {
+            flash('No se encontró la plantilla seleccionada')->error();
+            return back();
+        }
+        $template = new TemplateProcessor($pathTemplate);
+
+        $fileName .= $nombre_cliente;
+        $template->setValue('fecha_contrato', $fechaP);
+        $template->setValue('nombre_cli', ucwords(strtolower($cotizacion->nombre_cliente)));
+        $template->setValue('identificacion_cli', $cotizacion->identificacion_cliente);
+        $template->setValue('direccion_cli', $cotizacion->direccion);
+        $template->setValue('totalnetotexto', $totalEnTexto);
+        $template->setValue('totalprecio',  number_format($totalprecio, 2, '.', ''));
+        $template->setValue('descuentototal',  number_format($descuentototal, 2, '.', ''));
+        $template->setValue('totalneto',  number_format($totalneto, 2, '.', ''));
+        $template->setValue('iva',  number_format($iva, 2, '.', ''));
+        $template->setValue('totaliva',  number_format($totaliva, 2, '.', ''));
+        $template->setValue('formatotalp',  number_format($formatotalp, 2, '.', ''));
+        $template->setValue('totalformap',  number_format($totalformap, 2, '.', ''));
+        $template->setValue('pago_contado',  number_format(($totaliva - $porcentajeTarjetaContado), 2, '.', ''));
+        $template->cloneRowAndSetValues('detalle', $detalles);
+        $template->cloneRowAndSetValues('formapago', $formasPago);
+        $template->saveAs($fileName . '.docx');
+
+        return response()->download($fileName . '.docx')->deleteFileAfterSend(true);
     }
 
     public function recuperarPrecio(Request $request)

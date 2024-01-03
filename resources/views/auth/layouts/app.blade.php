@@ -43,8 +43,6 @@
                 @include('auth.include.navBar')
                 @yield('contenido')
                 @include('auth.include.footer')
-
-
             </div>
         </div>
     </div>

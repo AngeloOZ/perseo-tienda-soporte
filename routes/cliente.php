@@ -44,6 +44,7 @@ Route::group(['middleware' => 'auth', 'prefix' => 'cotizaciones'], function () {
 
         Route::get('/editar/{cotizacion}', [cotizarController::class, 'editarCotizaciones'])->name('cotizarPlantilla.editar');
         Route::put('/actualizar/{cotizacion}', [cotizarController::class, 'actualizarCotizaciones'])->name('actualizarCotizacion.index');
+        Route::post('/generar-contrato/{cotizacion}', [cotizarController::class, 'generarContrato'])->name('generarContrato.index');
         Route::post('/recuperar-precio', [cotizarController::class, 'recuperarPrecio'])->name('recuperarPrecio');
 
         Route::delete('/eliminar/{cotizacion}', [cotizarController::class, 'eliminarCotizaciones'])->name('eliminarCotizaciones.eliminar');
