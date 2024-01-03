@@ -203,7 +203,7 @@
                 type: 'pie',
             },
             labels: dataChart.estados.labels,
-            colors: [primary, info, success, danger],
+            colors: [primary, info, success, danger, warning],
             dataLabels: {
                 enabled: true,
                 formatter(val, opts) {

@@ -913,7 +913,6 @@ class TicketSoporteController extends Controller
 
     public function editar_ticket_revisor(Ticket $ticket)
     {
-
         $desarrolladores = Tecnicos::where('rol', ConstantesTecnicos::ROL_DESARROLLO)->get();
         $tecnicoAsignado = Tecnicos::find($ticket->tecnicosid);
         $tecnicos = $this->obtener_tecnicos_distribuidor();
@@ -1032,8 +1031,20 @@ class TicketSoporteController extends Controller
                 "values" => [],
             ],
             "estados" => [
-                "labels" => [],
-                "values" => [],
+                "labels" => [
+                    "abierto" => "Abierto",
+                    "en_progreso" => "En progreso",
+                    "desarrollo" => "Desarrollo",
+                    "cerrado" => "Cerrado",
+                    "sin_respuesta" => "Sin respuesta",
+                ],
+                "values" => [
+                    "abierto" => 0,
+                    "en_progreso" => 0,
+                    "desarrollo" => 0,
+                    "cerrado" => 0,
+                    "sin_respuesta" => 0,
+                ],
             ],
             "tiempo" => [
                 "labels" => [],
@@ -1056,23 +1067,35 @@ class TicketSoporteController extends Controller
 
         foreach ($ticketsPorEstado as $key => $item) {
             $estado = "abierto";
+            $key = "abierto";
             switch ($item->estado) {
                 case 2:
                     $estado = "En progreso";
+                    $key = "en_progreso";
                     break;
                 case 3:
                     $estado = "Desarrollo";
+                    $key = "desarrollo";
                     break;
                 case 4:
                     $estado = "Cerrado";
+                    $key = "cerrado";
                     break;
                 case 5:
                     $estado = "Sin respuesta";
+                    $key = "sin_respuesta";
+                    break;
+                default:
+                    $estado = "Cerrado";
+                    $key = "cerrado";
                     break;
             }
-            array_push($data["estados"]["labels"], strtoupper($estado));
-            array_push($data["estados"]["values"], $item->cantidad);
+            $data["estados"]["labels"][$key] = $estado;
+            $data["estados"]["values"][$key] = $item->cantidad;
         }
+
+        $data["estados"]["labels"] = array_values($data["estados"]["labels"]);
+        $data["estados"]["values"] = array_values($data["estados"]["values"]);
 
         foreach ($ticketsPorTiempo as $key => $item) {
             array_push($data["tiempo"]["labels"], date("Y-m-d\TH:i:s.u\Z", strtotime($item->fecha . ':00:00')));
@@ -1159,8 +1182,20 @@ class TicketSoporteController extends Controller
     public function procesarResultados($results)
     {
         $data = [
-            "labels" => [],
-            "values" => [],
+            "labels" => [
+                "1_punto" => "1 punto",
+                "2_puntos" => "2 puntos",
+                "3_puntos" => "3 puntos",
+                "4_puntos" => "4 puntos",
+                "5_puntos" => "5 puntos",
+            ],
+            "values" => [
+                "1_punto" => 0,
+                "2_puntos" => 0,
+                "3_puntos" => 0,
+                "4_puntos" => 0,
+                "5_puntos" => 0,
+            ],
             "total_puntaje" => 0,
             "promedio" => 0,
         ];
@@ -1168,13 +1203,17 @@ class TicketSoporteController extends Controller
 
         foreach ($results as $item) {
             $text = ($item->puntaje == 1) ? "{$item->puntaje} punto" : "{$item->puntaje} puntos";
-            array_push($data["labels"], strtoupper($text));
-            array_push($data["values"], $item->total);
+            $key = str_replace(" ", "_", $text);
+
+            $data["labels"][$key] = $text;
+            $data["values"][$key] = $item->total;
             $data["total_puntaje"] += $item->total * $item->puntaje;
             $total += $item->total;
         }
 
         $data["promedio"] = number_format($data["total_puntaje"] / $total, 2) . "/5.00";
+        $data["labels"] = array_values($data["labels"]);
+        $data["values"] = array_values($data["values"]);
 
         return $data;
     }
