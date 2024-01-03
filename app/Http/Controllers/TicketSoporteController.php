@@ -1181,63 +1181,33 @@ class TicketSoporteController extends Controller
 
     private function calificaciones_por_tecnico(Request $request)
     {
-        $resultadosPregunta1 = EncuestaSoporte::select(
-            'tecnicos.nombres as tecnico',
-            DB::raw('SUM(CASE WHEN pregunta_1 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
-            DB::raw('SUM(CASE WHEN pregunta_1 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
-            DB::raw('SUM(CASE WHEN pregunta_1 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
-            DB::raw('SUM(CASE WHEN pregunta_1 = 4 THEN 1 ELSE 0 END) AS puntaje_4'),
-            DB::raw('SUM(CASE WHEN pregunta_1 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
-            DB::raw('COUNT(pregunta_1) AS total_respuestas')
-        )
-            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
-            ->when($request->tecnicoid, function ($query, $tecnico) {
-                return $query->where('tecnicoid', $tecnico);
-            })
-            ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('tecnicos.distribuidoresid', $distribuidor);
-            })
-            ->when($request->fecha, function ($query, $fecha) {
-                $dates = explode(" / ", $fecha);
 
-                $date1 = strtotime($dates[0]);
-                $desde = date('Y-m-d H:i:s', $date1);
-
-                $date2 = strtotime($dates[1] . ' +1 day -1 second');
-                $hasta = date('Y-m-d H:i:s', $date2);
-                return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
-            })
+        $resultadosPregunta1 = $this->filtrado_base_query($request)
+            ->select(
+                'tecnicos.nombres as tecnico',
+                DB::raw('SUM(CASE WHEN pregunta_1 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
+                DB::raw('SUM(CASE WHEN pregunta_1 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
+                DB::raw('SUM(CASE WHEN pregunta_1 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
+                DB::raw('SUM(CASE WHEN pregunta_1 = 4 THEN 1 ELSE 0 END) AS puntaje_4'),
+                DB::raw('SUM(CASE WHEN pregunta_1 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
+                DB::raw('COUNT(pregunta_1) AS total_respuestas')
+            )
             ->groupBy('tecnicos.nombres')
             ->get();
 
-        $resultadosPregunta2 = EncuestaSoporte::select(
-            'tecnicos.nombres as tecnico',
-            DB::raw('SUM(CASE WHEN pregunta_2 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
-            DB::raw('SUM(CASE WHEN pregunta_2 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
-            DB::raw('SUM(CASE WHEN pregunta_2 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
-            DB::raw('SUM(CASE WHEN pregunta_2 = 4 THEN 1 ELSE 0 END) AS puntaje_4'),
-            DB::raw('SUM(CASE WHEN pregunta_2 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
-            DB::raw('COUNT(pregunta_2) AS total_respuestas')
-        )
-            ->join('tecnicos', 'encuesta_soporte.tecnicoid', '=', 'tecnicos.tecnicosid')
-            ->when($request->tecnicoid, function ($query, $tecnico) {
-                return $query->where('tecnicoid', $tecnico);
-            })
-            ->when($request->distribuidor, function ($query, $distribuidor) {
-                return $query->where('tecnicos.distribuidoresid', $distribuidor);
-            })
-            ->when($request->fecha, function ($query, $fecha) {
-                $dates = explode(" / ", $fecha);
-
-                $date1 = strtotime($dates[0]);
-                $desde = date('Y-m-d H:i:s', $date1);
-
-                $date2 = strtotime($dates[1] . ' +1 day -1 second');
-                $hasta = date('Y-m-d H:i:s', $date2);
-                return $query->whereBetween('fecha_creacion', [$desde, $hasta]);
-            })
+        $resultadosPregunta2 = $this->filtrado_base_query($request)
+            ->select(
+                'tecnicos.nombres as tecnico',
+                DB::raw('SUM(CASE WHEN pregunta_2 = 1 THEN 1 ELSE 0 END) AS puntaje_1'),
+                DB::raw('SUM(CASE WHEN pregunta_2 = 2 THEN 1 ELSE 0 END) AS puntaje_2'),
+                DB::raw('SUM(CASE WHEN pregunta_2 = 3 THEN 1 ELSE 0 END) AS puntaje_3'),
+                DB::raw('SUM(CASE WHEN pregunta_2 = 4 THEN 1 ELSE 0 END) AS puntaje_4'),
+                DB::raw('SUM(CASE WHEN pregunta_2 = 5 THEN 1 ELSE 0 END) AS puntaje_5'),
+                DB::raw('COUNT(pregunta_2) AS total_respuestas')
+            )
             ->groupBy('tecnicos.nombres')
             ->get();
+
 
         $resultados = $resultadosPregunta1->concat($resultadosPregunta2)
             ->groupBy('tecnico')

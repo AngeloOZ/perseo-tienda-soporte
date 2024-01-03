@@ -125,6 +125,7 @@
     @include('soporte.admin.revisor.modal_calificaciones')
 @endsection
 @section('script')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         const colors = ["#FA5563", "#FB834F", "#FCCF3E", "#A0D77A", "#6BCA6C"];
