@@ -7,7 +7,7 @@ use App\Mail\CalificarSoporte;
 use App\Mail\EnviarTicketSoporte;
 use App\Models\ActividadTicket;
 use App\Models\EncuestaSoporte;
-use App\Models\Log;
+use App\Models\LogSoporte;
 use App\Models\SoporteEspecial;
 use App\Models\Tecnicos;
 use App\Models\Ticket;
@@ -258,7 +258,7 @@ class TicketSoporteController extends Controller
             $ticket->save();
 
             $ticketLog =  Ticket::find($ticket->ticketid);
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Modificar";
@@ -331,7 +331,7 @@ class TicketSoporteController extends Controller
                 ]);
             }
 
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Enviar correo";
@@ -716,6 +716,13 @@ class TicketSoporteController extends Controller
 
             $this->enviar_correo_calificacion($ticket);
 
+            $log = new LogSoporte();
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
+            $log->pantalla = "Soporte";
+            $log->operacion = "Reactivar encuesta";
+            $log->fecha = now();
+            $log->detalle = $ticket;
+
             flash("Encuesta reactivada")->success();
             return back();
         } catch (\Throwable $th) {
@@ -893,7 +900,7 @@ class TicketSoporteController extends Controller
     public function eliminar_soporte_revisor(Ticket $ticket)
     {
         try {
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte";
             $log->operacion = "Modificar";
@@ -1409,7 +1416,7 @@ class TicketSoporteController extends Controller
             $encuesta->estado_revision = $request->estado_revision;
 
             if ($encuesta->save()) {
-                $log = new Log();
+                $log = new LogSoporte();
                 $log->usuario = Auth::guard('tecnico')->user()->nombres;
                 $log->pantalla = "Calificacion";
                 $log->operacion = "Registrar justificacion";
@@ -1550,7 +1557,7 @@ class TicketSoporteController extends Controller
                     $tecnicoLibre->save();
                     $this->notificar_asignacion_ticket($tecnicoLibre->tecnicosid, $ticket);
 
-                    $log = new Log();
+                    $log = new LogSoporte();
                     $log->usuario = "Sistema";
                     $log->pantalla = "Soporte";
                     $log->operacion = "Asignacion de ticket";

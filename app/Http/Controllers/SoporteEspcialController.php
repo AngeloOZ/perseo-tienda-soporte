@@ -6,7 +6,7 @@ use App\Constants\ConstantesTecnicos;
 use App\Events\NuevoRegistroSopEsp;
 use App\Mail\NotificacionEstadoCapacitacion;
 use App\Mail\NotificacionVendedores;
-use App\Models\Log;
+use App\Models\LogSoporte;
 use App\Models\Factura;
 use App\Models\Producto;
 use App\Models\SoporteEspecial;
@@ -153,7 +153,7 @@ class SoporteEspcialController extends Controller
 
             $this->notificar_asignacion($soporte->tecnicoid, $soporte->tipo);
 
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
@@ -271,7 +271,7 @@ class SoporteEspcialController extends Controller
 
             $soporte->update($data);
 
-            $log = new Log();
+            $log = new LogSoporte();
             $soporteLog =  SoporteEspecial::find($soporte->soporteid);
             $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Soporte Especial";
@@ -398,7 +398,7 @@ class SoporteEspcialController extends Controller
             $factura->capacitacionid = $soporte->soporteid;
             $factura->save();
 
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
@@ -538,7 +538,7 @@ class SoporteEspcialController extends Controller
 
             flash("Nuevo registro creado")->success();
 
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
@@ -603,7 +603,7 @@ class SoporteEspcialController extends Controller
             $this->notificar_asignacion($lite->tecnicoid, $lite->tipo);
 
 
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Soporte Especial";
             $log->operacion = "Agregar";
@@ -642,7 +642,7 @@ class SoporteEspcialController extends Controller
                     $soporte->lite_liberado = 1;
                     $soporte->save();
 
-                    $log = new Log();
+                    $log = new LogSoporte();
                     $log->usuario = Auth::user()->nombres;
                     $log->pantalla = "Demos";
                     $log->operacion = "Liberar Lite";
@@ -751,7 +751,7 @@ class SoporteEspcialController extends Controller
     public function eliminar_soporte_especial(SoporteEspecial $soporte)
     {
         try {
-            $log = new Log();
+            $log = new LogSoporte();
             $log->usuario = Auth::user()->nombres;
             $log->pantalla = "Demos";
             $log->operacion = "Eliminar";
