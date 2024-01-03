@@ -120,7 +120,6 @@ class cotizarController extends Controller
     public function actualizarCotizaciones(Request $request, $cotizaciones)
     {
         if (str_contains($request->botonDescargaCrear, "descargar")) {
-            dd($request->all());
             $totalprecio = 0;
             $descuentototal = 0;
             $totalneto = 0;
