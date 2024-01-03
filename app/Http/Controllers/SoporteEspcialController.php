@@ -751,6 +751,14 @@ class SoporteEspcialController extends Controller
     public function eliminar_soporte_especial(SoporteEspecial $soporte)
     {
         try {
+            $log = new Log();
+            $log->usuario = Auth::user()->nombres;
+            $log->pantalla = "Demos";
+            $log->operacion = "Eliminar";
+            $log->fecha = now();
+            $log->detalle =  $soporte;
+            $log->save();
+
             $soporte->delete();
             flash("Soporte eliminado correctamente")->success();
             return back();
