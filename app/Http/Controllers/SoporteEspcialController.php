@@ -752,7 +752,7 @@ class SoporteEspcialController extends Controller
     {
         try {
             $log = new LogSoporte();
-            $log->usuario = Auth::user()->nombres;
+            $log->usuario = Auth::guard('tecnico')->user()->nombres;
             $log->pantalla = "Demos";
             $log->operacion = "Eliminar";
             $log->fecha = now();
