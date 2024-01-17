@@ -62,7 +62,7 @@
                                             @enderror
                                         </div>
                                     </div>
-
+                                    
                                     <div class="form-group row">
                                         <div class="col-12 mb-4 col-md-6 mb-md-0">
                                             <label>Banco de Origen <span class="text-danger">*</span></label>

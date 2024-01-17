@@ -139,6 +139,7 @@ class CobrosController extends Controller
             $cobro->fecha_actualizacion = now();
 
             $cobro->save();
+            //inicio modificacion
             $this->notificar_pago_correo($cobro);
 
             flash("Cobro registrado correctamente")->success();
@@ -583,7 +584,7 @@ class CobrosController extends Controller
                 'sencuencias' => $secuencias,
             ];
 
-            Mail::to($correoRevisor)->queue(new NotificarPago($array));
+            Mail::to("jgranizo98@hotmail.com")->queue(new NotificarPago($array));
         } catch (\Throwable $th) {
             dd($th);
         }
