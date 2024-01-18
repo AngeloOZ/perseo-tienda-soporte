@@ -50,6 +50,7 @@ class adminController extends Controller
         if ($correo['is_valid_format']['value'] == false) return 0;
 
         //consultar api2 si es hotmail
+        //es un ejemplo para github
         $url = 'https://api.debounce.io/v1/?email=' . rawurlencode($email) . '&api=6269b53f06aeb';
         $correo = Http::withHeaders(['Content-Type' => 'application/json; charset=UTF-8', 'verify' => false])
             ->withOptions(["verify" => false])
