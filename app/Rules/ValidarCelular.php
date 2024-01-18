@@ -18,6 +18,7 @@ class ValidarCelular implements Rule
     }
 
     /**
+     * esto es una prueba 
      * Determine if the validation rule passes.
      *
      * @param  string  $attribute
@@ -44,6 +45,7 @@ class ValidarCelular implements Rule
     }
 
     /**
+     * aqui tambien es otra prueba
      * Get the validation error message.
      *
      * @return string
