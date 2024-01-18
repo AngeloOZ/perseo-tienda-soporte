@@ -38,6 +38,7 @@
                                         <tr>
                                             <th class="no-exportar">#</th>
                                             <th>Nº Factura</th>
+                                            <th>Propietario Cuenta Bancaria</th>
                                             <th>Obs. Revisor</th>
                                             <th>Fecha de registro</th>
                                             <th>Estado</th>
@@ -105,7 +106,12 @@
                         data: 'secuencias',
                         name: 'secuencias',
 
-                    }, {
+                    }, 
+                    {
+                        data: 'nombre_cuenta',
+                        name: 'nombre_cuenta',
+                    }, 
+                    {
                         data: 'obs_revisor',
                         name: 'obs_revisor',
                     },

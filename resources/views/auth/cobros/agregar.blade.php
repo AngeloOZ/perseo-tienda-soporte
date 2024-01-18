@@ -50,7 +50,7 @@
                                             @enderror
                                         </div>
 
-                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                        <div class="col-12 mb-4 col-md-6 mb-md-6">
                                             <label for="whatsapp">Número de comprobante <span class="text-danger">*</span>
                                             </label>
                                             <input
@@ -61,6 +61,19 @@
                                                 <span class="text-danger">{{ $errors->first('numero_comprobante') }}</span>
                                             @enderror
                                         </div>
+
+                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
+                                            <label for="whatsapp">Nombre del Propietario de la Cuenta Origen <span class="text-danger">*</span>
+                                            </label>
+                                            <input
+                                                type="text"class="form-control {{ $errors->has('nombre_cuenta') ? 'is-invalid' : '' }}"
+                                                id="nombre_cuenta" name="nombre_cuenta"
+                                                value="{{ old('nombre_cuenta') }}" placeholder="Luis Andres Daga" />
+                                            @error('nombre_cuenta')
+                                                <span class="text-danger">{{ $errors->first('nombre_cuenta') }}</span>
+                                            @enderror
+                                        </div>
+
                                     </div>
                                     
                                     <div class="form-group row">
@@ -119,7 +132,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="textObsPago2">Obseración del pago vendedor</label>
+                                        <label for="textObsPago2">Observación del pago vendedor</label>
                                         <textarea class="form-control {{ $errors->has('obs_vendedor') ? 'is-invalid' : '' }}" id="textObsPago2"
                                             name="obs_vendedor" style="resize: none" rows="3">{{ old('obs_vendedor') }}</textarea>
                                         @error('obs_vendedor')

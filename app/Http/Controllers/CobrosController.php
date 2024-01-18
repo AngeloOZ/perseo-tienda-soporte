@@ -37,7 +37,7 @@ class CobrosController extends Controller
 
             $estado = $request->estado;
 
-            $cobros = Cobros::select('cobrosid', 'secuencias', 'estado', 'obs_vendedor', 'obs_revisor', 'fecha_registro')
+            $cobros = Cobros::select('cobrosid', 'secuencias', 'estado', 'obs_vendedor', 'obs_revisor', 'fecha_registro', 'nombre_cuenta')
                 ->where('usuariosid', Auth::user()->usuariosid)
                 ->get();
 
@@ -101,6 +101,7 @@ class CobrosController extends Controller
                 'estado' => 'required',
                 'obs_vendedor' => 'min:0|max:255',
                 'comprobante' => 'required',
+                'nombre_cuenta' => 'required',
             ],
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
@@ -111,6 +112,7 @@ class CobrosController extends Controller
                 'estado.required' => 'El campo estado es obligatorio',
                 'comprobante.required' => 'Se debe subir al menos 1 comprobante',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
+                'nombre_cuenta.required' => 'El campo nombre del propietario de la cuenta origen es obligatorio',
             ]
         );
 
@@ -123,6 +125,7 @@ class CobrosController extends Controller
             $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->banco_origen = $request->banco_origen;
             $cobro->banco_destino = $request->banco_destino;
+            $cobro->nombre_cuenta = $request->nombre_cuenta;
 
             $temp = [];
             if (isset($request->comprobante)) {
@@ -175,6 +178,7 @@ class CobrosController extends Controller
                 'banco_destino' => 'required',
                 'estado' => 'required',
                 'obs_vendedor' => 'min:0|max:255',
+                'nombre_cuenta' => 'required'
             ],
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
@@ -184,6 +188,7 @@ class CobrosController extends Controller
                 'banco_destino.required' => 'El campo banco de destino es obligatorio',
                 'estado.required' => 'El campo estado es obligatorio',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
+                'nombre_cuenta.required' => 'El campo Nombre del Propietario de la Cuenta Origen es obligatorio',
             ]
         );
 
@@ -194,7 +199,8 @@ class CobrosController extends Controller
             $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->banco_origen = $request->banco_origen;
             $cobro->banco_destino = $request->banco_destino;
-
+            $cobro->nombre_cuenta = $request->nombre_cuenta;
+            
             $temp = [];
             if (isset($request->comprobante)) {
                 foreach ($request->comprobante as $file) {
@@ -252,7 +258,7 @@ class CobrosController extends Controller
 
             $estado = $request->estado;
 
-            $cobros = Cobros::select('cobrosid', 'secuencias', 'estado', 'obs_vendedor', 'obs_revisor', 'fecha_registro')
+            $cobros = Cobros::select('cobrosid', 'secuencias', 'estado', 'obs_vendedor', 'obs_revisor', 'fecha_registro', 'nombre_cuenta')
                 ->where('distribuidoresid', Auth::user()->distribuidoresid);
 
             if ($estado != "") {
@@ -318,6 +324,7 @@ class CobrosController extends Controller
                     'banco_destino' => 'required',
                     'estado' => 'required',
                     'obs_vendedor' => 'min:0|max:255',
+                    'nombre_cuenta' => 'required',
                 ],
                 [
                     'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
@@ -326,6 +333,7 @@ class CobrosController extends Controller
                     'banco_destino.required' => 'El campo banco de destino es obligatorio',
                     'estado.required' => 'El campo estado es obligatorio',
                     'obs_revisor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
+                    'nombre_cuenta.required' => 'El campo nombre del propietario de la cuenta origen es obligatorio',
                 ]
             );
 
@@ -574,6 +582,10 @@ class CobrosController extends Controller
             foreach ($secuenciasAux as $item) {
                 array_push($secuencias, $item->value);
             }
+            /*cambio  */
+            $numerocomprobante = $cobro->numero_comprobante;
+            $nombreduenio = $cobro->nombre_cuenta;
+            /*fin cambio */
 
             $correoRevisor = $revisor->correo;
 
@@ -582,9 +594,11 @@ class CobrosController extends Controller
                 'subject' => "Nuevo cobro registrado",
                 'revisora' => $revisor->nombres,
                 'sencuencias' => $secuencias,
+                'comprobante'=> $numerocomprobante ,
+                'propietario' => $nombreduenio,
             ];
 
-            Mail::to("jgranizo98@hotmail.com")->queue(new NotificarPago($array));
+            Mail::to($correoRevisor)->queue(new NotificarPago($array));
         } catch (\Throwable $th) {
             dd($th);
         }
