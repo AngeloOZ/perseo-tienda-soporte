@@ -289,10 +289,6 @@
                                                                 <ul>       
                                                                     <li>{{ $array['comprobante'] }}</li>  
                                                                 </ul>
-                                                                El nombre del dueño de la cuenta de banco asociado al cobro es el siguiente:
-                                                                <ul>       
-                                                                    <li>{{ $array['propietario'] }}</li>  
-                                                                </ul>
                                                                 <!--fin cambio-->
                                                             </div>
                                                         </td>

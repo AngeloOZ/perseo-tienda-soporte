@@ -44,7 +44,7 @@
                                                 <input id="secuencias"
                                                     class="form-control {{ $errors->has('secuencias') ? 'is-invalid' : '' }}"
                                                     name="secuencias" value="{{ old('secuencias') }}" />
-                                            </div>
+                                        </div>
                                             @error('secuencias')
                                                 <span class="text-danger">{{ $errors->first('secuencias') }}</span>
                                             @enderror
@@ -60,19 +60,7 @@
                                             @error('numero_comprobante')
                                                 <span class="text-danger">{{ $errors->first('numero_comprobante') }}</span>
                                             @enderror
-                                        </div>
-
-                                        <div class="col-12 mb-4 col-md-6 mb-md-0">
-                                            <label for="whatsapp">Nombre del Propietario de la Cuenta Origen <span class="text-danger">*</span>
-                                            </label>
-                                            <input
-                                                type="text"class="form-control {{ $errors->has('nombre_cuenta') ? 'is-invalid' : '' }}"
-                                                id="nombre_cuenta" name="nombre_cuenta"
-                                                value="{{ old('nombre_cuenta') }}" placeholder="Luis Andres Daga" />
-                                            @error('nombre_cuenta')
-                                                <span class="text-danger">{{ $errors->first('nombre_cuenta') }}</span>
-                                            @enderror
-                                        </div>
+                                        </div> 
 
                                     </div>
                                     

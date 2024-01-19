@@ -53,14 +53,6 @@
                                                 @enderror
                                             </div>
 
-                                            <div class="form-group">
-                                                <label style="flex-basis: 100%;">Nombre del Propietario de la Cuenta Origen </label>
-                                                <div class="d-flex">
-                                                    <input id="nombre_cuenta" name="nombre_cuenta" readonly class="form-control"
-                                                        value="{{ $cobro->nombre_cuenta }}" />
-                                                </div>
-                                            </div>
-
                                             <div class="form-group row">
                                                 <div class="col-12 mb-2 col-md-6 mb-md-0">
                                                     <label>Banco de Origen <span class="text-danger">*</span></label>
