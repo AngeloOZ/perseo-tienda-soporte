@@ -18,6 +18,7 @@
                     <h4 class="modal-title h6">Generar contrato</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                 </div>
+
                 <div class="modal-body">
                     <div class="form-group mb-2">
                         <label for="">Dirección:</label>
@@ -28,6 +29,17 @@
                         <input type="date" name="fecha" class="form-control" placeholder="Fecha"
                             value="{{ date('Y-m-d') }}">
                     </div>
+                    <!--//aqui cambio
+                    <div class="form-group mb-2">
+                        <label for="">Tipo:</label>
+                        <select id="tipo" name="tipo" class="form-control" disabled>
+                            <option value="anual">Anual</option>
+                            <option value="mensual">Mensual</option>
+                            <option value="extra">Extra</option>
+                        </select>
+                    </div>
+                    -->
+                    <!--////termina cambio-->
                 </div>
                 <div class="modal-footer p-0 pt-4 pr-4">
                     <button type="button" class="btn btn-link" data-dismiss="modal">Cancelar</button>

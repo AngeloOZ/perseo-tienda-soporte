@@ -113,7 +113,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="textObsPago2">Obseración del pago vendedor</label>
+                                                <label for="textObsPago2">Observación del pago vendedor</label>
                                                 <textarea class="form-control {{ $errors->has('obs_vendedor') ? 'is-invalid' : '' }}" id="textObsPago2"
                                                     name="obs_vendedor" style="resize: none" rows="3">{{ $cobro->obs_vendedor }}</textarea>
                                                 @error('obs_vendedor')

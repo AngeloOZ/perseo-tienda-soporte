@@ -105,7 +105,8 @@
                         data: 'secuencias',
                         name: 'secuencias',
 
-                    }, {
+                    }, 
+                    {
                         data: 'obs_revisor',
                         name: 'obs_revisor',
                     },

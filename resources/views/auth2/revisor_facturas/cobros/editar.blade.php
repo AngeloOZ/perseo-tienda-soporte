@@ -105,13 +105,13 @@
 
                                             @if ($cobro->obs_vendedor != null)
                                                 <div class="form-group">
-                                                    <label for="">Obseración del pago vendedor</label>
+                                                    <label for="">Observación del pago vendedor</label>
                                                     <textarea class="form-control" readonly style="resize: none" rows="3">{{ $cobro->obs_vendedor }}</textarea>
                                                 </div>
                                             @endif
 
                                             <div class="form-group">
-                                                <label for="">Obseración del pago vendedor</label>
+                                                <label for="">Observación del pago revisor</label>
                                                 <textarea class="form-control {{ $errors->has('obs_revisor') ? 'is-invalid' : '' }}" name="obs_revisor"
                                                     style="resize: none" rows="3">{{ $cobro->obs_revisor }}</textarea>
                                                 @error('obs_revisor')
