@@ -332,7 +332,7 @@ class CobrosController extends Controller
         try {
             
             $cobro->estado = $request->estado;
-            $cobro->obs_vendedor = $request->obs_vendedor;
+            $cobro->obs_revisor = $request->obs_revisor;
             $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->banco_origen = $request->banco_origen;
             $cobro->banco_destino = $request->banco_destino;
