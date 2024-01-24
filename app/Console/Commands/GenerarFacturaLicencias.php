@@ -19,7 +19,7 @@ class GenerarFacturaLicencias extends Command
      *
      * @var string
      */
-    protected $description = 'Este comando consulta las licencias que estan por vencer a 5 días y genera la factura de forma auyomatica para su renovacion ';
+    protected $description = 'Este comando consulta las licencias que estan por vencer a 5 días y genera la factura de forma automatica para su renovacion ';
 
     /**
      * Create a new command instance.
