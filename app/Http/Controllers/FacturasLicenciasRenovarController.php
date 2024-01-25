@@ -118,7 +118,7 @@ class FacturasLicenciasRenovarController extends Controller
                         "secuencia" => $factura->secuencia,
                     ]);
 
-                    if($vendedor->distribuidoresid == 1 || $vendedor->distribuidoresid == 2){
+                    if($vendedor->distribuidoresid != 1 || $vendedor->distribuidoresid != 2){
                         echo "\n";
                         echo "Se denego el envio de sms a Matriz, se envia facturas no autorizadas al numero de Matriz\n";
     
