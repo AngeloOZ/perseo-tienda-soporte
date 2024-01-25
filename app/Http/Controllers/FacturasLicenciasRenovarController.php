@@ -73,7 +73,13 @@ class FacturasLicenciasRenovarController extends Controller
                     $datos_cliente = $instancia->obtener_datos_facturacion($licencia);
                     $cliente = $instancia->crear_cliente($vendedor, $datos_cliente);
                     $factura = $instancia->crear_factura($cliente, $vendedor, $productos);
-                    $autorizada = $instancia->autorizar_factura($factura, $vendedor);
+                    
+                    if($vendedor->distribuidoresid == 1 || $vendedor->distribuidoresid == 2){
+                        echo "\n";
+                        echo "Se denego la autorizacion a la factura: $factura->secuencia , del distribuidor: $vendedor->distribuidoresid \n";
+                    }else{
+                        $autorizada = $instancia->autorizar_factura($factura, $vendedor);  
+                    }                        
 
                     switch ($vendedor->distribuidoresid) {
                         case '1':
@@ -112,16 +118,31 @@ class FacturasLicenciasRenovarController extends Controller
                         "secuencia" => $factura->secuencia,
                     ]);
 
-
-                    if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
-                        WhatsappRenovacionesController::enviar_archivo_mensaje([
-                            "phone" => $datos_cliente->telefono2,
-                            "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
-                            "filename" => "factura_{$factura->secuencia}.pdf",
-                            "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
-                            "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
-                        ]);
-                    }
+                    if($vendedor->distribuidoresid == 1 || $vendedor->distribuidoresid == 2){
+                        echo "\n";
+                        echo "Se denego el envio de sms a Matriz, se envia facturas no autorizadas al numero de Matriz\n";
+    
+                        if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
+                            WhatsappRenovacionesController::enviar_archivo_mensaje([
+                                "phone" => "593987740386",
+                                "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
+                                "filename" => "factura_{$factura->secuencia}.pdf",
+                                "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
+                                "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                            ]);
+                        }
+                    }else{
+                        if ($datos_cliente->telefono2 != "" || $datos_cliente->telefono2 != null) {
+                            WhatsappRenovacionesController::enviar_archivo_mensaje([
+                                "phone" => $datos_cliente->telefono2,
+                                "caption" => "🎉 ¡Hola *{$datos_cliente->nombres}*! Esperamos que estés teniendo un excelente día. Queremos informarte con mucha alegría que hemos generado la factura de la renovación de tu plan, cuyo vencimiento está programado en 5 días. 🔄💼\n\n¡Agradecemos tu confianza en nosotros y estamos aquí para cualquier cosa que necesites! 🤝🌟💙\n\nPuedes cargar 📤 tu comprobante de pago en el siguiente enlace 💳💰:\n\n" . route('pagos.registrar', $renovacion->uuid),
+                                "filename" => "factura_{$factura->secuencia}.pdf",
+                                "filebase64" => "data:application/pdf;base64," . $autorizada->pdf,
+                                "distribuidor" => $instancia->homologar_distribuidor($licencia->sis_distribuidoresid),
+                            ]);
+                        }
+                    }   
+                    
                 } catch (\Throwable $th) {
                     echo $th->getMessage() . "\n";
                     continue;

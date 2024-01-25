@@ -139,7 +139,7 @@ class CobrosController extends Controller
             $cobro->fecha_actualizacion = now();
 
             $cobro->save();
-            //inicio modificacion
+            
             $this->notificar_pago_correo($cobro);
 
             flash("Cobro registrado correctamente")->success();
