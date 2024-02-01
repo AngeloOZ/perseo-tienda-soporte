@@ -239,6 +239,9 @@ class cotizarController extends Controller
             $template->setValue('pago_contado',  number_format(($totaliva - $porcentajeTarjetaContado), 2, '.', ''));
             $template->cloneRowAndSetValues('detalle', $detalles);
             $template->cloneRowAndSetValues('formapago', $formasPago);
+            //inicio cambio hipervinculo   
+
+            //fin cambio hipervinculo            
             $template->saveAs($fileName . '.docx');
 
             $actualizar = Cotizaciones::where('cotizacionesid', $cotizaciones)->first();

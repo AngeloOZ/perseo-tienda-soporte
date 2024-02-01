@@ -92,7 +92,7 @@ class SoporteEspcialController extends Controller
     {
         $validate1 = [
             'tipo' => 'required',
-            'ruc' => 'required',
+            'ruc' => 'required|min:13',
             'razon_social' => 'required',
             'correo' => ['required', new ValidarCorreo],
             'whatsapp' => ['required', new ValidarCelular],
@@ -106,6 +106,7 @@ class SoporteEspcialController extends Controller
         $validate2 = [
             'tipo.required' => 'Seleccione un tipo de soporte',
             'ruc.required' => 'Ingrese el RUC',
+            'ruc.min' => 'Ingrese un numero de RUC válido',
             'razon_social.required' => 'Ingrese la razón social',
             'correo.required' => 'Ingrese un correo electrónico',
             'whatsapp.required' => 'Ingrese un número celular',
@@ -116,7 +117,7 @@ class SoporteEspcialController extends Controller
             'vededorid.required' => 'Seleccione un vendedor',
             'actividad_empresa.required' => 'Ingrese una actividad de la empresa',
             'actividad_empresa.min' => 'La actividad de la empresa debe tener al menos 10 caracteres',
-            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',
+            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',            
         ];
 
         $request->validate($validate1, $validate2);
@@ -317,11 +318,14 @@ class SoporteEspcialController extends Controller
                 'nombre2' => 'required',
                 'correo2' => ['required', new ValidarCorreo],
                 'whatsapp' => ['required', new ValidarCelular],
+                'identificacion2' => 'required|min:13|max:13',
             ],
             [
                 'nombre2.required' => 'Ingrese el nombre de la persona que asistirá a la capacitación',
                 'correo2.required' => 'Ingrese un correo electrónico',
                 'whatsapp.required' => 'Ingrese un número celular',
+                'identificacion2.required' => 'Ingrese el RUC',
+                'identificacion2.min' => 'El RUC debe tener 13 dígitos',
             ],
         );
 

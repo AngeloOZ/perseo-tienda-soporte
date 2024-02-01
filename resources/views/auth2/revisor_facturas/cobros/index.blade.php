@@ -104,8 +104,8 @@
                     {
                         data: 'secuencias',
                         name: 'secuencias',
-
-                    }, {
+                    },
+                    {
                         data: 'obs_vendedor',
                         name: 'obs_vendedor',
                     },

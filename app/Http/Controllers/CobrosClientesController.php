@@ -13,12 +13,12 @@ use Illuminate\Support\Facades\Http;
 class CobrosClientesController extends Controller
 {
     private $client;
-
+    //comentario prueba
     public function __construct()
     {
-        $this->client = new Client();
+        $this->client = new Client(['verify' => false]);
     }
-
+    
     public function registrar_pago_cliente($factura)
     {
         $renovacion = RenovacionLicencias::where('uuid', $factura)->firstOrfail();
@@ -245,10 +245,12 @@ class CobrosClientesController extends Controller
                 'origen' => json_decode($results['origen']->getBody()->getContents())->bancoc,
             ];
         } catch (\Throwable $th) {
+
             return (object)[
                 'destino' => [],
                 'origen' => [],
             ];
+
         }
     }
 }

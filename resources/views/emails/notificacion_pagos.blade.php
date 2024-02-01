@@ -284,8 +284,12 @@
                                                                         <li>{{ $item }}</li>
                                                                     @endforeach
                                                                 </ul>
-
-                                                               
+                                                                <!--inicio cambio-->
+                                                                El número de comprobante asociado al cobro es el siguiente:
+                                                                <ul>       
+                                                                    <li>{{ $array['comprobante'] }}</li>  
+                                                                </ul>
+                                                                <!--fin cambio-->
                                                             </div>
                                                         </td>
                                                     </tr>

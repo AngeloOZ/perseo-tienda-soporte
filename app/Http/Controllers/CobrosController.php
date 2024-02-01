@@ -95,7 +95,7 @@ class CobrosController extends Controller
         $request->validate(
             [
                 'secuencias' => 'required',
-                'numero_comprobante' => 'required:min:6',
+                'numero_comprobante' => 'required|regex:/^\d{6,}$/',
                 'banco_origen' => 'required',
                 'banco_destino' => 'required',
                 'estado' => 'required',
@@ -105,14 +105,14 @@ class CobrosController extends Controller
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
                 'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
-                'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                'numero_comprobante.regex' => 'El campo numero de comprobante debe tener solo numeros y minimo 6',
                 'banco_origen.required' => 'El campo banco de origen es obligatorio',
                 'banco_destino.required' => 'El campo banco de destino es obligatorio',
                 'estado.required' => 'El campo estado es obligatorio',
                 'comprobante.required' => 'Se debe subir al menos 1 comprobante',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
             ]
-        );
+        );        
 
         try {
 
@@ -139,7 +139,7 @@ class CobrosController extends Controller
             $cobro->fecha_actualizacion = now();
 
             $cobro->save();
-            //inicio modificacion
+            
             $this->notificar_pago_correo($cobro);
 
             flash("Cobro registrado correctamente")->success();
@@ -170,7 +170,7 @@ class CobrosController extends Controller
         $request->validate(
             [
                 'secuencias' => 'required',
-                'numero_comprobante' => 'required:min:6',
+                'numero_comprobante' => 'required|regex:/^\d{6,}$/',
                 'banco_origen' => 'required',
                 'banco_destino' => 'required',
                 'estado' => 'required',
@@ -179,14 +179,14 @@ class CobrosController extends Controller
             [
                 'secuencias.required' => 'Se debe ingresar al menos una secuencia',
                 'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
-                'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                'numero_comprobante.regex' => 'El campo numero de comprobante debe tener solo numeros y minimo 6',
                 'banco_origen.required' => 'El campo banco de origen es obligatorio',
                 'banco_destino.required' => 'El campo banco de destino es obligatorio',
                 'estado.required' => 'El campo estado es obligatorio',
                 'obs_vendedor.max' => 'El campo observaciones no puede tener mas de 255 caracteres',
             ]
         );
-
+        
         try {
             $cobro->secuencias = $request->secuencias;
             $cobro->estado = 1;
@@ -194,7 +194,7 @@ class CobrosController extends Controller
             $cobro->numero_comprobante = $request->numero_comprobante;
             $cobro->banco_origen = $request->banco_origen;
             $cobro->banco_destino = $request->banco_destino;
-
+            
             $temp = [];
             if (isset($request->comprobante)) {
                 foreach ($request->comprobante as $file) {
@@ -310,10 +310,10 @@ class CobrosController extends Controller
 
     public function actualizar_revisor(Cobros $cobro, Request $request)
     {
-        try {
+        
             $request->validate(
                 [
-                    'numero_comprobante' => 'required:min:6',
+                    'numero_comprobante' => 'required|regex:/^\d{6,}$/',
                     'banco_origen' => 'required',
                     'banco_destino' => 'required',
                     'estado' => 'required',
@@ -321,7 +321,7 @@ class CobrosController extends Controller
                 ],
                 [
                     'numero_comprobante.required' => 'El campo numero de comprobante es obligatorio',
-                    'numero_comprobante.min' => 'El campo numero de comprobante debe tener al menos 6 caracteres',
+                    'numero_comprobante.regex' => 'El campo numero de comprobante debe tener solo numeros y minimo 6',
                     'banco_origen.required' => 'El campo banco de origen es obligatorio',
                     'banco_destino.required' => 'El campo banco de destino es obligatorio',
                     'estado.required' => 'El campo estado es obligatorio',
@@ -329,7 +329,28 @@ class CobrosController extends Controller
                 ]
             );
 
-            $cobro->update($request->all());
+        try {
+            
+            $cobro->estado = $request->estado;
+            $cobro->obs_revisor = $request->obs_revisor;
+            $cobro->numero_comprobante = $request->numero_comprobante;
+            $cobro->banco_origen = $request->banco_origen;
+            $cobro->banco_destino = $request->banco_destino;
+
+            $temp = [];
+            if (isset($request->comprobante)) {
+                foreach ($request->comprobante as $file) {
+                    $id = uniqid("comprobante-");
+                    $temp[$id] = base64_encode(file_get_contents($file->getRealPath()));
+                }
+                $cobro->comprobante = json_encode($temp);
+            }
+
+            $cobro->fecha_registro = now();
+            $cobro->fecha_actualizacion = now();
+
+            $cobro->save();
+            flash("Cobro actualizado correctamente")->success();
 
             $log = new Log();
             $log->usuario = Auth::user()->nombres;
@@ -339,7 +360,6 @@ class CobrosController extends Controller
             $log->detalle = json_encode($cobro);
             $log->save();
 
-            flash("Cobro actualizado correctamente")->success();
             return back();
         } catch (\Throwable $th) {
             flash("Error al actualizar el cobro")->error();
@@ -574,6 +594,9 @@ class CobrosController extends Controller
             foreach ($secuenciasAux as $item) {
                 array_push($secuencias, $item->value);
             }
+            /*cambio  */
+            $numerocomprobante = $cobro->numero_comprobante;
+            /*fin cambio */
 
             $correoRevisor = $revisor->correo;
 
@@ -582,9 +605,10 @@ class CobrosController extends Controller
                 'subject' => "Nuevo cobro registrado",
                 'revisora' => $revisor->nombres,
                 'sencuencias' => $secuencias,
+                'comprobante'=> $numerocomprobante ,
             ];
 
-            Mail::to("jgranizo98@hotmail.com")->queue(new NotificarPago($array));
+            Mail::to($correoRevisor)->queue(new NotificarPago($array));
         } catch (\Throwable $th) {
             dd($th);
         }
