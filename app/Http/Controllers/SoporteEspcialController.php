@@ -238,9 +238,9 @@ class SoporteEspcialController extends Controller
         }
 
         switch ($request->estado) {
-            case 3:
-                if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
-                break;
+            //case 3:
+              //  if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
+                //break;
             case 3:
                 if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
                 break;
