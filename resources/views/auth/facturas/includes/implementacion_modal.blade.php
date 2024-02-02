@@ -26,6 +26,18 @@
                             <span class="text-primary">Ingrese el RUC del cliente, no del Contador</span>
                         </div>
                     @endif
+
+                    @if (!$esWebContador)
+                        <div class="form-group">
+                            <label for="identificacion2">RUC</label>
+                            <input type="text" class="form-control {{ $errors->has('identificacion2') ? 'is-invalid' : '' }}"
+                                id="identificacion2" name="identificacion2" value="{{ $factura->identificacion }}">
+                            @if ($errors->has('identificacion2'))
+                                <span class="text-danger">{{ $errors->first('identificacion2') }}</span>
+                            @endif
+                        </div>
+                    @endif
+
                     <h3 class="h6 mb-3">Datos de quien recibe la capacitación</h3>
                     <div class="form-group">
                         <label for="nombre2">Nombre y Apellido</label>

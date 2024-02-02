@@ -333,6 +333,7 @@ class SoporteEspcialController extends Controller
                 'identificacion2.required' => 'Ingrese un RUC',
             ],
         );
+
         $identificacionActual = $request->identificacion2 ?? $factura->identificacion;
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
