@@ -348,21 +348,33 @@ class SoporteEspcialController extends Controller
             ->orderBy('soporteid', 'desc')
             ->first();
 
-        if ($soporteAnteriorPro == $soporteAnteriorGb && $soporteAnteriorPro != null) {
-            $mensaje = "Ya existe una capacitación registrada para este cliente";
-   
-            $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);                
+            $lastRuc = null;
 
-            flash($mensaje)->warning();
-            return back();
-        }else { 
-            $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
-            ->where('ruc', $identificacionActual)
-            ->where('vededorid', Auth::user()->usuariosid)
-            ->whereIn('tipo', [1, 3])
-            ->orderBy('soporteid', 'desc')
-            ->first();        
-        }        
+            $exists = SoporteEspecial::where('ruc', $identificacionActual)
+                        ->select('ruc') 
+                        ->orderBy('soporteid', 'desc')  
+                        ->first(function ($query) use (&$lastRuc) {
+                            $lastRuc = $query->ruc;  
+                        });
+
+            if($exists) {
+                $mensaje = "Ya existe una capacitación registrada para este cliente";
+                    if ($soporteAnteriorGb) {
+                        $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);    
+                    }
+                    //dd($mensaje);
+                flash($mensaje)->warning();
+                return back();
+            }else{
+                $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
+                    ->where('ruc', $identificacionActual)
+                    ->where('vededorid', Auth::user()->usuariosid)
+                    ->whereIn('tipo', [1, 3])
+                    ->orderBy('soporteid', 'desc')
+                    ->first(); 
+            }
+
+        //dd('Si debio pasar');
 
         $productos = json_decode($factura->productos);
 
