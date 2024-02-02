@@ -14,6 +14,7 @@ use App\Models\Tecnicos;
 use App\Models\User;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
+use App\Rules\ValidarRUC;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -92,7 +93,7 @@ class SoporteEspcialController extends Controller
     {
         $validate1 = [
             'tipo' => 'required',
-            'ruc' => 'required',
+            'ruc' => 'required|min:13',
             'razon_social' => 'required',
             'correo' => ['required', new ValidarCorreo],
             'whatsapp' => ['required', new ValidarCelular],
@@ -106,6 +107,7 @@ class SoporteEspcialController extends Controller
         $validate2 = [
             'tipo.required' => 'Seleccione un tipo de soporte',
             'ruc.required' => 'Ingrese el RUC',
+            'ruc.min' => 'Ingrese un numero de RUC válido',
             'razon_social.required' => 'Ingrese la razón social',
             'correo.required' => 'Ingrese un correo electrónico',
             'whatsapp.required' => 'Ingrese un número celular',
@@ -116,7 +118,7 @@ class SoporteEspcialController extends Controller
             'vededorid.required' => 'Seleccione un vendedor',
             'actividad_empresa.required' => 'Ingrese una actividad de la empresa',
             'actividad_empresa.min' => 'La actividad de la empresa debe tener al menos 10 caracteres',
-            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',
+            'actividad_empresa.max' => 'La actividad de la empresa debe tener máximo 255 caracteres',            
         ];
 
         $request->validate($validate1, $validate2);
@@ -236,9 +238,9 @@ class SoporteEspcialController extends Controller
         }
 
         switch ($request->estado) {
-            case 3:
-                if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
-                break;
+            //case 3:
+              //  if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
+                //break;
             case 3:
                 if (!$soporte->fecha_iniciado) $data['fecha_iniciado'] = now();
                 break;
@@ -312,19 +314,25 @@ class SoporteEspcialController extends Controller
 
     public function registrar_capacitacion_ventas(Factura $factura, Request $request)
     {
+        if ($request->implementacionRegistrar != "guardar") {
+            flash('Ocurrió un error, vuelva a intentarlo')->error();
+            //return back();
+        }
+
         $request->validate(
             [
                 'nombre2' => 'required',
                 'correo2' => ['required', new ValidarCorreo],
                 'whatsapp' => ['required', new ValidarCelular],
+                'identificacion2' => ['required', new ValidarRUC],
             ],
             [
                 'nombre2.required' => 'Ingrese el nombre de la persona que asistirá a la capacitación',
                 'correo2.required' => 'Ingrese un correo electrónico',
                 'whatsapp.required' => 'Ingrese un número celular',
+                'identificacion2.required' => 'Ingrese un RUC',
             ],
         );
-
         $identificacionActual = $request->identificacion2 ?? $factura->identificacion;
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
@@ -340,23 +348,21 @@ class SoporteEspcialController extends Controller
             ->orderBy('soporteid', 'desc')
             ->first();
 
-        if ($soporteAnteriorPro || $soporteAnteriorGb) {
+        if ($soporteAnteriorPro == $soporteAnteriorGb && $soporteAnteriorPro != null) {
             $mensaje = "Ya existe una capacitación registrada para este cliente";
-
-            if ($soporteAnteriorGb) {
-                $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);
-            }
+   
+            $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);                
 
             flash($mensaje)->warning();
             return back();
-        }
-
-        $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
+        }else { 
+            $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
             ->where('ruc', $identificacionActual)
             ->where('vededorid', Auth::user()->usuariosid)
             ->whereIn('tipo', [1, 3])
             ->orderBy('soporteid', 'desc')
-            ->first();
+            ->first();        
+        }        
 
         $productos = json_decode($factura->productos);
 
@@ -364,7 +370,7 @@ class SoporteEspcialController extends Controller
         $soporte->ruc = $identificacionActual;
         $soporte->razon_social = $request->nombre2 ?? $factura->nombre;
         $soporte->correo = $request->correo2 ?? $factura->correo;
-        $soporte->whatsapp = $request->whatsapp;
+        $soporte->whatsapp = $request->whatsapp ?? $factura->telefono;
         $soporte->estado = 1;
         $soporte->tipo = 2;
         $soporte->fecha_creacion = now();
@@ -387,7 +393,6 @@ class SoporteEspcialController extends Controller
         NuevoRegistroSopEsp::dispatch($soporte, $factura, $soporteAnteriorPro);
 
         try {
-
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
             if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;

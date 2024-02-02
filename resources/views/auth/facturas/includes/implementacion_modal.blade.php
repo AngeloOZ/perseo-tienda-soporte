@@ -4,6 +4,7 @@
     $interseccion = $productos->intersect($soyContadoresIds);
     $esWebContador = !$interseccion->isEmpty();
 @endphp
+
 <div id="implementacion-modal" class="modal fade">
     <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
@@ -16,12 +17,13 @@
                 <div class="modal-body">
                     @if ($esWebContador)
                         <div class="form-group">
-                            <label for="identificacion2">RUC DEL PLAN CONTRATADO</label>
-                            <input type="text" class="form-control" id="identificacion2" name="identificacion2"
-                                value="{{ $factura->identificacion }}">
+                            <label for="identificacion2">RUC DEL PLAN LIBERADO</label>
+                            <input type="text" class="form-control {{ $errors->has('identificacion2') ? 'is-invalid' : '' }}"
+                                id="identificacion2" name="identificacion2" value="{{ $factura->identificacion }}">
                             @if ($errors->has('identificacion2'))
                                 <span class="text-danger">{{ $errors->first('identificacion2') }}</span>
                             @endif
+                            <span class="text-primary">Ingrese el RUC del cliente, no del Contador</span>
                         </div>
                     @endif
                     <h3 class="h6 mb-3">Datos de quien recibe la capacitación</h3>
@@ -52,7 +54,7 @@
                     </div>
                     <div class="text-right">
                         <button type="button" class="btn btn-link mt-2" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" id="btnSendNumber" class="btn btn-primary mt-2">Registrar</button>
+                        <button type="submit" id="btnSendNumber" name="implementacionRegistrar" class="btn btn-primary mt-2">Registrar</button>
                     </div>
                 </div>
             </form>
