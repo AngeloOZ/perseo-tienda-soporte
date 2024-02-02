@@ -14,6 +14,7 @@ use App\Models\Tecnicos;
 use App\Models\User;
 use App\Rules\ValidarCelular;
 use App\Rules\ValidarCorreo;
+use App\Rules\ValidarRUC;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -323,19 +324,15 @@ class SoporteEspcialController extends Controller
                 'nombre2' => 'required',
                 'correo2' => ['required', new ValidarCorreo],
                 'whatsapp' => ['required', new ValidarCelular],
-                'identificacion2' => 'required|min:13|max:13',
+                'identificacion2' => ['required', new ValidarRUC],
             ],
             [
                 'nombre2.required' => 'Ingrese el nombre de la persona que asistirá a la capacitación',
                 'correo2.required' => 'Ingrese un correo electrónico',
                 'whatsapp.required' => 'Ingrese un número celular',
-                'identificacion2.required' => 'Ingrese el RUC',
-                'identificacion2.min' => 'El RUC debe tener 13 dígitos',
+                'identificacion2.required' => 'Ingrese un RUC',
             ],
         );
-
-        //dd($request);
-        
         $identificacionActual = $request->identificacion2 ?? $factura->identificacion;
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
@@ -351,24 +348,22 @@ class SoporteEspcialController extends Controller
             ->orderBy('soporteid', 'desc')
             ->first();
 
-        if ($soporteAnteriorPro || $soporteAnteriorGb) {
+        if ($soporteAnteriorPro == $soporteAnteriorGb && $soporteAnteriorPro != null) {
             $mensaje = "Ya existe una capacitación registrada para este cliente";
-
-            if ($soporteAnteriorGb) {
-                $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);
-            }
+   
+            $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);                
 
             flash($mensaje)->warning();
-            //return back();
-        }
-
-        $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
+            return back();
+        }else { 
+            $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
             ->where('ruc', $identificacionActual)
             ->where('vededorid', Auth::user()->usuariosid)
             ->whereIn('tipo', [1, 3])
             ->orderBy('soporteid', 'desc')
-            ->first();
-        try {
+            ->first();        
+        }        
+
         $productos = json_decode($factura->productos);
 
         $soporte = new SoporteEspecial();
@@ -397,8 +392,7 @@ class SoporteEspcialController extends Controller
 
         NuevoRegistroSopEsp::dispatch($soporte, $factura, $soporteAnteriorPro);
 
-        
-
+        try {
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
             if ($soporteAnteriorPro) {
                 $soporte->tecnicoid = $soporteAnteriorPro->tecnicoid;

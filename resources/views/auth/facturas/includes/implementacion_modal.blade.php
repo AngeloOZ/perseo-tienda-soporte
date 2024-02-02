@@ -17,9 +17,9 @@
                 <div class="modal-body">
                     @if ($esWebContador)
                         <div class="form-group">
-                            <label for="identificacion2">RUC DEL PLAN LIBERADO </label>
-                            <input type="text" class="form-control" id="identificacion2" name="identificacion2"
-                                value="{{ $factura->identificacion }}">
+                            <label for="identificacion2">RUC DEL PLAN LIBERADO</label>
+                            <input type="text" class="form-control {{ $errors->has('identificacion2') ? 'is-invalid' : '' }}"
+                                id="identificacion2" name="identificacion2" value="{{ $factura->identificacion }}">
                             @if ($errors->has('identificacion2'))
                                 <span class="text-danger">{{ $errors->first('identificacion2') }}</span>
                             @endif
