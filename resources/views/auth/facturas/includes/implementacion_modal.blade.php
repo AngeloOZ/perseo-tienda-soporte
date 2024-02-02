@@ -54,7 +54,7 @@
                     </div>
                     <div class="text-right">
                         <button type="button" class="btn btn-link mt-2" data-dismiss="modal">Cancelar</button>
-                        <button type="submit" id="btnSendNumber" class="btn btn-primary mt-2">Registrar</button>
+                        <button type="submit" id="btnSendNumber" name="implementacionRegistrar" class="btn btn-primary mt-2">Registrar</button>
                     </div>
                 </div>
             </form>

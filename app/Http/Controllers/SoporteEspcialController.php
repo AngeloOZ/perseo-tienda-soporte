@@ -313,6 +313,11 @@ class SoporteEspcialController extends Controller
 
     public function registrar_capacitacion_ventas(Factura $factura, Request $request)
     {
+        if ($request->implementacionRegistrar != "guardar") {
+            flash('Ocurrió un error, vuelva a intentarlo')->error();
+            //return back();
+        }
+
         $request->validate(
             [
                 'nombre2' => 'required',
@@ -329,6 +334,8 @@ class SoporteEspcialController extends Controller
             ],
         );
 
+        //dd($request);
+        
         $identificacionActual = $request->identificacion2 ?? $factura->identificacion;
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'vededorid', 'razon_social', 'ruc')
@@ -352,7 +359,7 @@ class SoporteEspcialController extends Controller
             }
 
             flash($mensaje)->warning();
-            return back();
+            //return back();
         }
 
         $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
@@ -361,14 +368,14 @@ class SoporteEspcialController extends Controller
             ->whereIn('tipo', [1, 3])
             ->orderBy('soporteid', 'desc')
             ->first();
-
+        try {
         $productos = json_decode($factura->productos);
 
         $soporte = new SoporteEspecial();
         $soporte->ruc = $identificacionActual;
         $soporte->razon_social = $request->nombre2 ?? $factura->nombre;
         $soporte->correo = $request->correo2 ?? $factura->correo;
-        $soporte->whatsapp = $request->whatsapp;
+        $soporte->whatsapp = $request->whatsapp ?? $factura->telefono;
         $soporte->estado = 1;
         $soporte->tipo = 2;
         $soporte->fecha_creacion = now();
@@ -390,7 +397,7 @@ class SoporteEspcialController extends Controller
 
         NuevoRegistroSopEsp::dispatch($soporte, $factura, $soporteAnteriorPro);
 
-        try {
+        
 
             ComisionesController::actualizar_comision($factura, $soporte->soporteid);
             if ($soporteAnteriorPro) {
