@@ -55,6 +55,7 @@
             <option value="1" {{ $soporte->plan == 1 ? 'selected' : '' }}>WEB</option>
             <option value="2" {{ $soporte->plan == 2 ? 'selected' : '' }}>PC</option>
             <option value="3" {{ $soporte->plan == 3 ? 'selected' : '' }}>FACTURITO</option>
+            <option value="4" {{ $soporte->plan == 4 ? 'selected' : '' }}>PRIME</option>
         </select>
         @error('plan')
             <span class="text-danger">{{ $errors->first('plan') }}</span>

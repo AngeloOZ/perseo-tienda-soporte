@@ -314,10 +314,10 @@ class SoporteEspcialController extends Controller
 
     public function registrar_capacitacion_ventas(Factura $factura, Request $request)
     {
-        if ($request->implementacionRegistrar != "guardar") {
-            flash('Ocurrió un error, vuelva a intentarlo')->error();
+        //if ($request->implementacionRegistrar != "guardar") {
+            //flash('Ocurrió un error, vuelva a intentarlo')->error();
             //return back();
-        }
+        //}
 
         $request->validate(
             [
