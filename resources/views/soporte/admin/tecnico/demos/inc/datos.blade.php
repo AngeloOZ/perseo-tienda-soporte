@@ -43,6 +43,7 @@
             <option value="1">WEB</option>
             <option value="2">PC</option>
             <option value="3">FACTURITO</option>
+            <option value="4">PRIME</option>
         </select>
         @error('plan')
             <span class="text-danger">{{ $errors->first('plan') }}</span>
