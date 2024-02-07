@@ -11,36 +11,49 @@
             </div>
             <div class="modal-body">
                 <form id="formContador" action="#">
+                   
                     @if ($contador->esContador)
                         <div class="form-group m-2">
                             <label for="tiempoRenovacion">Ruc Contador <small>Contador</small></label>
-                            <input type="text" class="form-control" id="rucContador"
-                                value="{{ $factura->identificacion }}">
+                            <input type="text" class="form-control {{ $errors->has('rucContador') ? 'is-invalid' : '' }}"
+                            id="rucContador" name="rucContador" value="{{ $factura->identificacion }}">
+                            @if ($errors->has('rucContador'))
+                                <span class="text-danger">{{ $errors->first('rucContador') }}</span>
+                            @endif
                         </div>
                     @endif
+    
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Identificación <small>Cliente</small></label>
-                        <input type="text" class="form-control" id="rucCliente"
-                            value="{{ $factura->identificacion }}">
+                        <input type="text" class="form-control {{ $errors->has('rucCliente') ? 'is-invalid' : '' }}"
+                        id="rucCliente" name="rucCliente" value="{{ $factura->identificacion }}">
+                            @if ($errors->has('rucCliente'))
+                                 <span class="text-danger">{{ $errors->first('rucCliente') }}</span>
+                            @endif
                     </div>
+                    
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Nombres y Apellidos <small>Cliente</small></label>
                         <input type="text" class="form-control" id="nombresCliente" value="{{ $factura->nombre }}">
                     </div>
+
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Dirección <small>Cliente</small></label>
                         <input type="text" class="form-control" id="direccionCliente"
                             value="{{ $factura->direccion }}">
                     </div>
+
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Teléfono <small>Cliente</small></label>
                         <input type="text" class="form-control" id="telefonoCliente"
                             value="{{ $factura->telefono }}">
                     </div>
+
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Correo <small>Cliente</small></label>
                         <input type="text" class="form-control" id="correoCliente" value="{{ $factura->correo }}">
                     </div>
+                    
                     <div class="text-center mt-4">
                         <button type="button" class="btn btn-outline-danger mr-2"
                             data-dismiss="modal">Cancelar</button>
