@@ -110,23 +110,6 @@ class LiberarLicenciasController extends Controller
 
     public function liberar_producto(Factura $factura, Request $request)
     {
-        $request->validate(
-            [
-                'rucContador' => 'required|numeric|min:10|max:13',
-                'rucCliente' => 'required|numeric|min:10|max:13',
-            ],
-            [
-                'rucContador.required' => 'Ingrese el Ruc del Contador',
-                'rucContador.numeric' => 'El Ruc del Contador debe ser numerico',
-                'rucContador.min' => 'El Ruc del Contador debe tener al menos 10 digitos',
-                'rucContador.max' => 'El Ruc del Contador debe tener maximo 13 digitos',
-                'rucCliente.required' => 'Ingrese el Ruc del Cliente',                
-                'rucCliente.numeric' => 'El Ruc del Cliente debe ser numerico',                
-                'rucCliente.min' => 'El Ruc del Cliente debe tener al menos 10 digitos',                
-                'rucCliente.max' => 'El Ruc del Cliente debe tener maximo 13 digitos',
-            ],
-        );
-
         $responseData = (object)[
             "status" => 500,
             "message" => "Error interno",

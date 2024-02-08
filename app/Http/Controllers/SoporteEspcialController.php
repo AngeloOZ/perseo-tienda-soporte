@@ -314,11 +314,6 @@ class SoporteEspcialController extends Controller
 
     public function registrar_capacitacion_ventas(Factura $factura, Request $request)
     {
-        //if ($request->implementacionRegistrar != "guardar") {
-            //flash('Ocurrió un error, vuelva a intentarlo')->error();
-            //return back();
-        //}
-
         $request->validate(
             [
                 'nombre2' => 'required',
@@ -349,33 +344,23 @@ class SoporteEspcialController extends Controller
             ->orderBy('soporteid', 'desc')
             ->first();
 
-            $lastRuc = null;
-
-            $exists = SoporteEspecial::where('ruc', $identificacionActual)
-                        ->select('ruc') 
-                        ->orderBy('soporteid', 'desc')  
-                        ->first(function ($query) use (&$lastRuc) {
-                            $lastRuc = $query->ruc;  
-                        });
-
-            if($exists) {
-                $mensaje = "Ya existe una capacitación registrada para este cliente";
-                    if ($soporteAnteriorGb) {
-                        $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);    
-                    }
-                    //dd($mensaje);
-                flash($mensaje)->warning();
-                return back();
-            }else{
-                $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
-                    ->where('ruc', $identificacionActual)
-                    ->where('vededorid', Auth::user()->usuariosid)
-                    ->whereIn('tipo', [1, 3])
-                    ->orderBy('soporteid', 'desc')
-                    ->first(); 
+        if ($soporteAnteriorPro || $soporteAnteriorGb) {
+            $mensaje = "Ya existe una capacitación registrada para este cliente";
+    
+            if ($soporteAnteriorGb) {
+                $mensaje = $this->validar_soportes_anteriores($soporteAnteriorGb);
             }
-
-        //dd('Si debio pasar');
+    
+            flash($mensaje)->warning();
+            return back();
+        }
+    
+        $soporteAnteriorPro = SoporteEspecial::select('tecnicoid', 'soporteid', 'razon_social', 'ruc')
+            ->where('ruc', $identificacionActual)
+            ->where('vededorid', Auth::user()->usuariosid)
+            ->whereIn('tipo', [1, 3])
+            ->orderBy('soporteid', 'desc')
+            ->first();
 
         $productos = json_decode($factura->productos);
 
