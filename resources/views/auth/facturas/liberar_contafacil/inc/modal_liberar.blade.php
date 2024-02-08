@@ -7,11 +7,16 @@
             </div>
             <div class="modal-body">
                 <form id="formLicencia" action="#">
+
                     <div class="form-group mx-2">
                         <label for="tiempoRenovacion">Identificación <small>Cliente</small></label>
-                        <input type="text" class="form-control" id="rucCliente"
-                            value="{{ $factura->identificacion }}">
+                        <input type="text" class="form-control {{ $errors->has('rucCliente') ? 'is-invalid' : '' }}" 
+                        id="rucCliente"  name="rucCliente" value="{{ $factura->identificacion }}">
+                        @if ($errors->has('rucCliente'))
+                            <span class="text-danger">{{ $errors->first('rucCliente') }}</span>
+                        @endif
                     </div>
+
                     <div class="form-group m-2">
                         <label for="tiempoRenovacion">Nombres y Apellidos <small>Cliente</small></label>
                         <input type="text" class="form-control" id="nombresCliente" value="{{ $factura->nombre }}">
