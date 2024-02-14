@@ -71,6 +71,18 @@
                     solicitudLicencidador.cliente.direccion = this.direccionCliente.value;
                     solicitudLicencidador.cliente.correos = this.correoCliente.value;
                     solicitudLicencidador.cliente.telefono2 = this.telefonoCliente.value;
+                    
+                    const inputRucCliente = $('#rucCliente').val();
+                    
+                    if (inputRucCliente.length < 10 || inputRucCliente.length > 13) {
+                        Swal.fire({
+                            title: "RUC INCORRECTO",
+                            text: "Por favor, completa el campo con un RUC válido.",
+                            icon: "error",
+                        });
+                        this.btnFormSubmit.removeAttribute('disabled');
+                        return;
+                    }
 
                     registrarLicencia(solicitudLicencidador);
                 });

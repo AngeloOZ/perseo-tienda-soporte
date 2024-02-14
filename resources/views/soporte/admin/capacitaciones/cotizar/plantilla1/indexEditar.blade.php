@@ -434,7 +434,7 @@
                 min: 0,
                 max: 100,
                 step: 1,
-                decimals: 2,
+                decimals: 3,
                 boostat: 5,
                 maxboostedstep: 10,
                 forcestepdivisibility: 'none',
