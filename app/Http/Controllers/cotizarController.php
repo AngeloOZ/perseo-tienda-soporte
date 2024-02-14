@@ -148,7 +148,7 @@ class cotizarController extends Controller
                 $precioFinal = $consultaDetalle->precio * $convertirArray[1];
                 $descuentoFinal = ($precioFinal * $convertirArray[2]) / 100;
                 $valorneto = $precioFinal  - $descuentoFinal;
-                $detalles[$i] = ['detalle' => $consultaDetalle->detalle, 'cantidad' => $convertirArray[1], 'precio' =>  number_format($precioFinal, 2, '.', ''), 'porcentaje' => number_format($convertirArray[2], 2, '.', ''), 'descuento' =>  number_format($descuentoFinal, 2, '.', ''), 'neto' =>  number_format($valorneto, 2, '.', '')];
+                $detalles[$i] = ['detalle' => $consultaDetalle->detalle, 'cantidad' => $convertirArray[1], 'precio' =>  number_format($precioFinal, 2, '.', ''), 'porcentaje' => number_format($convertirArray[2], 3, '.', ''), 'descuento' =>  number_format($descuentoFinal, 2, '.', ''), 'neto' =>  number_format($valorneto, 2, '.', '')];
                 $totalprecio = floatval($precioFinal) + $totalprecio;
                 $descuentototal = floatval($descuentoFinal) + $descuentototal;
                 $totalneto = floatval($valorneto) + $totalneto;
