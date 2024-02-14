@@ -10,10 +10,10 @@
 
                     <div class="form-group mx-2">
                         <label for="tiempoRenovacion">Identificación <small>Cliente</small></label>
-                        <input type="text" class="form-control {{ $errors->has('rucCliente') ? 'is-invalid' : '' }}" 
-                        id="rucCliente"  name="rucCliente" value="{{ $factura->identificacion }}">
+                        <input type="number" class="form-control {{ $errors->has('rucCliente') ? 'is-invalid' : '' }}" 
+                        id="rucCliente"  name="rucCliente" value="{{ $factura->identificacion }}" >
                         @if ($errors->has('rucCliente'))
-                            <span class="text-danger">{{ $errors->first('rucCliente') }}</span>
+                            <span id="rucClienteError" class="text-danger">{{ $errors->first('rucCliente') }}</span>
                         @endif
                     </div>
 
