@@ -122,7 +122,7 @@ class TicketSoporteController extends Controller
                 $sms = new WhatsappController();
                 $sendMessage = $sms->enviar_personalizado([
                     "numero" => $ticket->whatsapp,
-                    "mensaje" =>  "¡Buen día! ☀️ {$ticket->razon_social}, saludos del equipo de soporte del Sistema Contable Perseo. 👋\n\nHemos recibido tu solicitud de soporte (Ticket No: *{$ticket->numero_ticket}*). Pronto nos comunicaremos contigo a través de WhatsApp o correo electrónico. 📞📧\n\nNúmeros de WhatsApp para contacto:\n📞 0988349407\n📞0958878881\n📞0979391799\n\nTiempo de espera estimado: *30 min*⌛️ (*8 AM - 5 PM*⌚️). Si enviaste tu solicitud fuera de ese horario, te responderemos al día siguiente.\n\n¡Gracias por confiar en Perseo! 🙏 No es necesario responder a este número. 📞 ¡Que tengas un excelente día! 😊",
+                    "mensaje" =>  "¡Buen día! ☀️ {$ticket->razon_social}, saludos del equipo de soporte del Sistema Contable Perseo. 👋\n\nHemos recibido tu solicitud de soporte (Ticket No: *{$ticket->numero_ticket}*). Pronto nos comunicaremos contigo a través de WhatsApp o correo electrónico. 📞📧\n\nNúmeros de WhatsApp para contacto:\n📞 0988349407\n📞0963963890\n📞0979391799\n\nTiempo de espera estimado: *30 min*⌛️ (*8 AM - 5 PM*⌚️). Si enviaste tu solicitud fuera de ese horario, te responderemos al día siguiente.\n\n¡Gracias por confiar en Perseo! 🙏 No es necesario responder a este número. 📞 ¡Que tengas un excelente día! 😊",
                     "nombre" => $ticket->razon_social,
                 ]);
 
