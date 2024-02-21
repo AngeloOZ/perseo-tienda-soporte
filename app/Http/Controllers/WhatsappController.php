@@ -16,6 +16,7 @@ class WhatsappController extends Controller
 
     private function init_config()
     {
+        //8144 puerto de pruebas para sooprote
         $das = isset(Auth::guard('tecnico')->user()->distribuidoresid) ? Auth::guard('tecnico')->user()->distribuidoresid : 2;
         switch ($das) {
             case 1:
