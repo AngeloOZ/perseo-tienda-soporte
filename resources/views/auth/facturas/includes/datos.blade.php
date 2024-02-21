@@ -8,7 +8,7 @@
         $concepto = old('concepto_abv');
     }
 
-    $origenes = ['Empresarios365', 'Registros Web Lite Alfa', 'Referidos Personales', 'Referido Clientes', 'Contadores (Ya son Clientes)', 'Ya es Cliente'];
+    $origenes = ['Empresarios365', 'Registros Web Lite Alfa', 'Referidos Personales', 'Referido Clientes', 'Contadores (Ya son Clientes)', 'Ya es Cliente', 'Prospectos Matriz'];
 
 @endphp
 <div class="form-group row">

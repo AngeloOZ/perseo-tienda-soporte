@@ -392,7 +392,7 @@
         }
 
         function agregarFila() {
-            table.row.add({
+            var newRow = table.row.add({
                 detalle: ` <td><select class="form-control select2 valoresSelect" name="detallesid"><option value="">Escoja un detalle </option>
                 @foreach ($detalleSinDefault as $detalleL)
                     <option value="{{ $detalleL->detallesid }}"
@@ -404,6 +404,9 @@
                 descuento: `<td> <input value="0" type="text" class="form-control descuento descuentoT input-sm validarDigitos"> <span class="text-danger d-none" name="mensajeDescuento">Ingrese descuento</span></td>`,
                 eliminar: `<td> <button type="button" class="btn btn-sm btn-danger botonEliminar" name="botonEliminar"  onclick="eliminarFila(this)">-</button></td>`
             }).draw(false);
+
+            var firstRow = table.row(0).node();
+            $(firstRow).before(newRow.node());
 
             $('.select2').select2({
                 width: '100%',
@@ -567,15 +570,18 @@
         });
 
         function eliminarFila(boton) {
-            var table = document.getElementById("kt_datatable");
-            var t = $("#kt_datatable").DataTable();
+            // Verificar si la tabla está inicializada
+            if (!$.fn.DataTable.isDataTable("#kt_datatable_detalle")) {
+                console.error("La tabla no está inicializada correctamente.");
+                return;
+            }
 
-            var rowCount = table.rows.length;
+            var table = $("#kt_datatable_detalle").DataTable();
+            var rowCount = table.rows().count();
 
             if (rowCount <= 2) {
                 $.notify({
-                    // options
-                    message: 'No se puede eliminar la primera fila',
+                    message: 'Total Filas: ' + rowCount,
                 }, {
                     // settings
                     showProgressbar: true,
@@ -592,14 +598,11 @@
                     type: 'warning',
                 });
             } else {
-                var row = $(boton).parents('tr');
+                var row = $(boton).closest('tr');
                 if ($(row).hasClass('child')) {
-                    t.row($(row).prev('tr')).remove().draw();
+                    table.row($(row).prev('tr')).remove().draw();
                 } else {
-                    t
-                        .row($(boton).parents('tr'))
-                        .remove()
-                        .draw();
+                    table.row($(row)).remove().draw();
                 }
             }
         }

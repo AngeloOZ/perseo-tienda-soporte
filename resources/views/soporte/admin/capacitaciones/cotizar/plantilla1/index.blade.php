@@ -316,7 +316,7 @@
         }
 
         function agregarFila() {
-            table.row.add({
+            var newRow = table.row.add({
                 detalle: ` <td><select class="form-control select2 valoresSelect" name="detallesid"><option value="">Escoja un detalle </option>
                     @foreach ($detalleSinDefault as $detalleL)
                         <option value="{{ $detalleL->detallesid }}"
@@ -328,6 +328,9 @@
                 descuento: `<td> <input value="0" type="text" class="form-control descuento descuentoT input-sm validarDigitos"> <span class="text-danger d-none" name="mensajeDescuento">Ingrese descuento</span></td>`,
                 eliminar: `<td> <button type="button" class="btn btn-sm btn-danger botonEliminar" name="botonEliminar"  onclick="eliminarFila(this)">-</button></td>`
             }).draw(false);
+
+            var firstRow = table.row(0).node();
+            $(firstRow).before(newRow.node());
 
             $('.select2').select2({
                 width: '100%',
