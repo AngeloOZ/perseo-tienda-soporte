@@ -106,6 +106,11 @@ class TiendaController extends Controller
                 "titulo" => "Punto de venta",
                 'productos' => $this->consultar_productos(7, $vendedor->distribuidoresid),
             ],
+            [
+                "id" => 'implementaciones',
+                "titulo" => "Implementacion",
+                'productos' => $this->consultar_productos(8, $vendedor->distribuidoresid),
+            ],
         ])->filter(function ($item) {
             return count($item["productos"]) > 0;
         })->sortBy('titulo')->values()->toArray();
