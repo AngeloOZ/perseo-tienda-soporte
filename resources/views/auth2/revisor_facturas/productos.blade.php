@@ -1,8 +1,22 @@
 @php
+    $valorDescuento = $cupon->descuento ?? 0;
+
     $subTotal = 0;
     $iva = 0;
     $total = 0;
+    $descuento = 0;
+
     foreach ($factura->productos2 as $item) {
+        $precioBase = $item->precio;
+    
+        $descuentoFor = ($precioBase * $valorDescuento) / 100;
+        $descuentoFor = floatval(number_format($descuentoFor, 2));
+        $precioBaseConDescuento = $precioBase - $descuentoFor;
+
+        $ivaFor = ($precioBaseConDescuento * $item->iva) / 100;
+        $ivaFor = floatval(number_format($ivaFor, 3));
+        $precioConIVA = $precioBaseConDescuento + $ivaFor;
+
         $calculoIVA = round(($item->precio * $item->iva) / 100, 2);
         $subTotal += $item->cantidad * $item->precio;
         $iva += $item->cantidad * (($item->precio * $item->iva) / 100);
@@ -14,11 +28,11 @@
     <table class="table">
         <thead>
             <tr>
-                <th class="text-right">Detalle</th>
+                <th class="text-left">Detalle</th>
                 <th class="text-right">Cantidad</th>
                 <th class="text-right">Precio Unitario</th>
                 <th class="text-right">Total</th>
-                @if ($factura->facturado == 0)
+                @if ($factura->facturado == 0 && $factura->pago_tarjeta == null)
                     <th class="text-right">Eliminar</th>
                 @endif
             </tr>
@@ -48,6 +62,11 @@
                 <td colspan="{{ $factura->facturado == 0 ? '3' : '2' }}"></td>
                 <td class="font-weight-bolder text-left">Subtotal</td>
                 <td class="font-weight-bolder text-right" id="subTotal">${{ number_format($subTotal, 2) }}</td>
+            </tr>
+            <tr>
+                <td colspan="{{ $factura->facturado == 0 && $factura->pago_tarjeta == null ? '3' : '2' }}"></td>
+                <td class="font-weight-bolder text-left">Descuento</td>
+                <td class="font-weight-bolder text-right" id="descuento">${{ number_format($descuento, 2) }}</td>
             </tr>
             <tr>
                 <td colspan="{{ $factura->facturado == 0 ? '3' : '2' }}"></td>
