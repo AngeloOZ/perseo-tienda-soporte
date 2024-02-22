@@ -127,6 +127,7 @@ class SoporteEspcialController extends Controller
         $soporteAnterior = SoporteEspecial::where('ruc', $request->ruc)
             ->where('tipo', $request->tipo)
             ->where('plan', $request->plan)
+            ->where('estado', '!=', 6)
             ->first();
 
         if ($soporteAnterior) {
