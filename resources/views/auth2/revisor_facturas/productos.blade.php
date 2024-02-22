@@ -1,26 +1,31 @@
 @php
+
+    $cuponR = $factura->cuponid;
+    $cupon = \App\Models\Cupones::find($cuponR);
+
     $valorDescuento = $cupon->descuento ?? 0;
 
     $subTotal = 0;
     $iva = 0;
     $total = 0;
     $descuento = 0;
-
+    
+    
     foreach ($factura->productos2 as $item) {
         $precioBase = $item->precio;
     
         $descuentoFor = ($precioBase * $valorDescuento) / 100;
         $descuentoFor = floatval(number_format($descuentoFor, 2));
         $precioBaseConDescuento = $precioBase - $descuentoFor;
-
+    
         $ivaFor = ($precioBaseConDescuento * $item->iva) / 100;
         $ivaFor = floatval(number_format($ivaFor, 3));
         $precioConIVA = $precioBaseConDescuento + $ivaFor;
-
-        $calculoIVA = round(($item->precio * $item->iva) / 100, 2);
-        $subTotal += $item->cantidad * $item->precio;
-        $iva += $item->cantidad * (($item->precio * $item->iva) / 100);
-        $total += $item->cantidad * ($calculoIVA + $item->precio);
+    
+        $subTotal += $item->cantidad * $precioBase;
+        $descuento += $item->cantidad * $descuentoFor;
+        $iva += $item->cantidad * $ivaFor;
+        $total += $item->cantidad * $precioConIVA;
     }
     
 @endphp
